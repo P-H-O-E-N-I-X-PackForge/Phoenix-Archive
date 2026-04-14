@@ -1,26 +1,38 @@
-# GregTech Addon Template
-## Template for GregTech Modern addons on 1.20.1
+# Phoenix Archive
+## A Quest and Lore System for Minecraft
 
- Original template by [screret](https://github.com/screret), maintained by [JuiceyBeans](https://github.com/JuiceyBeans)
-
-<hr>
-
-## How do I make an addon for GregTech Modern?
-Well for one, you WILL need to know Java to make an addon. There's no getting around this. A good starting point would be [MOOC](https://java-programming.mooc.fi/) or [W3Schools](https://www.w3schools.com/java/
-)
-
-Unfortunately, there isn't any official documentation so far for making GregTech Modern addons. There are a couple of mods you can look at to reference though!
-
-Repositories for other addons:
-
-- [GT Community Additions](https://github.com/mordgren/GTCA)
-- [MoniLabs](https://github.com/NegaNote/MoniLabs)
-
-Additionally, you may be able to find help on the [GregTech CEu Discord](https://discord.gg/bWSWuYvURP)!
+Phoenix Archive is a Minecraft mod that adds a flexible and powerful quest and lore system, designed to be easily integrated with other mods, especially GregTech.
 
 <hr>
 
-## This template comes packaged with [Spotless](https://github.com/diffplug/spotless)!
+## Features
+- **Custom Lore Entries:** Create custom lore entries with titles, categories, content, and icons.
+- **Quest Integration:** Link lore entries to FTB Quests, requiring players to complete quests to unlock lore.
+- **Custom Conditions:** Define custom conditions for unlocking lore, such as reaching a specific dimension, biome, or crafting a specific machine.
+- **In-Game Editor:** A built-in editor allows you to create and edit lore entries directly in the game.
+- **Client-Side Unlock Logic:** All unlock logic is handled on the client, ensuring a smooth and responsive experience.
+
+<hr>
+
+## How to Use
+1.  **Create Lore Entries:** Use the in-game editor (`/phoenix_archive edit`) to create new lore entries.
+2.  **Define Conditions:** Set the conditions for unlocking each entry, such as a quest ID, dimension, biome, or machine.
+3.  **Save and Reload:** Save your changes and reload the game to see your new lore entries in the Phoenix Archive.
+
+<hr>
+
+## For Developers
+This mod is built on the GregTech Modern addon template and can be easily extended and customized. The code is designed to be modular and easy to understand, with a clear separation between server-side and client-side logic.
+
+### Key Classes
+-   `LoreDataLoader`: Loads all lore entries from JSON files.
+-   `TriggerRegistry`: Fires events when custom conditions are met.
+-   `ArchiveScreen`: The main GUI for displaying lore entries.
+-   `QuestHelper`: Provides helper methods for interacting with the FTB Quests API.
+
+<hr>
+
+This template comes packaged with [Spotless](https://github.com/diffplug/spotless)!
 
 ### 1. What is Spotless?
 - Spotless keeps your code neatly formatted. It's essentially a grammar check for your code!

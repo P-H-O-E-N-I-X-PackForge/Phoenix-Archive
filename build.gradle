@@ -33,14 +33,32 @@ repositories {
         url "https://maven.firstdark.dev/snapshots/"
     }
     maven {
+        url = "https://maven.architectury.dev"
+    }
+    maven {
         name = "BlameJared"
         url = "https://maven.blamejared.com/"
     }
+    maven { url "https://www.cursemaven.com" }
     maven {
         url = "https://maven.tterrag.com/"
         content {
             includeGroup("com.tterrag.registrate")
         }
+    }
+    maven { //GTM maven
+        name = 'GTCEu Maven'
+        url = 'https://maven.gtceu.com'
+        content {
+            includeGroup 'com.gregtechceu.gtceu'
+            includeGroup 'appeng'
+            includeGroup 'lu.kolja'
+
+        }
+    }
+    maven {
+        name = "ftbMavenReleases"
+        url = uri("https://maven.ftb.dev/releases")
     }
 }
 
@@ -108,7 +126,14 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     modImplementation("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
+    modImplementation("dev.ftb.mods:ftb-quests-forge:${ftbquests_version}")
+    modImplementation("dev.ftb.mods:ftb-library-forge:${ftblibrary_version}")
+    modImplementation("dev.ftb.mods:ftb-teams-forge:${ftbteams_version}")
+    modImplementation("curse.maven:ldlib-626676:7809449")
+    modImplementation("com.gregtechceu.gtceu:gtceu-${minecraft_version}:${gtceu_version}:slim") { transitive = false }
 
+    modRuntimeOnly("dev.architectury:architectury-forge:${architectury_version}")
+    modImplementation("com.tterrag.registrate:Registrate:${registrate_version}")
 
      jarJar("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
 

@@ -1,0 +1,11 @@
+{
+  "key.phoenix_archive.open": "Open Phoenix Archive",
+  "category.phoenix_archive": "Phoenix Forge Technologies",
+
+  "gui.phoenix_archive.terminal_header": "> PHOENIX_OS_V1.06_PROMPT",
+  "gui.phoenix_archive.editor_header": "> ARCHIVE_EDITOR_UNIT",
+  "gui.phoenix_archive.save_button": "[ COMMIT_TO_DISK ]",
+  "gui.phoenix_archive.new_entry": "[+] NEW_ENTRY",
+
+  "block.phoenix_chromatic_codes.phoenix_enriched_tritanium_casing": "§wExtremely Heat-Stable Casing"
+}
