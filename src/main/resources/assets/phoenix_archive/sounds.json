@@ -1,0 +1,20 @@
+{
+  "voice.microverse_log": {
+    "subtitle": "subtitles.phoenix_archive.voice.microverse",
+    "sounds": [
+      {
+        "name": "phoenix_archive:microverse",
+        "stream": true
+      }
+    ]
+  },
+  "voice.drift_log": {
+    "subtitle": "subtitles.phoenix_archive.voice.drift",
+    "sounds": [
+      {
+        "name": "phoenix_archive:drift",
+        "stream": true
+      }
+    ]
+  }
+}

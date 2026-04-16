@@ -44,3 +44,9 @@ mandatory = false
 versionRange = "[1.0,)"
 ordering = "AFTER"
 side = "BOTH"
+[[dependencies.phoenix_archive]]
+modId = "phoenix_chromatic_codes"
+mandatory = false
+versionRange = "[0,)" # This tells Forge "any version from 0.0.0 upwards"
+ordering = "AFTER"
+side = "BOTH"

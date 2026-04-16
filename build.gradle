@@ -134,6 +134,7 @@ dependencies {
 
     modRuntimeOnly("dev.architectury:architectury-forge:${architectury_version}")
     modImplementation("com.tterrag.registrate:Registrate:${registrate_version}")
+    modImplementation("curse.maven:phoenixs-chromatic-colors-1483210:7863211")
 
      jarJar("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
 
