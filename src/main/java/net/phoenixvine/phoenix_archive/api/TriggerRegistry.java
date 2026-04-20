@@ -14,72 +14,74 @@ import java.util.UUID;
 
 public class TriggerRegistry {
 
-    /**
-     * The primary entry point. Call this when an action happens in the world.
-     * Example: fire(player, "suit_event", "first_rebirth")
-     */
     public static void fire(ServerPlayer player, String conditionType, @Nullable Object context) {
         if (context == null || player == null) return;
 
         String contextStr = (context instanceof ResourceLocation rl) ? rl.toString() : String.valueOf(context);
         LoreSavedData data = LoreSavedData.get(player.serverLevel());
 
-        // 1. Record the "Hardware/Requirement" unlock in the SavedData
-        // This is the specific signal (e.g., machine:electric_furnace)
         String signalKey = conditionType + ":" + contextStr;
 
         if (!data.isUnlocked(player.getUUID(), signalKey)) {
             data.unlock(player.getUUID(), signalKey);
-
-            // Audio feedback that a requirement was met
-       //     player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-        //            SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS, 0.8f, 1.5f);
-
-            // 2. Check if this newly met requirement completes any Lore Entries
             checkForNewCompletions(player, data);
         }
     }
 
+    public static void fireItem(ServerPlayer player, ItemStack stack) {
+        if (stack.isEmpty()) return;
+        ResourceLocation itemKey = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+        if (itemKey != null) {
+            fire(player, "item", itemKey);
+        }
+    }
+
+    public static void fireWearing(ServerPlayer player, ItemStack stack) {
+        if (stack.isEmpty()) return;
+        ResourceLocation itemKey = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+        if (itemKey != null) {
+            fire(player, "wearing", itemKey);
+        }
+    }
+
     public static void hardwareHandshake(ServerPlayer player) {
-        // Current Environment
         fire(player, "dimension", player.level().dimension().location());
+
         player.level().getBiome(player.blockPosition()).unwrapKey().ifPresent(key -> {
             fire(player, "biome", key.location());
         });
 
-        // CHECK INVENTORY (For "Have Item" requirements)
         for (ItemStack stack : player.getInventory().items) {
-            if (!stack.isEmpty()) {
-                fire(player, "item", stack.getItem().toString());
-            }
+            if (!stack.isEmpty()) fireItem(player, stack);
         }
 
-        // CHECK EQUIPMENT (For "Wearing Armor" requirements)
         player.getArmorSlots().forEach(stack -> {
-            if (!stack.isEmpty()) {
-                fire(player, "wearing", stack.getItem().toString());
-            }
+            if (!stack.isEmpty()) fireWearing(player, stack);
         });
     }
 
     public static void checkForNewCompletions(ServerPlayer player, LoreSavedData data) {
-        boolean newlyUnlocked = false;
+        boolean anyChange = false;
         UUID uuid = player.getUUID();
 
         for (LoreEntry lore : LoreDataLoader.LORE_ENTRIES.values()) {
-            String loreId = (lore.id() != null && !lore.id().isEmpty()) ? lore.id() : lore.title().toLowerCase().replace(" ", "_");
+            String loreId = (lore.id() != null && !lore.id().isEmpty())
+                    ? lore.id()
+                    : lore.title().toLowerCase().replace(" ", "_");
             String loreUnlockKey = "lore_unlocked:" + loreId;
 
-            if (!data.isUnlocked(uuid, loreUnlockKey)) {
-                // Check if it's "Free" (No conditions AND no Quest)
-                boolean isPublicArchive = (lore.getConditions() == null || lore.getConditions().isEmpty()) && lore.questId() == 0;
+            boolean isPublicArchive = (lore.getConditions() == null || lore.getConditions().isEmpty())
+                    && lore.questId() == 0;
 
+            boolean alreadyUnlocked = data.isUnlocked(uuid, loreUnlockKey);
+
+            if (!alreadyUnlocked) {
+                // Not yet unlocked — check if it should be
                 if (isPublicArchive || isEntryCompleteServer(player, data, lore)) {
                     data.unlock(uuid, loreUnlockKey);
-                    newlyUnlocked = true;
+                    anyChange = true;
 
-                    // Only show the toast/sound if it WASN'T a public archive
-                    // We don't want to spam the player with 10 toasts the first time they join
+                    // Only play sound/toast for gated entries being newly unlocked
                     if (!isPublicArchive) {
                         player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.MASTER, 0.5f, 1.5f);
                         player.displayClientMessage(
@@ -88,30 +90,33 @@ public class TriggerRegistry {
                         );
                     }
                 }
+            } else if (!isPublicArchive) {
+                // FIX: Only relock if conditions are now UNMET (was inverted before — was relocking
+                // entries whose conditions ARE met, causing infinite ding + toast loops)
+                if (!isEntryCompleteServer(player, data, lore)) {
+                    data.relock(uuid, loreUnlockKey);
+                    anyChange = true;
+                }
+                // If conditions ARE still met, do nothing — no sound, no toast, no sync
             }
         }
 
-        if (newlyUnlocked) {
+        if (anyChange) {
             ServerEvents.syncAllLore(player);
         }
     }
 
-    /**
-     * Logic: An entry is complete ONLY IF every condition in its Map
-     * is found in the Player's LoreSavedData.
-     */
     private static boolean isEntryCompleteServer(ServerPlayer player, LoreSavedData data, LoreEntry entry) {
-        // 1. Check Dynamic Conditions Map
         for (Map.Entry<String, String> condition : entry.getConditions().entrySet()) {
+            if (condition.getValue() == null || condition.getValue().isEmpty()) continue;
+
             String requiredKey = condition.getKey() + ":" + condition.getValue();
 
-            // If even ONE requirement is missing from the saved data, the lore is locked
             if (!data.isUnlocked(player.getUUID(), requiredKey)) {
                 return false;
             }
         }
 
-        // 2. Check Quest (Still a separate field in your LoreEntry record)
         if (entry.questId() != 0) {
             if (!QuestHelper.isQuestCompletedServer(player, entry.questId())) {
                 return false;
