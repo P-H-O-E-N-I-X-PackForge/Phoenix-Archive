@@ -13,7 +13,6 @@ import java.util.UUID;
 public class LoreSavedData extends SavedData {
     private static final String DATA_NAME = "phoenix_archive_master_ledger";
 
-    // Player UUID -> The collection of all their unlocks (Dimensions, Biomes, Lore entries)
     private final Map<UUID, CompoundTag> playerLoreMap = new HashMap<>();
 
     public LoreSavedData() {}
@@ -36,31 +35,22 @@ public class LoreSavedData extends SavedData {
     }
 
     /**
-     * This is the "Truth Anchor."
-     * No matter which dimension calls this, it forces the Overworld to be the storage location.
+     * Always fetches from the Overworld so data is consistent across dimensions.
      */
     public static LoreSavedData get(ServerLevel level) {
-        // We ALWAYS fetch the data from Level 0 (Overworld)
         ServerLevel overworld = level.getServer().getLevel(Level.OVERWORLD);
         return (overworld == null ? level : overworld).getDataStorage()
                 .computeIfAbsent(LoreSavedData::load, LoreSavedData::new, DATA_NAME);
     }
 
-
-
     public boolean isUnlocked(UUID playerUUID, String id) {
         CompoundTag playerData = playerLoreMap.get(playerUUID);
         if (playerData == null) return false;
-
-        // Check for the exact ID passed (works for biomes, machines, etc.)
         return playerData.getBoolean(id);
     }
 
     public void unlock(UUID playerUUID, String id) {
         CompoundTag tag = playerLoreMap.computeIfAbsent(playerUUID, k -> new CompoundTag());
-
-        // FIX: Don't force "unlocked_" on everything.
-        // Let the TriggerRegistry decide the key name.
         if (!tag.getBoolean(id)) {
             tag.putBoolean(id, true);
             this.setDirty();
@@ -68,9 +58,17 @@ public class LoreSavedData extends SavedData {
     }
 
     /**
-     * Returns the full NBT for a player.
-     * If the player has no data, returns an empty tag instead of null to prevent crashes.
+     * FIX #8: Remove an unlock key so a modified entry can be re-locked.
+     * Called by TriggerRegistry when a previously-unlocked entry no longer meets its conditions.
      */
+    public void relock(UUID playerUUID, String id) {
+        CompoundTag tag = playerLoreMap.get(playerUUID);
+        if (tag != null && tag.contains(id)) {
+            tag.remove(id);
+            this.setDirty();
+        }
+    }
+
     public CompoundTag getRawDataForPlayer(UUID playerUUID) {
         return playerLoreMap.getOrDefault(playerUUID, new CompoundTag()).copy();
     }

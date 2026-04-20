@@ -1,0 +1,26 @@
+package net.phoenixvine.phoenix_archive.api;
+
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import net.minecraft.server.level.ServerPlayer;
+
+public class QuestHelperServer {
+
+    /**
+     * SERVER SIDE ONLY
+     * Used by TriggerRegistry to check for Toasts/Unlocks.
+     */
+    public static boolean isQuestCompletedServer(ServerPlayer player, long id) {
+        if (id == 0) return true;
+        try {
+            // FTB Quests API handles the side check internally here
+            var file = FTBQuestsAPI.api().getQuestFile(false); // false = server file
+            if (file == null || player == null) return false;
+
+            var data = file.getOrCreateTeamData(player);
+            var quest = file.get(id);
+            return quest != null && data.isCompleted(quest);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}

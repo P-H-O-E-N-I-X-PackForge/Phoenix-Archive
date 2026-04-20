@@ -8,8 +8,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.phoenixvine.phoenix_archive.api.CategoryRegistry; // New Import
 import net.phoenixvine.phoenix_archive.api.LoreDataLoader;
-import net.phoenixvine.phoenix_archive.network.PhoenixNetwork; // NEW import
+import net.phoenixvine.phoenix_archive.common.ArchiveItems;
+import net.phoenixvine.phoenix_archive.config.ArchiveConfigs;
+import net.phoenixvine.phoenix_archive.network.PhoenixNetwork;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,30 +22,41 @@ public class PhoenixArchive {
     public static final String MOD_ID = "phoenix_archive";
     public static final Logger LOGGER = LogManager.getLogger();
 
+
+
     public PhoenixArchive(FMLJavaModLoadingContext context) {
+        ArchiveConfigs.init();
         IEventBus modEventBus = context.getModEventBus();
 
+        ArchiveItems.ITEMS.register(modEventBus);
 
         // Setup listener
         modEventBus.addListener(this::commonSetup);
 
-        // INITIALIZE NETWORK: Critical for the "Nuclear Option"
+        // INITIALIZE NETWORK
         PhoenixNetwork.init();
 
-        // Register this class to the Forge Event Bus for the Reload Listener
+        // Register this class to the Forge Event Bus
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            LOGGER.info("It's Lore time! Initializing Phoenix Archive...");
+            LOGGER.info("PHOENIX_OS // Initializing Archives...");
+
+            // CRITICAL: Load Category Metadata from config/phoenix_archive/categories/
+            // This ensures your weights and descriptions are ready before the GUI opens
+            CategoryRegistry.loadFromDisk();
+
+            LOGGER.info("PHOENIX_OS // Category Metadata indexed.");
         });
     }
 
     @SubscribeEvent
     public void onAddReloadListener(AddReloadListenerEvent event) {
+        // This handles the Lore Entries (.json files in data packs)
         event.addListener(new LoreDataLoader());
-        LOGGER.info("Phoenix Archive: Lore Data Listener registered.");
+        LOGGER.info("PHOENIX_OS // Lore Data Listener online.");
     }
 
     public static ResourceLocation id(String path) {
