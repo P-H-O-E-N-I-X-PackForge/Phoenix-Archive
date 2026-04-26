@@ -3,14 +3,14 @@ package net.phoenixvine.phoenix_archive.api;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
 public class BlockPlacementTracker {
 
-    private static final Map<ResourceKey<Level>, Map<BlockPos, Pair<UUID, Long>>> recentPlacements
-            = new HashMap<>();
+    private static final Map<ResourceKey<Level>, Map<BlockPos, Pair<UUID, Long>>> recentPlacements = new HashMap<>();
 
     private static final long EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -44,8 +44,8 @@ public class BlockPlacementTracker {
 
     public static void cleanup() {
         long now = System.currentTimeMillis();
-        recentPlacements.values().forEach(map ->
-                map.entrySet().removeIf(e -> now - e.getValue().getRight() > EXPIRY_MS));
+        recentPlacements.values()
+                .forEach(map -> map.entrySet().removeIf(e -> now - e.getValue().getRight() > EXPIRY_MS));
         recentPlacements.entrySet().removeIf(e -> e.getValue().isEmpty());
     }
 }

@@ -3,11 +3,9 @@ package net.phoenixvine.phoenix_archive;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
 import net.phoenixvine.phoenix_archive.api.TriggerRegistry;
+import net.phoenixvine.phoenix_archive.common.LoreSavedData;
 import net.phoenixvine.phoenix_archive.network.PhoenixNetwork;
 import net.phoenixvine.phoenix_archive.network.SyncLorePacket;
-
-
-import net.phoenixvine.phoenix_archive.common.LoreSavedData;
 
 public class ArchiveAPI {
 
@@ -30,6 +28,7 @@ public class ArchiveAPI {
         // 4. Update the player's entity NBT (Used as a backup/cache)
         player.getPersistentData().put("PhoenixArchive", data.getRawDataForPlayer(player.getUUID()));
     }
+
     /**
      * Fire a generic trigger. Useful for PhoenixCore machines or custom logic.
      * Example: ArchiveAPI.fireTrigger(player, "voltage", new ResourceLocation("phoenix:hv"));

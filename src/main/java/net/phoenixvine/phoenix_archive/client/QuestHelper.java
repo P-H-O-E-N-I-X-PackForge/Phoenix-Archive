@@ -1,9 +1,10 @@
 package net.phoenixvine.phoenix_archive.client;
 
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 
 @OnlyIn(Dist.CLIENT)
 public class QuestHelper {

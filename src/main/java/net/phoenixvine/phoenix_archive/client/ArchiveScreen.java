@@ -1,7 +1,5 @@
 package net.phoenixvine.phoenix_archive.client;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -21,6 +19,9 @@ import net.phoenixvine.phoenix_archive.api.CategoryRegistry;
 import net.phoenixvine.phoenix_archive.api.LoreDataLoader;
 import net.phoenixvine.phoenix_archive.api.LoreEntry;
 import net.phoenixvine.phoenix_archive.config.ArchiveConfigs;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -28,9 +29,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-
-
 public class ArchiveScreen extends Screen {
+
     private LoreEntry selectedEntry = null;
     private boolean isEditMode = false;
     private int contentScrollOffset = 0;
@@ -66,13 +66,16 @@ public class ArchiveScreen extends Screen {
 
         int sidebarWidth = 140;
         int contentXOffset = sidebarWidth + 20;
-        boolean isOp = this.minecraft != null && this.minecraft.player != null && this.minecraft.player.hasPermissions(2);
+        boolean isOp = this.minecraft != null && this.minecraft.player != null &&
+                this.minecraft.player.hasPermissions(2);
 
-        if (selectedEntry != null && isLoreUnlockedClient(selectedEntry) && selectedEntry.voiceLine() != null && !selectedEntry.voiceLine().isEmpty()) {
-            this.addRenderableWidget(Button.builder(Component.literal("▶ PLAY VOICE"), b -> playLoreVoice(selectedEntry.voiceLine()))
-                    .bounds(guiX + contentXOffset, guiY + guiHeight - 25, 100, 16)
-                    .tooltip(Tooltip.create(Component.literal("Play Voice Entry")))
-                    .build());
+        if (selectedEntry != null && isLoreUnlockedClient(selectedEntry) && selectedEntry.voiceLine() != null &&
+                !selectedEntry.voiceLine().isEmpty()) {
+            this.addRenderableWidget(
+                    Button.builder(Component.literal("▶ PLAY VOICE"), b -> playLoreVoice(selectedEntry.voiceLine()))
+                            .bounds(guiX + contentXOffset, guiY + guiHeight - 25, 100, 16)
+                            .tooltip(Tooltip.create(Component.literal("Play Voice Entry")))
+                            .build());
         }
 
         if (isOp) {
@@ -87,13 +90,13 @@ public class ArchiveScreen extends Screen {
 
             if (isEditMode) {
                 this.addRenderableWidget(Button.builder(Component.literal("New Category"),
-                                b -> this.minecraft.setScreen(new CategoryManagementScreen(this)))
+                        b -> this.minecraft.setScreen(new CategoryManagementScreen(this)))
                         .bounds(guiX + guiWidth - 220, guiY + 6, 72, 14)
                         .tooltip(Tooltip.create(Component.literal("Open New Entry Screen")))
                         .build());
 
                 this.addRenderableWidget(Button.builder(Component.literal("New Entry"),
-                                b -> this.minecraft.setScreen(new ArchiveEditorScreen(null, selectedCategory)))
+                        b -> this.minecraft.setScreen(new ArchiveEditorScreen(null, selectedCategory)))
                         .bounds(guiX + guiWidth - 146, guiY + 6, 64, 14)
                         .tooltip(Tooltip.create(Component.literal("Open New Entry Screen")))
                         .build());
@@ -122,12 +125,14 @@ public class ArchiveScreen extends Screen {
                             .tooltip(Tooltip.create(Component.literal("Move Category Down")))
                             .bounds(ctrlX, guiY + 50, 18, 18).build());
 
-                    this.addRenderableWidget(Button.builder(Component.literal("§4Delete"), b -> openDeleteCategoryPrompt())
-                            .tooltip(Tooltip.create(Component.literal("Delete this category (entries remain)")))
-                            .bounds(ctrlX - 36, guiY + 70, 55, 14).build());
+                    this.addRenderableWidget(
+                            Button.builder(Component.literal("§4Delete"), b -> openDeleteCategoryPrompt())
+                                    .tooltip(Tooltip.create(Component.literal("Delete this category (entries remain)")))
+                                    .bounds(ctrlX - 36, guiY + 70, 55, 14).build());
 
-                    this.addRenderableWidget(Button.builder(Component.literal("§eEdit"), b ->
-                                    this.minecraft.setScreen(new CategoryManagementScreen(this, selectedCategory)))
+                    this.addRenderableWidget(Button
+                            .builder(Component.literal("§eEdit"),
+                                    b -> this.minecraft.setScreen(new CategoryManagementScreen(this, selectedCategory)))
                             .tooltip(Tooltip.create(Component.literal("Edit this category's description and weight")))
                             .bounds(ctrlX - 36, guiY + 87, 55, 14).build());
                 }
@@ -176,7 +181,9 @@ public class ArchiveScreen extends Screen {
             try (java.io.FileWriter writer = new java.io.FileWriter(file)) {
                 GSON.toJson(meta, writer);
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void deleteCategory(String catId) {
@@ -197,7 +204,8 @@ public class ArchiveScreen extends Screen {
             if (confirmed) deleteCategory(selectedCategory);
             this.minecraft.setScreen(this);
         }, Component.literal("§4[DELETE_CATEGORY]"),
-                Component.literal("Delete category '" + selectedCategory + "'? Entries will remain in their category but it will not appear in the registry.")));
+                Component.literal("Delete category '" + selectedCategory +
+                        "'? Entries will remain in their category but it will not appear in the registry.")));
     }
 
     private void refreshGroups() {
@@ -230,7 +238,8 @@ public class ArchiveScreen extends Screen {
 
         graphics.fill(guiX, guiY, guiX + guiWidth, guiY + guiHeight, 0xEE050505);
         graphics.renderOutline(guiX, guiY, guiWidth, guiHeight, 0xFF00FF00);
-        graphics.drawString(this.font, "> PHOENIX_OS " + ArchiveConfigs.INSTANCE.general.mainMenuName + "// ARCHIVE", guiX + 10, guiY + 8, 0x00FF00);
+        graphics.drawString(this.font, "> PHOENIX_OS " + ArchiveConfigs.INSTANCE.general.mainMenuName + "// ARCHIVE",
+                guiX + 10, guiY + 8, 0x00FF00);
 
         // --- SIDEBAR TREE ---
         graphics.enableScissor(guiX, windowTop, guiX + sidebarWidth, guiY + guiHeight - 5);
@@ -241,7 +250,8 @@ public class ArchiveScreen extends Screen {
             boolean collapsed = collapsedCategories.getOrDefault(cat, false);
             boolean isCurrentDir = cat.equalsIgnoreCase(this.selectedCategory);
 
-            boolean hoveringCat = mouseX >= guiX && mouseX <= guiX + sidebarWidth && mouseY >= currentY && mouseY < currentY + 12;
+            boolean hoveringCat = mouseX >= guiX && mouseX <= guiX + sidebarWidth && mouseY >= currentY &&
+                    mouseY < currentY + 12;
             int catColor = isCurrentDir ? 0xFFAA00 : (hoveringCat ? 0xFFFFFF : 0x00AA00);
             graphics.drawString(this.font, (collapsed ? "§6+ " : "§6- ") + cat, guiX + 5, currentY, catColor);
             currentY += 12;
@@ -250,13 +260,17 @@ public class ArchiveScreen extends Screen {
                 for (LoreEntry entry : group.getValue()) {
                     boolean unlocked = isLoreUnlockedClient(entry);
                     boolean isSelected = entry == selectedEntry;
-                    if (isSelected) graphics.fill(guiX + 10, currentY - 1, guiX + sidebarWidth - 5, currentY + 10, 0x3300FF00);
+                    if (isSelected)
+                        graphics.fill(guiX + 10, currentY - 1, guiX + sidebarWidth - 5, currentY + 10, 0x3300FF00);
 
                     if (unlocked) {
                         int color = isSelected ? 0x00FF00 : 0xAAAAAA;
-                        graphics.drawString(this.font, (isSelected ? "§f> " : "  ") + (isEditMode ? "§6✎ §7" : "") + entry.title(), guiX + 12, currentY, color);
+                        graphics.drawString(this.font,
+                                (isSelected ? "§f> " : "  ") + (isEditMode ? "§6✎ §7" : "") + entry.title(), guiX + 12,
+                                currentY, color);
                     } else {
-                        graphics.drawString(this.font, (isSelected ? "> " : "  ") + "§c[DATA_LOCKED]", guiX + 12, currentY, 0xFF4444);
+                        graphics.drawString(this.font, (isSelected ? "> " : "  ") + "§c[DATA_LOCKED]", guiX + 12,
+                                currentY, 0xFF4444);
                     }
                     currentY += 12;
                 }
@@ -271,7 +285,8 @@ public class ArchiveScreen extends Screen {
             int centerX = contentX + (contentWidth / 2);
             int centerY = guiY + (guiHeight / 2);
 
-            graphics.drawCenteredString(this.font, "§6FOLDER: " + selectedCategory.toUpperCase(), centerX, centerY - 30, 0xFFFFFF);
+            graphics.drawCenteredString(this.font, "§6FOLDER: " + selectedCategory.toUpperCase(), centerX, centerY - 30,
+                    0xFFFFFF);
 
             String desc = CategoryRegistry.getDescription(selectedCategory);
             if (!desc.isEmpty()) {
@@ -284,7 +299,8 @@ public class ArchiveScreen extends Screen {
             }
 
             if (isEditMode) {
-                graphics.drawCenteredString(this.font, "§8[ SELECTED DESTINATION FOR NEW ENTRIES ]", centerX, centerY + 50, 0x444444);
+                graphics.drawCenteredString(this.font, "§8[ SELECTED DESTINATION FOR NEW ENTRIES ]", centerX,
+                        centerY + 50, 0x444444);
             }
         }
 
@@ -311,7 +327,8 @@ public class ArchiveScreen extends Screen {
             } catch (Exception ignored) {}
         }
 
-        graphics.drawString(this.font, unlocked ? "§6" + selectedEntry.title().toUpperCase() : "§4[ENCRYPTED]", titleX, guiY + 30, 0xFFFFFF);
+        graphics.drawString(this.font, unlocked ? "§6" + selectedEntry.title().toUpperCase() : "§4[ENCRYPTED]", titleX,
+                guiY + 30, 0xFFFFFF);
         graphics.drawString(this.font, "§8CAT: " + selectedEntry.category(), titleX, guiY + 40, 0x888888);
 
         String raw = unlocked ? selectedEntry.content() : selectedEntry.lockedContent();
@@ -363,7 +380,8 @@ public class ArchiveScreen extends Screen {
             boolean met = CLIENT_LORE_CACHE.getBoolean(cond.getKey() + ":" + cond.getValue());
             String typeLabel = getConditionTypeLabel(cond.getKey());
             String valueLabel = prettifyId(cond.getValue());
-            g.drawString(this.font, (met ? "§a" : "§7") + "- " + typeLabel + ": §f" + valueLabel, x + 5, y + offset, 0xAAAAAA);
+            g.drawString(this.font, (met ? "§a" : "§7") + "- " + typeLabel + ": §f" + valueLabel, x + 5, y + offset,
+                    0xAAAAAA);
             offset += 10;
         }
     }
@@ -383,7 +401,7 @@ public class ArchiveScreen extends Screen {
     private void renderScrollbar(GuiGraphics g, int x, int y, int h, int max) {
         g.fill(x, y, x + 2, y + h, 0x22FFFFFF);
         float pct = (float) contentScrollOffset / (float) Math.max(1, max);
-        g.fill(x - 1, y + (int)(pct * (h - 15)), x + 3, y + (int)(pct * (h - 15)) + 15, 0xFF00FF00);
+        g.fill(x - 1, y + (int) (pct * (h - 15)), x + 3, y + (int) (pct * (h - 15)) + 15, 0xFF00FF00);
     }
 
     @Override
@@ -396,7 +414,7 @@ public class ArchiveScreen extends Screen {
                 if (!collapsedCategories.getOrDefault(cat, false)) totalLines += groupedEntries.get(cat).size();
             }
             int max = Math.max(0, totalLines - ((guiHeight - 40) / 12));
-            scrollOffset = (int) Math.max(0, Math.min(scrollOffset - (int)delta, max));
+            scrollOffset = (int) Math.max(0, Math.min(scrollOffset - (int) delta, max));
             return true;
         }
 
@@ -407,7 +425,7 @@ public class ArchiveScreen extends Screen {
             var lines = this.font.split(Component.literal(raw.replace('&', '§')), guiWidth - 140 - 35);
             int total = lines.size() + (unlocked ? 0 : 8);
             int max = Math.max(0, (total * 10 - (guiHeight - 90)) / 10);
-            contentScrollOffset = (int) Math.max(0, Math.min(contentScrollOffset - (int)delta, max));
+            contentScrollOffset = (int) Math.max(0, Math.min(contentScrollOffset - (int) delta, max));
             return true;
         }
         return false;
@@ -432,16 +450,20 @@ public class ArchiveScreen extends Screen {
 
             if (!collapsedCategories.getOrDefault(cat, false)) {
                 for (LoreEntry entry : groupedEntries.get(cat)) {
-                    if (mouseX >= guiX + 10 && mouseX <= guiX + sidebarWidth && mouseY >= currentY && mouseY < currentY + 12) {
+                    if (mouseX >= guiX + 10 && mouseX <= guiX + sidebarWidth && mouseY >= currentY &&
+                            mouseY < currentY + 12) {
                         this.selectedEntry = entry;
                         this.selectedCategory = entry.category();
                         this.contentScrollOffset = 0;
 
                         if (button == 1 && isEditMode) {
-                            this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.2F));
-                            this.minecraft.tell(() -> this.minecraft.setScreen(new ArchiveEditorScreen(entry, entry.category())));
+                            this.minecraft.getSoundManager()
+                                    .play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.2F));
+                            this.minecraft.tell(
+                                    () -> this.minecraft.setScreen(new ArchiveEditorScreen(entry, entry.category())));
                         } else {
-                            this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                            this.minecraft.getSoundManager()
+                                    .play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                             this.minecraft.tell(() -> this.init(this.minecraft, this.width, this.height));
                         }
                         return true;
@@ -474,7 +496,10 @@ public class ArchiveScreen extends Screen {
 
         int currentIndex = -1;
         for (int i = 0; i < catEntries.size(); i++) {
-            if (catEntries.get(i).id().equals(selectedEntry.id())) { currentIndex = i; break; }
+            if (catEntries.get(i).id().equals(selectedEntry.id())) {
+                currentIndex = i;
+                break;
+            }
         }
         if (currentIndex == -1) return;
 
@@ -531,14 +556,17 @@ public class ArchiveScreen extends Screen {
                 .filter(e -> e.getValue().equals(entry)).map(Map.Entry::getKey).findFirst().orElse(null);
         if (id == null) return;
 
-        Path path = this.minecraft.gameDirectory.toPath().resolve("config/phoenix_archive/lore/" + id.getPath() + ".json");
+        Path path = this.minecraft.gameDirectory.toPath()
+                .resolve("config/phoenix_archive/lore/" + id.getPath() + ".json");
         try {
             Files.deleteIfExists(path);
             LoreDataLoader.LORE_ENTRIES.remove(id);
             this.selectedEntry = null;
             refreshGroups();
             this.init(this.minecraft, this.width, this.height);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean isLoreUnlockedClient(LoreEntry entry) {
@@ -546,9 +574,8 @@ public class ArchiveScreen extends Screen {
         boolean hasQuest = entry.questId() != 0;
         if (!hasConditions && !hasQuest) return true;
 
-        String loreId = (entry.id() != null && !entry.id().isEmpty())
-                ? entry.id()
-                : entry.title().toLowerCase().replace(" ", "_");
+        String loreId = (entry.id() != null && !entry.id().isEmpty()) ? entry.id() :
+                entry.title().toLowerCase().replace(" ", "_");
         String key = "lore_unlocked:" + loreId;
         return CLIENT_LORE_CACHE.getBoolean(key);
     }
@@ -575,9 +602,8 @@ public class ArchiveScreen extends Screen {
             currentVoice = null;
         }
 
-        ResourceLocation res = soundLocation.contains(":")
-                ? new ResourceLocation(soundLocation)
-                : new ResourceLocation("phoenix_archive", soundLocation);
+        ResourceLocation res = soundLocation.contains(":") ? new ResourceLocation(soundLocation) :
+                new ResourceLocation("phoenix_archive", soundLocation);
 
         SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(res);
 
@@ -602,6 +628,7 @@ public class ArchiveScreen extends Screen {
         this.minecraft.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen((confirmed) -> {
             if (confirmed) deleteEntry(selectedEntry);
             this.minecraft.setScreen(this);
-        }, Component.literal("§4[CRITICAL_PURGE]"), Component.literal("Permanently delete '" + selectedEntry.title() + "'?")));
+        }, Component.literal("§4[CRITICAL_PURGE]"),
+                Component.literal("Permanently delete '" + selectedEntry.title() + "'?")));
     }
 }

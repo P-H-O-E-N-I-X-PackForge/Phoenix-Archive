@@ -94,12 +94,4 @@ public class ServerEvents {
             }
         }
     }
-
-    // FIX #9: Item pickup — fire item condition when player picks something up
-    @SubscribeEvent
-    public static void onItemPickup(net.minecraftforge.event.entity.player.EntityItemPickupEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            TriggerRegistry.fireItem(player, event.getItem().getItem());
-        }
-    }
 }

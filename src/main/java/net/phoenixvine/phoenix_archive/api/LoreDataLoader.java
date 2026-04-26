@@ -1,13 +1,14 @@
 package net.phoenixvine.phoenix_archive.api;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.phoenixvine.phoenix_archive.PhoenixArchive;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -17,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class LoreDataLoader extends SimpleJsonResourceReloadListener {
+
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
@@ -29,7 +31,8 @@ public class LoreDataLoader extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> object, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+    protected void apply(Map<ResourceLocation, JsonElement> object, @NotNull ResourceManager resourceManager,
+                         @NotNull ProfilerFiller profiler) {
         Map<ResourceLocation, LoreEntry> newEntries = new LinkedHashMap<>();
 
         // 1. Load Internal Data
@@ -60,7 +63,8 @@ public class LoreDataLoader extends SimpleJsonResourceReloadListener {
         }
 
         LORE_ENTRIES = sortedMap;
-        PhoenixArchive.LOGGER.info("PHOENIX_OS // Handshake successful. {} archive records indexed.", LORE_ENTRIES.size());
+        PhoenixArchive.LOGGER.info("PHOENIX_OS // Handshake successful. {} archive records indexed.",
+                LORE_ENTRIES.size());
     }
 
     private void loadExternalLore(Map<ResourceLocation, LoreEntry> map) {
@@ -98,8 +102,7 @@ public class LoreDataLoader extends SimpleJsonResourceReloadListener {
                     fallback, // Use filename as ID if missing
                     entry.title(), entry.category(), entry.content(), entry.iconItem(),
                     entry.questId(), entry.lockedContent(), entry.voiceLine(),
-                    entry.getConditions(), entry.order()
-            );
+                    entry.getConditions(), entry.order());
         }
         return entry;
     }

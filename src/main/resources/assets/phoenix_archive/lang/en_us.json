@@ -7,5 +7,6 @@
   "gui.phoenix_archive.save_button": "[ COMMIT_TO_DISK ]",
   "gui.phoenix_archive.new_entry": "[+] NEW_ENTRY",
 
-  "block.phoenix_chromatic_codes.phoenix_enriched_tritanium_casing": "§wExtremely Heat-Stable Casing"
+  "block.phoenix_chromatic_codes.phoenix_enriched_tritanium_casing": "§wExtremely Heat-Stable Casing",
+  "item.phoenix_archive.lore_tablet": "Lore Tablet"
 }

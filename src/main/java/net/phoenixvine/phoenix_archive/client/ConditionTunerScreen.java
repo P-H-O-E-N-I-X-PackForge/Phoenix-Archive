@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ConditionTunerScreen extends Screen {
+
     private final ArchiveEditorScreen parent;
     private final Map<String, String> conditions;
 
@@ -24,7 +25,7 @@ public class ConditionTunerScreen extends Screen {
         this.conditions = conditions;
     }
 
-// ... (imports and class declaration remain the same)
+    // ... (imports and class declaration remain the same)
 
     @Override
     protected void init() {
@@ -83,15 +84,15 @@ public class ConditionTunerScreen extends Screen {
         if (value.isEmpty()) {
             // 2. ALL BASE TRIGGERS IN HINTS
             String hintText = switch (keyBox.getValue()) {
-                case "machine"   -> "gtceu:macerator";
+                case "machine" -> "gtceu:macerator";
                 case "dimension" -> "minecraft:the_end";
-                case "biome"     -> "minecraft:deep_dark";
-                case "item"      -> "minecraft:diamond";
-                case "kill"      -> "minecraft:warden";
-                case "craft"     -> "minecraft:netherite_pickaxe";
-                case "wearing"   -> "minecraft:netherite_chestplate";
-                case "event"     -> "custom_signal_id";
-                default          -> "modid:path_or_id";
+                case "biome" -> "minecraft:deep_dark";
+                case "item" -> "minecraft:diamond";
+                case "kill" -> "minecraft:warden";
+                case "craft" -> "minecraft:netherite_pickaxe";
+                case "wearing" -> "minecraft:netherite_chestplate";
+                case "event" -> "custom_signal_id";
+                default -> "modid:path_or_id";
             };
             valBox.setHint(Component.literal("§8" + hintText)); // Dark Hint
         } else {
@@ -111,7 +112,6 @@ public class ConditionTunerScreen extends Screen {
 
         rows.add(new ConditionRow(keyBox, valBox));
     }
-
 
     private void saveRowsToMap() {
         // Clear old and repopulate from the current UI state

@@ -2,6 +2,7 @@ package net.phoenixvine.phoenix_archive.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class CategoryRegistry {
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public record CategoryMeta(String id, String description, int weight) {}

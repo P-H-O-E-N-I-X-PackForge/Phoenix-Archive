@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class TriggerSelectorScreen extends Screen {
+
     private final ArchiveEditorScreen parent;
 
     public TriggerSelectorScreen(ArchiveEditorScreen parent) {

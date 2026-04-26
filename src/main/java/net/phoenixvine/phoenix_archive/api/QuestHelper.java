@@ -1,10 +1,11 @@
 package net.phoenixvine.phoenix_archive.api;
 
-import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 
 public class QuestHelper {
 

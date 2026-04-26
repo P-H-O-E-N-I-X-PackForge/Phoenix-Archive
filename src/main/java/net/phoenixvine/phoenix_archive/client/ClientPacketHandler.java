@@ -10,6 +10,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 // Put this in a Client-Side only class or your Main class's client setup
 public class ClientPacketHandler {
+
     public static void handleToast(String title, String iconId) {
         Minecraft mc = Minecraft.getInstance();
 

@@ -1,6 +1,5 @@
 package net.phoenixvine.phoenix_archive.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
@@ -9,16 +8,18 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.phoenixvine.phoenix_archive.PhoenixArchive;
+
+import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
 
 @Mod.EventBusSubscriber(modid = PhoenixArchive.MOD_ID, value = Dist.CLIENT)
 public class ClientEvents {
+
     public static final KeyMapping OPEN_ARCHIVE = new KeyMapping(
             "key.phoenix_archive.open",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_J,
-            "category.phoenix_archive"
-    );
+            "category.phoenix_archive");
 
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {

@@ -5,12 +5,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+
 import org.jetbrains.annotations.NotNull;
+
 import java.util.function.Consumer;
 
-
-
 public class TerminalInputScreen extends Screen {
+
     private final Screen parent;
     private final String titleLabel;
     private final String initialValue;

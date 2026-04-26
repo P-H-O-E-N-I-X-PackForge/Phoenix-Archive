@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.phoenixvine.phoenix_archive.common.LoreSavedData;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -65,13 +66,12 @@ public class TriggerRegistry {
         UUID uuid = player.getUUID();
 
         for (LoreEntry lore : LoreDataLoader.LORE_ENTRIES.values()) {
-            String loreId = (lore.id() != null && !lore.id().isEmpty())
-                    ? lore.id()
-                    : lore.title().toLowerCase().replace(" ", "_");
+            String loreId = (lore.id() != null && !lore.id().isEmpty()) ? lore.id() :
+                    lore.title().toLowerCase().replace(" ", "_");
             String loreUnlockKey = "lore_unlocked:" + loreId;
 
-            boolean isPublicArchive = (lore.getConditions() == null || lore.getConditions().isEmpty())
-                    && lore.questId() == 0;
+            boolean isPublicArchive = (lore.getConditions() == null || lore.getConditions().isEmpty()) &&
+                    lore.questId() == 0;
 
             boolean alreadyUnlocked = data.isUnlocked(uuid, loreUnlockKey);
 
@@ -85,9 +85,9 @@ public class TriggerRegistry {
                     if (!isPublicArchive) {
                         player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.MASTER, 0.5f, 1.5f);
                         player.displayClientMessage(
-                                Component.literal("§6[PHOENIX_OS] §fARCHIVE_DECRYPTED: §b" + lore.title().toUpperCase()),
-                                true
-                        );
+                                Component
+                                        .literal("§6[PHOENIX_OS] §fARCHIVE_DECRYPTED: §b" + lore.title().toUpperCase()),
+                                true);
                     }
                 }
             } else if (!isPublicArchive) {

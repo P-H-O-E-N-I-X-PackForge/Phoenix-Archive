@@ -8,11 +8,16 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.phoenixvine.phoenix_archive.api.CategoryRegistry; // New Import
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.phoenixvine.phoenix_archive.api.CategoryRegistry;
 import net.phoenixvine.phoenix_archive.api.LoreDataLoader;
 import net.phoenixvine.phoenix_archive.common.ArchiveItems;
 import net.phoenixvine.phoenix_archive.config.ArchiveConfigs;
 import net.phoenixvine.phoenix_archive.network.PhoenixNetwork;
+import net.phoenixvine.phoenix_archive.proxy.ClientProxy;
+import net.phoenixvine.phoenix_archive.proxy.IProxy;
+import net.phoenixvine.phoenix_archive.proxy.ServerProxy;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,8 +26,7 @@ public class PhoenixArchive {
 
     public static final String MOD_ID = "phoenix_archive";
     public static final Logger LOGGER = LogManager.getLogger();
-
-
+    public static IProxy PROXY;
 
     public PhoenixArchive(FMLJavaModLoadingContext context) {
         ArchiveConfigs.init();
@@ -32,6 +36,12 @@ public class PhoenixArchive {
 
         // Setup listener
         modEventBus.addListener(this::commonSetup);
+
+        if (FMLEnvironment.dist.isClient()) {
+            PROXY = new ClientProxy();
+        } else {
+            PROXY = new ServerProxy();
+        }
 
         // INITIALIZE NETWORK
         PhoenixNetwork.init();

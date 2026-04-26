@@ -7,9 +7,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
+
 import org.jetbrains.annotations.NotNull;
 
 public class GTLinkScreen extends Screen {
+
     private final ArchiveEditorScreen parent;
     private EditBox machineInput;
     private String status = "§8AWAITING_GT_ID...";
@@ -56,11 +58,14 @@ public class GTLinkScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(graphics);
-        graphics.fill(this.width / 2 - 120, this.height / 2 - 60, this.width / 2 + 120, this.height / 2 + 50, 0xEE050505);
+        graphics.fill(this.width / 2 - 120, this.height / 2 - 60, this.width / 2 + 120, this.height / 2 + 50,
+                0xEE050505);
         graphics.renderOutline(this.width / 2 - 120, this.height / 2 - 60, 240, 110, 0xFF00FF00);
 
-        graphics.drawCenteredString(this.font, "§2GREGTECH_INTEGRATION_UNIT", this.width / 2, this.height / 2 - 50, 0xFFFFFF);
-        graphics.drawCenteredString(this.font, "§7Registers a 'machine' condition key", this.width / 2, this.height / 2 - 40, 0xAAAAAA);
+        graphics.drawCenteredString(this.font, "§2GREGTECH_INTEGRATION_UNIT", this.width / 2, this.height / 2 - 50,
+                0xFFFFFF);
+        graphics.drawCenteredString(this.font, "§7Registers a 'machine' condition key", this.width / 2,
+                this.height / 2 - 40, 0xAAAAAA);
         graphics.drawCenteredString(this.font, status, this.width / 2, this.height / 2 - 25, 0xFFFFFF);
 
         super.render(graphics, mouseX, mouseY, partialTicks);

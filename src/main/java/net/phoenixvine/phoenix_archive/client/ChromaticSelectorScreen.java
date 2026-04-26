@@ -2,16 +2,15 @@ package net.phoenixvine.phoenix_archive.client;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.fml.ModList;
-import org.jetbrains.annotations.NotNull;
 import net.phoenix.chromatic_codes.config.ModConfig;
 
-
+import org.jetbrains.annotations.NotNull;
 
 public class ChromaticSelectorScreen extends Screen {
+
     private final TerminalInputScreen parent;
 
     public ChromaticSelectorScreen(TerminalInputScreen parent) {
@@ -57,9 +56,10 @@ public class ChromaticSelectorScreen extends Screen {
 
             for (String entry : ModConfig.INSTANCE.colors.customGradients) {
                 String code = entry.split(":")[0];
-                this.addRenderableWidget(Button.builder(Component.literal("§" + code + "EXECUTABLE_EFFECT: &" + code), b -> {
-                    insertAndClose("&" + code);
-                }).bounds(centerX - 100, startY, 200, 18).build());
+                this.addRenderableWidget(
+                        Button.builder(Component.literal("§" + code + "EXECUTABLE_EFFECT: &" + code), b -> {
+                            insertAndClose("&" + code);
+                        }).bounds(centerX - 100, startY, 200, 18).build());
                 startY += 20;
             }
         }

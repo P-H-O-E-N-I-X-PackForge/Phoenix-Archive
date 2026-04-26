@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class LoreSavedData extends SavedData {
+
     private static final String DATA_NAME = "phoenix_archive_master_ledger";
 
     private final Map<UUID, CompoundTag> playerLoreMap = new HashMap<>();

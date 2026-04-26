@@ -1,17 +1,10 @@
 package net.phoenixvine.phoenix_archive.api;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LoreDataHelper {
+
     private static final String TAG_NAME = "PhoenixArchive";
 
     public static void saveUnlock(ServerPlayer player, String entryId) {

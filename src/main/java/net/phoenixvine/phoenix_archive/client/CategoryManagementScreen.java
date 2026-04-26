@@ -1,6 +1,5 @@
 package net.phoenixvine.phoenix_archive.client;
 
-import com.google.gson.GsonBuilder;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -10,10 +9,13 @@ import net.minecraft.network.chat.Component;
 import net.phoenixvine.phoenix_archive.api.CategoryDefinition;
 import net.phoenixvine.phoenix_archive.api.CategoryRegistry;
 
+import com.google.gson.GsonBuilder;
+
 import java.io.File;
 import java.io.FileWriter;
 
 public class CategoryManagementScreen extends Screen {
+
     private final Screen lastScreen;
     /** If non-null, we are editing an existing category rather than creating a new one. */
     private final String editingId;
@@ -64,13 +66,12 @@ public class CategoryManagementScreen extends Screen {
         this.addRenderableWidget(descBox);
         this.addRenderableWidget(weightBox);
 
-// 1. Keep the button label simple
+        // 1. Keep the button label simple
         String label = (editingId != null) ? "§2UPDATE_CATEGORY" : "§2INITIALIZE_CATEGORY";
 
-// 2. Define the tooltip logic separately or inline correctly
-        Tooltip buttonTooltip = (editingId != null)
-                ? Tooltip.create(Component.literal("Update Selected Category"))
-                : Tooltip.create(Component.literal("Save New Category"));
+        // 2. Define the tooltip logic separately or inline correctly
+        Tooltip buttonTooltip = (editingId != null) ? Tooltip.create(Component.literal("Update Selected Category")) :
+                Tooltip.create(Component.literal("Save New Category"));
 
         this.addRenderableWidget(Button.builder(Component.literal(label), b -> saveCategory())
                 .bounds(x, y + 90, 200, 20)
@@ -101,18 +102,19 @@ public class CategoryManagementScreen extends Screen {
         file.getParentFile().mkdirs();
         try (FileWriter writer = new FileWriter(file)) {
             new GsonBuilder().setPrettyPrinting().create().toJson(def, writer);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
         this.renderBackground(graphics);
-        String title = (editingId != null)
-                ? "§6EDIT_CATEGORY: " + editingId
-                : "§6NEW_CATEGORY_PROTOCOL";
+        String title = (editingId != null) ? "§6EDIT_CATEGORY: " + editingId : "§6NEW_CATEGORY_PROTOCOL";
         graphics.drawCenteredString(this.font, title, this.width / 2, this.height / 2 - 70, 0xFFFFFF);
         if (editingId != null) {
-            graphics.drawCenteredString(this.font, "§8(ID cannot be changed)", this.width / 2, this.height / 2 - 58, 0x666666);
+            graphics.drawCenteredString(this.font, "§8(ID cannot be changed)", this.width / 2, this.height / 2 - 58,
+                    0x666666);
         }
         super.render(graphics, mouseX, mouseY, partial);
     }

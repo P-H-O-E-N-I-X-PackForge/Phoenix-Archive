@@ -1,6 +1,5 @@
 package net.phoenixvine.phoenix_archive.client;
 
-import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -8,12 +7,15 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+
+import dev.ftb.mods.ftbquests.quest.Quest;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class QuestSelectorScreen extends Screen {
+
     private final ArchiveEditorScreen parent;
     private final List<Quest> allQuests;
     private QuestList list;
@@ -81,6 +83,7 @@ public class QuestSelectorScreen extends Screen {
     // --- INNER CLASSES ---
 
     class QuestList extends ObjectSelectionList<QuestEntry> {
+
         public QuestList(Minecraft mc, int width, int height, int top, int bottom) {
             super(mc, width, height, top, bottom, 14);
             this.setRenderBackground(false); // Removes the dirt background
@@ -94,7 +97,9 @@ public class QuestSelectorScreen extends Screen {
         }
 
         @Override
-        public int getRowWidth() { return 200; }
+        public int getRowWidth() {
+            return 200;
+        }
 
         @Override
         protected int getScrollbarPosition() {
@@ -105,6 +110,7 @@ public class QuestSelectorScreen extends Screen {
     }
 
     class QuestEntry extends ObjectSelectionList.Entry<QuestEntry> {
+
         private final Quest quest; // Declare as a field so it's accessible in render()
         private final QuestSelectorScreen screen;
 
@@ -114,7 +120,8 @@ public class QuestSelectorScreen extends Screen {
         }
 
         @Override
-        public void render(GuiGraphics g, int i, int top, int left, int w, int h, int mx, int my, boolean hover, float p) {
+        public void render(GuiGraphics g, int i, int top, int left, int w, int h, int mx, int my, boolean hover,
+                           float p) {
             String text = quest.getTitle().getString();
             boolean isLocked = false;
 
@@ -141,6 +148,8 @@ public class QuestSelectorScreen extends Screen {
         }
 
         @Override
-        public @NotNull Component getNarration() { return quest.getTitle(); }
+        public @NotNull Component getNarration() {
+            return quest.getTitle();
+        }
     }
 }

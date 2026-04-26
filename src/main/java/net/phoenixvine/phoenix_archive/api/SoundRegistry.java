@@ -7,9 +7,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 
-
-
-
 @Mod.EventBusSubscriber(modid = "phoenix_archive", bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SoundRegistry {
 

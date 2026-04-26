@@ -1,7 +1,5 @@
 package net.phoenixvine.phoenix_archive.client;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -11,10 +9,13 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModList;
 import net.phoenixvine.phoenix_archive.api.LoreDataLoader;
 import net.phoenixvine.phoenix_archive.api.LoreEntry;
-import net.minecraftforge.fml.ModList;
 import net.phoenixvine.phoenix_archive.config.ArchiveConfigs;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -22,9 +23,8 @@ import java.io.FileWriter;
 import java.nio.file.Path;
 import java.util.*;
 
-
-
 public class ArchiveEditorScreen extends Screen {
+
     private final LoreEntry editingEntry;
     private final String initialCategory;
 
@@ -127,13 +127,16 @@ public class ArchiveEditorScreen extends Screen {
                     // Rebuild list and jump to new category
                     buildCategoryList();
                     for (int i = 0; i < categoryList.size(); i++) {
-                        if (categoryList.get(i).equalsIgnoreCase(res)) { categoryIndex = i; break; }
+                        if (categoryList.get(i).equalsIgnoreCase(res)) {
+                            categoryIndex = i;
+                            break;
+                        }
                     }
                 }
                 this.init(this.minecraft, this.width, this.height);
             }));
         }).bounds(x + 172, 60, 28, 20)
-                        .tooltip(Tooltip.create(Component.literal("Make a New Category")))
+                .tooltip(Tooltip.create(Component.literal("Make a New Category")))
                 .build());
 
         // 4. Icon & Voice
@@ -170,10 +173,11 @@ public class ArchiveEditorScreen extends Screen {
 
         this.addRenderableWidget(Button.builder(Component.literal("TERMINAL >_"), b -> {
             updateSavedValues();
-            this.minecraft.setScreen(new TerminalInputScreen(this, "ENCRYPTED_SIGNAL", this.savedLockedContent, (val) -> {
-                this.savedLockedContent = val;
-                this.lockedContentBox.setValue(val);
-            }));
+            this.minecraft
+                    .setScreen(new TerminalInputScreen(this, "ENCRYPTED_SIGNAL", this.savedLockedContent, (val) -> {
+                        this.savedLockedContent = val;
+                        this.lockedContentBox.setValue(val);
+                    }));
         }).bounds(x - 85, 185, btnWidth, 20)
                 .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Locked Content")))
                 .build());
@@ -209,7 +213,6 @@ public class ArchiveEditorScreen extends Screen {
                 .bounds(x, 215, 200, 20)
                 .tooltip(Tooltip.create(Component.literal("Save Archive Entry")))
                 .build());
-
     }
 
     /** Build the list of available categories, without the "+ NEW" sentinel in the cycling range */
@@ -224,9 +227,9 @@ public class ArchiveEditorScreen extends Screen {
         if (cats.isEmpty()) cats.add("GENERAL");
 
         // Sync categoryIndex to current category value if possible
-        String wantedCat = (editingEntry != null && savedTitle.equals(editingEntry.title()))
-                ? editingEntry.category().toUpperCase()
-                : (cats.contains(initialCategory.toUpperCase()) ? initialCategory.toUpperCase() : cats.get(0));
+        String wantedCat = (editingEntry != null && savedTitle.equals(editingEntry.title())) ?
+                editingEntry.category().toUpperCase() :
+                (cats.contains(initialCategory.toUpperCase()) ? initialCategory.toUpperCase() : cats.get(0));
 
         this.categoryList = cats;
 
@@ -247,7 +250,9 @@ public class ArchiveEditorScreen extends Screen {
             try (FileWriter writer = new FileWriter(file)) {
                 GSON.toJson(def, writer);
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void saveEntry() {
@@ -270,8 +275,7 @@ public class ArchiveEditorScreen extends Screen {
                 savedLockedContent.replace("&", "§"),
                 savedVoiceLine,
                 new HashMap<>(currentConditions),
-                finalOrder
-        );
+                finalOrder);
 
         String fileName = (editingEntry != null) ? savedId : savedTitle.toLowerCase().replaceAll("[^a-z0-9]", "_");
         Path path = Minecraft.getInstance().gameDirectory.toPath().resolve("config/phoenix_archive/lore");
@@ -300,7 +304,9 @@ public class ArchiveEditorScreen extends Screen {
             }
 
             this.minecraft.setScreen(new ArchiveScreen());
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -317,7 +323,10 @@ public class ArchiveEditorScreen extends Screen {
         // FIX #5: Only show conditions that have non-empty values; special text per type
         boolean hasAnything = questId != 0;
         for (Map.Entry<String, String> cond : currentConditions.entrySet()) {
-            if (!cond.getValue().isEmpty()) { hasAnything = true; break; }
+            if (!cond.getValue().isEmpty()) {
+                hasAnything = true;
+                break;
+            }
         }
 
         if (!hasAnything) {
@@ -336,7 +345,8 @@ public class ArchiveEditorScreen extends Screen {
             }
         }
 
-        graphics.drawString(this.font, "> " + ArchiveConfigs.INSTANCE.general.mainMenuName + "Lore_Dev", 10, 10, 0x00FF00);
+        graphics.drawString(this.font, "> " + ArchiveConfigs.INSTANCE.general.mainMenuName + "Lore_Dev", 10, 10,
+                0x00FF00);
     }
 
     private String getConditionTypeLabel(String key) {

@@ -2,12 +2,14 @@ package net.phoenixvine.phoenix_archive.mixin;
 
 import com.gregtechceu.gtceu.api.pattern.MultiblockState;
 import com.gregtechceu.gtceu.api.pattern.MultiblockWorldSavedData;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.phoenixvine.phoenix_archive.api.BlockPlacementTracker;
 import net.phoenixvine.phoenix_archive.api.TriggerRegistry;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,7 +51,6 @@ public class MultiblockFormedMixin {
                             if (nearestBase instanceof ServerPlayer nearestServer) {
                                 TriggerRegistry.fire(nearestServer, "machine", machineId);
                             }
-                        }
-                );
+                        });
     }
 }

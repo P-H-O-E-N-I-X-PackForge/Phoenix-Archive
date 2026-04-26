@@ -2,20 +2,19 @@ package net.phoenixvine.phoenix_archive.api;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 public record LoreEntry(
-        String id, // New Field
-        String title,
-        String category,
-        String content,
-        String iconItem,
-        int questId,
-        String lockedContent,
-        String voiceLine,
-        Map<String, String> conditions,
-        int order
-) {
+                        String id, // New Field
+                        String title,
+                        String category,
+                        String content,
+                        String iconItem,
+                        int questId,
+                        String lockedContent,
+                        String voiceLine,
+                        Map<String, String> conditions,
+                        int order) {
+
     public LoreEntry {
         if (category == null) category = "Uncategorized";
         // Process Hex and Color codes immediately upon creation
@@ -26,7 +25,9 @@ public record LoreEntry(
         if (conditions == null) conditions = Collections.emptyMap();
     }
 
-    public Map<String, String> getConditions() { return conditions(); }
+    public Map<String, String> getConditions() {
+        return conditions();
+    }
 
     public boolean hasCondition(String key, String value) {
         return value.equals(this.conditions.get(key));

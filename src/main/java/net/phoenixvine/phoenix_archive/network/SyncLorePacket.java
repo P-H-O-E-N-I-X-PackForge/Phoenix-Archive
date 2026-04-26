@@ -9,6 +9,7 @@ import net.phoenixvine.phoenix_archive.client.ArchiveScreen;
 import java.util.function.Supplier;
 
 public class SyncLorePacket {
+
     private final String hardwareId;
     private final boolean state;
     private final boolean playSound; // New field
