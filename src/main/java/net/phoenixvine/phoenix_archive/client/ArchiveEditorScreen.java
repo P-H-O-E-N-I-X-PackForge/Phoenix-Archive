@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModList;
+import net.phoenixvine.phoenix_archive.api.CategoryRegistry;
 import net.phoenixvine.phoenix_archive.api.LoreDataLoader;
 import net.phoenixvine.phoenix_archive.api.LoreEntry;
 import net.phoenixvine.phoenix_archive.config.ArchiveConfigs;
@@ -31,8 +32,11 @@ public class ArchiveEditorScreen extends Screen {
     private EditBox titleBox, iconBox, voiceLineBox, idBox;
     private MultiLineEditBox contentBox, lockedContentBox;
 
-    // FIX #3: Store the selected category index separately from cycle button
-    // so it doesn't drift on re-init
+    /**
+     * Flat list of available category IDs, ordered by DFS tree walk so that
+     * children appear immediately after their parent. Cycling through this list
+     * gives the author a sense of the hierarchy.
+     */
     private List<String> categoryList = new ArrayList<>();
     private int categoryIndex = 0;
 
@@ -49,6 +53,11 @@ public class ArchiveEditorScreen extends Screen {
     private int currentOrder = -1;
     public Map<String, String> currentConditions = new HashMap<>();
 
+    /** True once the user has changed anything since the screen was opened. */
+    private boolean isDirty = false;
+    /** Suppresses the unsaved-changes prompt when we're intentionally saving or discarding. */
+    private boolean suppressDirtyGuard = false;
+
     public ArchiveEditorScreen(LoreEntry existing, String defaultCategory) {
         super(Component.literal("Archive Editor"));
         this.editingEntry = existing;
@@ -56,9 +65,6 @@ public class ArchiveEditorScreen extends Screen {
 
         if (existing != null) {
             setupFromEntry(existing);
-        } else {
-            // For new entries, default to the passed category
-            // categoryIndex will be set during init() once we have the list
         }
     }
 
@@ -74,7 +80,7 @@ public class ArchiveEditorScreen extends Screen {
         this.currentConditions = new HashMap<>(entry.getConditions());
     }
 
-    /** Returns current category string from index */
+    /** Returns the category string currently selected by the cycle button. */
     private String getCurrentCategory() {
         if (categoryList.isEmpty()) return initialCategory;
         return categoryList.get(Math.min(categoryIndex, categoryList.size() - 1));
@@ -84,12 +90,14 @@ public class ArchiveEditorScreen extends Screen {
         return this.currentConditions;
     }
 
+    // -------------------------------------------------------------------------
+    // Init
+    // -------------------------------------------------------------------------
+
     @Override
     protected void init() {
-        // Save current field values before rebuilding widgets
         if (idBox != null) updateSavedValues();
 
-        // FIX #3: Build category list once, keep index stable
         buildCategoryList();
 
         int x = this.width / 2 - 100;
@@ -99,20 +107,26 @@ public class ArchiveEditorScreen extends Screen {
         idBox = new EditBox(this.font, x, 10, 200, 20, Component.empty());
         idBox.setHint(Component.literal("§6Permanent ID (e.g. log_001)"));
         idBox.setValue(savedId);
+        idBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(idBox);
 
         // 2. Title Field
         titleBox = new EditBox(this.font, x, 35, 200, 20, Component.empty());
         titleBox.setHint(Component.literal("§8Title..."));
         titleBox.setValue(savedTitle);
+        titleBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(titleBox);
 
-        // 3. FIX #3: Manual category cycle button using index — no CycleButton that resets
+        // 3. Category cycle button — label shows indentation depth prefix
         String currentCat = getCurrentCategory();
-        this.addRenderableWidget(Button.builder(Component.literal("§8< §7" + currentCat + " §8>"), b -> {
-            // This button cycles forward; right-click would cycle back but buttons only do left
+        int currentDepth = CategoryRegistry.getDepth(currentCat);
+        String depthPrefix = "  ".repeat(currentDepth);  // two spaces per level
+        String cycleLbl = "§8< §7" + depthPrefix + currentCat + " §8>";
+
+        this.addRenderableWidget(Button.builder(Component.literal(cycleLbl), b -> {
             updateSavedValues();
-            categoryIndex = (categoryIndex + 1) % (categoryList.size() - 1); // -1 to skip "+ NEW"
+            // Cycle through all categories except the last sentinel ("+ NEW")
+            categoryIndex = (categoryIndex + 1) % Math.max(1, categoryList.size() - 1);
             this.init(this.minecraft, this.width, this.height);
         }).bounds(x, 60, 170, 20).build());
 
@@ -121,10 +135,8 @@ public class ArchiveEditorScreen extends Screen {
             updateSavedValues();
             this.minecraft.setScreen(new TerminalInputScreen(this, "NEW_CATEGORY", "", (res) -> {
                 if (res != null && !res.isEmpty()) {
-                    net.phoenixvine.phoenix_archive.api.CategoryRegistry.register(res, "", 50);
-                    // Save new category to disk
+                    CategoryRegistry.register(res, "", 50, null);
                     saveCategoryToDisk(res);
-                    // Rebuild list and jump to new category
                     buildCategoryList();
                     for (int i = 0; i < categoryList.size(); i++) {
                         if (categoryList.get(i).equalsIgnoreCase(res)) {
@@ -143,20 +155,24 @@ public class ArchiveEditorScreen extends Screen {
         iconBox = new EditBox(this.font, x, 85, 200, 20, Component.empty());
         iconBox.setHint(Component.literal("§8Icon (minecraft:apple)"));
         iconBox.setValue(savedIcon);
+        iconBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(iconBox);
 
         voiceLineBox = new EditBox(this.font, x, 110, 200, 20, Component.empty());
         voiceLineBox.setHint(Component.literal("§dVoice (phoenix_archive:voice.filename)"));
         voiceLineBox.setValue(savedVoiceLine);
+        voiceLineBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(voiceLineBox);
 
         // 5. Content Boxes
         contentBox = new MultiLineEditBox(this.font, x, 135, 200, 45, Component.empty(), Component.empty());
         contentBox.setValue(savedContent);
+        contentBox.setValueListener(v -> isDirty = true);
         this.addRenderableWidget(contentBox);
 
         lockedContentBox = new MultiLineEditBox(this.font, x, 185, 200, 25, Component.empty(), Component.empty());
         lockedContentBox.setValue(savedLockedContent);
+        lockedContentBox.setValueListener(v -> isDirty = true);
         this.addRenderableWidget(lockedContentBox);
 
         // 6. Terminal Input Buttons
@@ -190,7 +206,6 @@ public class ArchiveEditorScreen extends Screen {
                 .tooltip(Tooltip.create(Component.literal("Add/Remove Entry Conditions")))
                 .build());
 
-        // FTB Quests button
         this.addRenderableWidget(Button.builder(Component.literal("FTB_QUESTS"), b -> {
             updateSavedValues();
             openQuestSelector();
@@ -198,7 +213,6 @@ public class ArchiveEditorScreen extends Screen {
                 .tooltip(Tooltip.create(Component.literal("Open Quest Selector")))
                 .build());
 
-        // FIX #4: Clear quest button
         if (questId != 0) {
             this.addRenderableWidget(Button.builder(Component.literal("§4CLEAR QUEST"), b -> {
                 this.questId = 0;
@@ -215,36 +229,87 @@ public class ArchiveEditorScreen extends Screen {
                 .build());
     }
 
-    /** Build the list of available categories, without the "+ NEW" sentinel in the cycling range */
+    // -------------------------------------------------------------------------
+    // Category list building (tree-ordered)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Builds {@link #categoryList} in DFS tree order (parent before its children,
+     * siblings sorted by weight). This means that when the author cycles through
+     * categories the hierarchy is apparent from the label indentation in the button.
+     *
+     * <p>
+     * A sentinel {@code "+ NEW"} is appended at the end so that the cycle button
+     * can skip it (it cycles up to {@code size - 1}).
+     * </p>
+     */
     private void buildCategoryList() {
-        List<String> cats = new ArrayList<>();
-        LoreDataLoader.LORE_ENTRIES.values().forEach(e -> {
-            if (!cats.contains(e.category().toUpperCase())) cats.add(e.category().toUpperCase());
-        });
-        net.phoenixvine.phoenix_archive.api.CategoryRegistry.getRegisteredIds().forEach(id -> {
-            if (!cats.contains(id)) cats.add(id);
-        });
-        if (cats.isEmpty()) cats.add("GENERAL");
+        Set<String> seen = new HashSet<>();
+        List<String> ordered = new ArrayList<>();
 
-        // Sync categoryIndex to current category value if possible
+        // Collect all known IDs (registered + referenced by entries)
+        Set<String> allIds = new HashSet<>(CategoryRegistry.getRegisteredIds());
+        LoreDataLoader.LORE_ENTRIES.values().forEach(e -> allIds.add(e.category().toUpperCase()));
+        if (allIds.isEmpty()) allIds.add("GENERAL");
+
+        // Walk tree depth-first
+        walkCategoryTree(null, allIds, seen, ordered);
+
+        // Append any orphaned IDs (unregistered categories referenced by entries)
+        for (String id : allIds) {
+            if (!seen.contains(id)) {
+                ordered.add(id);
+                seen.add(id);
+            }
+        }
+
+        // Append sentinel (skipped by cycle logic)
+        ordered.add("+ NEW");
+
+        this.categoryList = ordered;
+
+        // Determine which index should be selected
         String wantedCat = (editingEntry != null && savedTitle.equals(editingEntry.title())) ?
-                editingEntry.category().toUpperCase() :
-                (cats.contains(initialCategory.toUpperCase()) ? initialCategory.toUpperCase() : cats.get(0));
+                editingEntry.category().toUpperCase() : (ordered.contains(initialCategory.toUpperCase()) ?
+                        initialCategory.toUpperCase() : (ordered.isEmpty() ? "GENERAL" : ordered.get(0)));
 
-        this.categoryList = cats;
-
-        // Only reset index on first load (idBox is null) or if list changed
-        int foundIndex = cats.indexOf(wantedCat);
+        int foundIndex = ordered.indexOf(wantedCat);
         if (foundIndex >= 0) {
             categoryIndex = foundIndex;
-        } else if (categoryIndex >= cats.size()) {
+        } else if (categoryIndex >= ordered.size()) {
             categoryIndex = 0;
         }
     }
 
+    private void walkCategoryTree(String parentId, Set<String> allIds, Set<String> seen, List<String> out) {
+        List<String> children = new ArrayList<>(CategoryRegistry.getChildren(parentId));
+
+        // Include unregistered IDs that logically belong here
+        for (String id : allIds) {
+            if (!children.contains(id) && !seen.contains(id)) {
+                String regParent = CategoryRegistry.getParentId(id);
+                if (Objects.equals(regParent, parentId == null ? null : parentId.toUpperCase())) {
+                    children.add(id);
+                }
+            }
+        }
+
+        for (String cat : children) {
+            if (seen.contains(cat)) continue;
+            seen.add(cat);
+            out.add(cat);
+            walkCategoryTree(cat, allIds, seen, out);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Save helpers
+    // -------------------------------------------------------------------------
+
     private void saveCategoryToDisk(String categoryId) {
         try {
-            var def = new net.phoenixvine.phoenix_archive.api.CategoryDefinition(categoryId.toUpperCase(), "", 50);
+            var def = new net.phoenixvine.phoenix_archive.api.CategoryDefinition(
+                    categoryId.toUpperCase(), "", 50, null);
             File file = new File("config/phoenix_archive/categories/" + categoryId.toLowerCase() + ".json");
             file.getParentFile().mkdirs();
             try (FileWriter writer = new FileWriter(file)) {
@@ -252,6 +317,22 @@ public class ArchiveEditorScreen extends Screen {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onClose() {
+        if (isDirty && !suppressDirtyGuard) {
+            this.minecraft.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(
+                    confirmed -> {
+                        suppressDirtyGuard = true;
+                        if (confirmed) saveEntry();
+                        else this.minecraft.setScreen(new ArchiveScreen());
+                    },
+                    Component.literal("§6[UNSAVED_CHANGES]"),
+                    Component.literal("You have unsaved changes. Save before leaving?")));
+        } else {
+            super.onClose();
         }
     }
 
@@ -290,16 +371,9 @@ public class ArchiveEditorScreen extends Screen {
             ResourceLocation resId = new ResourceLocation("phoenix_archive", fileName);
             LoreDataLoader.LORE_ENTRIES.put(resId, entry);
 
-            // FIX #8: If this is an existing entry being modified, send a packet to the server
-            // to re-evaluate unlock status (so conditions can lock/unlock correctly)
-            // We do this by triggering a refresh via a server-bound packet if one exists,
-            // or by notifying via chat command. For now we flag dirty on the entry.
-            // The server-side fix is in TriggerRegistry / ServerEvents.
-            // Client side: clear the cached unlock for this entry so it re-evaluates on next sync
             boolean hasConditions = !entry.getConditions().isEmpty();
             boolean hasQuest = entry.questId() != 0;
             if (hasConditions || hasQuest) {
-                // Clear local cache key so screen shows it as locked until server confirms
                 ArchiveScreen.CLIENT_LORE_CACHE.remove("lore_unlocked:" + savedId);
             }
 
@@ -308,6 +382,10 @@ public class ArchiveEditorScreen extends Screen {
             e.printStackTrace();
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Rendering
+    // -------------------------------------------------------------------------
 
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
@@ -320,7 +398,6 @@ public class ArchiveEditorScreen extends Screen {
 
         int statusY = 100;
 
-        // FIX #5: Only show conditions that have non-empty values; special text per type
         boolean hasAnything = questId != 0;
         for (Map.Entry<String, String> cond : currentConditions.entrySet()) {
             if (!cond.getValue().isEmpty()) {
@@ -345,8 +422,8 @@ public class ArchiveEditorScreen extends Screen {
             }
         }
 
-        graphics.drawString(this.font, "> " + ArchiveConfigs.INSTANCE.general.mainMenuName + "Lore_Dev", 10, 10,
-                0x00FF00);
+        graphics.drawString(this.font, "> " + ArchiveConfigs.INSTANCE.general.mainMenuName + "Lore_Dev",
+                10, 10, 0x00FF00);
     }
 
     private String getConditionTypeLabel(String key) {

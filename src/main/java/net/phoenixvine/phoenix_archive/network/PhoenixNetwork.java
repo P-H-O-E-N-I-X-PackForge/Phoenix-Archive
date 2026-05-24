@@ -21,5 +21,9 @@ public class PhoenixNetwork {
         // ID 1: Bulk synchronization (used for dimension hops, login, and respawn)
         CHANNEL.registerMessage(1, BulkSyncLorePacket.class, BulkSyncLorePacket::encode, BulkSyncLorePacket::decode,
                 BulkSyncLorePacket::handle);
+
+        // ID 2: Client → Server bookmark toggle (persisted in PhoenixArchive NBT, synced back via BulkSyncLorePacket)
+        CHANNEL.registerMessage(2, BookmarkPacket.class, BookmarkPacket::encode, BookmarkPacket::decode,
+                BookmarkPacket::handle);
     }
 }
