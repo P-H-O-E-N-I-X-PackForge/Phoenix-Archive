@@ -16,9 +16,6 @@ plugins {
     id 'com.diffplug.spotless' version '7.0.2'
 }
 
-// NOTE: We do NOT apply the 'org.spongepowered.mixin' plugin here manually.
-// The NeoForged plugin handles the lifecycle, and we configure it via the mixin block at the bottom.
-
 sourceSets {
     main.resources {
         srcDir 'src/generated/resources'
@@ -28,6 +25,10 @@ sourceSets {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven {
+        name = "Repsy"
+        url = uri("https://repo.repsy.io/mvn/user75142941/phoenixsuite")
+    }
     maven {
         name 'FirstDarkDev'
         url "https://maven.firstdark.dev/snapshots/"
@@ -53,12 +54,14 @@ repositories {
             includeGroup 'com.gregtechceu.gtceu'
             includeGroup 'appeng'
             includeGroup 'lu.kolja'
-
         }
     }
     maven {
         name = "ftbMavenReleases"
         url = uri("https://maven.ftb.dev/releases")
+    }
+    flatDir {
+        dir 'libs'
     }
 }
 
@@ -79,8 +82,6 @@ legacyForge {
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
-
-            // FIXED: Changed 'property' to 'systemProperty' to fix the Gradle evaluation crash
             systemProperty 'mixin.debug.export', 'true'
         }
         client {
@@ -136,13 +137,17 @@ dependencies {
     modImplementation("com.tterrag.registrate:Registrate:${registrate_version}")
     modImplementation("curse.maven:phoenixs-chromatic-colors-1483210:7863211")
 
-     jarJar("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
+    modImplementation("net.phoenixvine.wiki:phoenix_wiki:${phoenix_wiki_version}")
+
+    modCompileOnly 'curse.maven:phoenix-chronicles-quests-1614113:8751236'
+    modRuntimeOnly 'curse.maven:phoenix-chronicles-quests-1614113:8751236'
+
+    jarJar("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
-// This block tells the MixinGradle tool to generate the translation map for obfuscated environments
 mixin {
     add sourceSets.main, "${mod_id}.refmap.json"
     config "${mod_id}.mixins.json"
@@ -172,4 +177,27 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
     options.release.set(17)
     options.compilerArgs << "-Aquiet=true"
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            groupId = project.group
+            artifactId = base.archivesName.get()
+            version = project.version
+            artifact(tasks.named('jar').flatMap { it.archiveFile }) {
+                builtBy tasks.named('reobfJar')
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "Repsy"
+            url = uri("https://repo.repsy.io/mvn/user75142941/phoenixsuite")
+            credentials {
+                username = project.findProperty("repsyUsername") ?: System.getenv("REPSY_USERNAME")
+                password = project.findProperty("repsyPassword") ?: System.getenv("REPSY_PASSWORD")
+            }
+        }
+    }
 }
