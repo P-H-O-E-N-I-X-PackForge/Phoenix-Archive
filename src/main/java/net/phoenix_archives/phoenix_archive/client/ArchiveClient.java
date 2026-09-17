@@ -63,6 +63,11 @@ public class ArchiveClient {
         Minecraft mc = Minecraft.getInstance();
         PhoenixArchive.LOGGER.info("PHOENIX_OS // Client setup, registering HUD bar entry...");
 
+        // Lets the suite's shared/per-mod theme toggle (see PhoenixTheme#setSharedMode) tell this
+        // mod's own code apart from every other Phoenix mod's when they call the no-arg theme
+        // accessors -- see PhoenixTheme#resolveCallerModId.
+        PhoenixTheme.registerMod("net.phoenix_archives.phoenix_archive", MOD_ID);
+
         ArchivePalette.refresh(PhoenixTheme.current());
         PhoenixTheme.addChangeListener(() -> ArchivePalette.refresh(PhoenixTheme.current()));
 
