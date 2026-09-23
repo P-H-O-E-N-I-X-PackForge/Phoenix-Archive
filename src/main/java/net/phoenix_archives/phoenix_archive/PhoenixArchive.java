@@ -1,8 +1,10 @@
 package net.phoenix_archives.phoenix_archive;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -36,6 +38,7 @@ public class PhoenixArchive {
         ArchiveItems.ITEMS.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::buildCreativeTab);
 
         if (FMLEnvironment.dist.isClient()) {
             PROXY = new ClientProxy();
@@ -59,9 +62,19 @@ public class PhoenixArchive {
         });
     }
 
+    /**
+     * The Lore Tablet was never added to any creative tab -- JEI (and the creative inventory itself)
+     * builds its ingredient list from tab contents, not the raw item registry, so it was silently
+     * invisible in both despite being fully registered and obtainable via /give.
+     */
+    private void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            event.accept(ArchiveItems.LORE_TABLET);
+        }
+    }
+
     @SubscribeEvent
     public void onAddReloadListener(AddReloadListenerEvent event) {
-        
         event.addListener(new LoreDataLoader());
         LOGGER.info("PHOENIX_OS // Lore Data Listener online.");
     }

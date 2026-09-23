@@ -1,5 +1,6 @@
 package net.phoenix_archives.phoenix_archive.client;
 
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -29,22 +30,23 @@ import net.phoenix_archives.phoenix_archive.api.LoreEntry;
 import net.phoenix_archives.phoenix_archive.api.QuestHelper;
 import net.phoenix_archives.phoenix_archive.client.render.shader.ArchiveShaderManager;
 import net.phoenix_archives.phoenix_archive.client.render.shader.ArchiveShaderRenderUtil;
-import net.phoenix_archives.phoenix_archive.client.rich.ArchiveMarkdownParser;
-import net.phoenix_archives.phoenix_archive.client.rich.ArchiveRichTextRenderer;
-import net.phoenix_archives.phoenix_archive.client.rich.RichBlock;
-import net.phoenix_archives.phoenix_archive.client.rich.RichSpan;
+import net.phoenix_archives.phoenix_archive.client.rich.ArchiveConditionalSection;
+import net.phoenix_archives.phoenix_archive.client.rich.ArchiveMarkdown;
 import net.phoenix_archives.phoenix_archive.common.LoreSavedData;
 import net.phoenix_archives.phoenix_archive.config.ArchiveConfigs;
 import net.phoenix_archives.phoenix_archive.network.BookmarkPacket;
 import net.phoenix_archives.phoenix_archive.network.PhoenixNetwork;
+import net.phoenixvine.wiki.client.rich.RichBlock;
+import net.phoenixvine.wiki.client.rich.RichSpan;
+import net.phoenixvine.wiki.client.rich.WikiRichTextRenderer;
 import net.phoenixvine.wiki.client.screen.WikiScreen;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
+import net.phoenixvine.wiki.theme.PhoenixThemeEditorScreen;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.net.URI;
 import java.nio.file.Files;
@@ -64,7 +66,7 @@ public class ArchiveScreen extends Screen {
     private List<RichBlock> cachedContentBlocks;
 
     private final Set<String> richExpandedKeys = new HashSet<>();
-    
+
     private List<RichSpan.Region> lastContentRegions = List.of();
 
     private CompoundTag lastPhoenixData;
@@ -76,21 +78,21 @@ public class ArchiveScreen extends Screen {
     private String searchQuery = "";
 
     private int dragRowIndex = -1;
-    
+
     private LoreEntry dragEntry = null;
-    
+
     private double dragCurrentY = 0;
 
     private LoreEntry dragPending = null;
     private int dragPendingRowIndex = -1;
     private double dragPendingMouseY = 0;
-    
+
     private long dragPressTime = 0;
-    
+
     private static final long DRAG_HOLD_MS = 300;
 
     private final Set<String> bulkSelected = new HashSet<>();
-    
+
     private boolean bulkMode = false;
 
     private final List<SidebarRow> sidebarRows = new ArrayList<>();
@@ -201,7 +203,7 @@ public class ArchiveScreen extends Screen {
 
         if (selectedEntry != null && isLoreUnlockedClient(selectedEntry) && selectedEntry.voiceLine() != null &&
                 !selectedEntry.voiceLine().isEmpty()) {
-            final LoreEntry voiceTarget = selectedEntry; 
+            final LoreEntry voiceTarget = selectedEntry;
             this.addRenderableWidget(
                     Button.builder(Component.literal("▶ PLAY VOICE"), b -> playLoreVoice(voiceTarget.voiceLine()))
                             .bounds(guiX + contentXOffset, guiY + guiHeight - 25, 100, 16)
@@ -222,7 +224,7 @@ public class ArchiveScreen extends Screen {
         }
 
         if (selectedEntry != null) {
-            final LoreEntry pinnedEntry = selectedEntry; 
+            final LoreEntry pinnedEntry = selectedEntry;
             boolean bookmarked = isBookmarked(pinnedEntry);
             this.addRenderableWidget(Button.builder(
                     Component.literal(bookmarked ? "§6★" : "§8☆"),
@@ -245,6 +247,12 @@ public class ArchiveScreen extends Screen {
             }
         }
 
+        this.addRenderableWidget(Button.builder(Component.literal("§6[ THEME ]"),
+                b -> this.minecraft.setScreen(new PhoenixThemeEditorScreen(this, "Phoenix Archive")))
+                .bounds(guiX + guiWidth - 75, guiY + 22, 70, 14)
+                .tooltip(Tooltip.create(Component.literal("Open the Suite Theme Editor")))
+                .build());
+
         if (isOp) {
             this.addRenderableWidget(Button.builder(
                     Component.literal(isEditMode ? "§c[EDIT: ON]" : "§7[EDIT: OFF]"),
@@ -263,7 +271,7 @@ public class ArchiveScreen extends Screen {
                         .build());
 
                 int ctrlX = guiX + guiWidth - 22;
-                final String pinnedCat = selectedCategory; 
+                final String pinnedCat = selectedCategory;
 
                 this.addRenderableWidget(Button.builder(Component.literal("New Entry"),
                         b -> this.minecraft.setScreen(new ArchiveEditorScreen(this, null, pinnedCat)))
@@ -321,7 +329,7 @@ public class ArchiveScreen extends Screen {
 
                 if (bulkMode && !bulkSelected.isEmpty() && selectedCategory != null &&
                         !BOOKMARK_CAT_ID.equals(selectedCategory)) {
-                    final String bulkTarget = selectedCategory; 
+                    final String bulkTarget = selectedCategory;
                     int assignX = guiX + 144;
                     int assignW = guiWidth - 144 - 25;
                     this.addRenderableWidget(Button.builder(
@@ -343,7 +351,7 @@ public class ArchiveScreen extends Screen {
         if (selectedCategory == null) return;
 
         String parentId = CategoryRegistry.getParentId(selectedCategory);
-        
+
         List<String> siblings = new ArrayList<>(CategoryRegistry.getChildren(parentId));
 
         int idx = siblings.indexOf(selectedCategory);
@@ -428,6 +436,7 @@ public class ArchiveScreen extends Screen {
 
         List<LoreEntry> bookmarked = LoreDataLoader.LORE_ENTRIES.values().stream()
                 .filter(e -> CLIENT_LORE_CACHE.getBoolean("bookmark:" + e.id()))
+                .filter(this::isRowVisible)
                 .sorted(Comparator.comparing(LoreEntry::title))
                 .toList();
         if (!bookmarked.isEmpty()) {
@@ -482,7 +491,7 @@ public class ArchiveScreen extends Screen {
 
     private void appendCategoryRows(String cat, Set<String> orphanIds, Set<String> visited, int depth) {
         if (visited.contains(cat)) return;
-        
+
         if (!categoryHasSearchMatch(cat)) {
             visited.add(cat);
             return;
@@ -497,6 +506,7 @@ public class ArchiveScreen extends Screen {
         if (!collapsed) {
             LoreDataLoader.LORE_ENTRIES.values().stream()
                     .filter(e -> e.category().equalsIgnoreCase(cat) && entryMatchesSearch(e))
+                    .filter(this::isRowVisible)
                     .sorted(Comparator.comparingInt(LoreEntry::order))
                     .forEach(e -> sidebarRows.add(new EntryRow(e, depth)));
             walkTree(cat, orphanIds, visited, depth + 1);
@@ -520,7 +530,7 @@ public class ArchiveScreen extends Screen {
         graphics.fill(guiX + 2, guiY + 29, guiX + 138, guiY + 30,
                 ArchivePalette.withAlpha(ArchivePalette.TERM_BRIGHT, 0x44));
 
-        int windowTop = guiY + 33; 
+        int windowTop = guiY + 33;
         graphics.enableScissor(guiX, windowTop, guiX + sidebarWidth, guiY + guiHeight - 5);
         int currentY = windowTop - (scrollOffset * 12);
 
@@ -541,7 +551,7 @@ public class ArchiveScreen extends Screen {
                 String badge = entryCount > 0 ? " §8(" + entryCount + ")" : "";
 
                 boolean isBookmarkCat = catRow.id.equals(BOOKMARK_CAT_ID);
-                
+
                 int catColor = isBookmarkCat ? ArchivePalette.GOLD :
                         (isCurrentDir ? ArchivePalette.GOLD :
                                 (hoveringCat ? ArchivePalette.TERM_BRIGHT : ArchivePalette.TERM));
@@ -583,17 +593,18 @@ public class ArchiveScreen extends Screen {
                 }
 
                 if (unlocked) {
-                    
+
                     boolean starred = isBookmarked(entry);
                     int starX = guiX + sidebarWidth - 12;
-                    int textMaxX = starX - 2; 
+                    int textMaxX = starX - 2;
                     int textX = indentX + (bulkMode ? 14 : 2);
 
                     if (starred) {
                         graphics.drawString(this.font, "§6★", starX, currentY, ArchivePalette.GOLD, false);
                     }
 
-                    String prefix = (isSelected ? "§f> " : "  ") + (isEditMode ? "§6✎ §7" : "");
+                    String prefix = (isSelected ? "§f> " : "  ") + (isEditMode ? "§6✎ §7" : "") +
+                            (isEditMode && entry.hidden() ? "§d[H] " : "");
                     String title = entry.title();
                     int maxTitlePx = textMaxX - textX - this.font.width(prefix);
                     while (title.length() > 1 && this.font.width(title) > maxTitlePx) {
@@ -604,8 +615,9 @@ public class ArchiveScreen extends Screen {
                     int color = isSelected ? ArchivePalette.TERM_BRIGHT : ArchivePalette.TEXT_DIM;
                     graphics.drawString(this.font, prefix + title, textX, currentY, color, false);
                 } else {
+                    String hiddenTag = isEditMode && entry.hidden() ? "§d[H] " : "";
                     graphics.drawString(this.font,
-                            (isSelected ? "> " : "  ") + "§c[DATA_LOCKED]",
+                            (isSelected ? "> " : "  ") + hiddenTag + "§c[DATA_LOCKED]",
                             indentX + (bulkMode ? 14 : 2), currentY, ArchivePalette.ALERT, false);
                 }
                 currentY += 12;
@@ -676,10 +688,10 @@ public class ArchiveScreen extends Screen {
             boolean unlocked = isLoreUnlockedClient(selectedEntry);
             int contentWidth = guiWidth - listWidth - 25;
             List<RichBlock> blocks = resolveConditionals(parsedContent(selectedEntry, unlocked));
-            int bodyH = ArchiveRichTextRenderer.measureBlocksHeight(this.font, blocks, contentWidth);
+            int bodyH = WikiRichTextRenderer.measureBlocksHeight(this.font, blocks, contentWidth);
             int totalH = bodyH + (!unlocked ? 75 : 0);
             int maxPx = Math.max(0, totalH - (guiHeight - 90));
-            int step = ArchiveRichTextRenderer.LINE_H;
+            int step = WikiRichTextRenderer.LINE_H;
             contentScrollOffset = Math.max(0, Math.min(contentScrollOffset - (int) delta * step, maxPx));
             return true;
         }
@@ -734,7 +746,7 @@ public class ArchiveScreen extends Screen {
                         this.minecraft.getSoundManager()
                                 .play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                         if (isEditMode && button == 0) {
-                            
+
                             dragPending = entry;
                             dragPendingRowIndex = rowIdx;
                             dragPendingMouseY = mouseY;
@@ -752,7 +764,6 @@ public class ArchiveScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        
         if (dragEntry == null && dragPending != null && System.currentTimeMillis() - dragPressTime >= DRAG_HOLD_MS) {
             dragEntry = dragPending;
             dragRowIndex = dragPendingRowIndex;
@@ -768,17 +779,16 @@ public class ArchiveScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        
         dragPending = null;
         dragPendingRowIndex = -1;
 
         if (dragEntry != null && button == 0) {
             int currentY = guiY + 33 - (scrollOffset * 12);
-            int dropIndex = sidebarRows.size(); 
+            int dropIndex = sidebarRows.size();
             for (int i = 0; i < sidebarRows.size(); i++) {
                 SidebarRow row = sidebarRows.get(i);
                 if (row instanceof CatRow cr) {
-                    
+
                     if (!cr.id.equals(BOOKMARK_CAT_ID) && mouseY >= currentY && mouseY < currentY + 12) {
                         dropIndex = i;
                         break;
@@ -833,11 +843,11 @@ public class ArchiveScreen extends Screen {
         LoreEntry updatedA = new LoreEntry(entryA.id(), entryA.title(), entryA.category(),
                 entryA.content(), entryA.iconItem(), entryA.questId(),
                 entryA.lockedContent(), entryA.voiceLine(), entryA.conditionTree(), orderB,
-                entryA.backgroundShader());
+                entryA.backgroundShader(), entryA.hidden(), entryA.hiddenUntilId());
         LoreEntry updatedB = new LoreEntry(entryB.id(), entryB.title(), entryB.category(),
                 entryB.content(), entryB.iconItem(), entryB.questId(),
                 entryB.lockedContent(), entryB.voiceLine(), entryB.conditionTree(), orderA,
-                entryB.backgroundShader());
+                entryB.backgroundShader(), entryB.hidden(), entryB.hiddenUntilId());
 
         ResourceLocation keyA = LoreDataLoader.LORE_ENTRIES.entrySet().stream()
                 .filter(e -> e.getValue().id().equals(entryA.id())).map(Map.Entry::getKey).findFirst().orElse(null);
@@ -914,10 +924,16 @@ public class ArchiveScreen extends Screen {
         if (url == null || url.isEmpty()) return;
         if (url.startsWith("wiki:")) {
             String spec = url.substring(5);
+            String pageId = null;
+            int hash = spec.indexOf('#');
+            if (hash >= 0) {
+                pageId = spec.substring(hash + 1);
+                spec = spec.substring(0, hash);
+            }
             int slash = spec.indexOf('/');
             String namespace = slash >= 0 ? spec.substring(0, slash) : spec;
             String basePath = slash >= 0 ? spec.substring(slash + 1) : "";
-            this.minecraft.setScreen(new WikiScreen(this, namespace, basePath));
+            this.minecraft.setScreen(new WikiScreen(this, namespace, basePath, pageId));
             return;
         }
         if (url.startsWith("quest:")) {
@@ -925,8 +941,10 @@ public class ArchiveScreen extends Screen {
             return;
         }
         try {
-            Desktop.getDesktop().browse(URI.create(url));
-        } catch (Exception ignored) {}
+            Util.getPlatform().openUri(URI.create(url));
+        } catch (Exception e) {
+            PhoenixArchive.LOGGER.warn("Failed to open link '{}'", url, e);
+        }
     }
 
     private void renderEntryContent(GuiGraphics graphics, int x, int top, int width, int contentMouseX,
@@ -967,13 +985,13 @@ public class ArchiveScreen extends Screen {
 
         graphics.drawString(this.font, unlocked ? "§6" + selectedEntry.title().toUpperCase() : "§4[ENCRYPTED]",
                 titleX, guiY + 30, ArchivePalette.TERM_BRIGHT);
-        
+
         graphics.drawString(this.font, "§8CAT: " + buildBreadcrumb(selectedEntry.category()),
                 titleX, guiY + 40, ArchivePalette.TEXT_FAINT);
 
         List<RichBlock> blocks = resolveConditionals(parsedContent(selectedEntry, unlocked));
-        int bodyH = ArchiveRichTextRenderer.measureBlocksHeight(this.font, blocks, width,
-                ArchiveRichTextRenderer.DEFAULT_SCALE, richExpandedKeys);
+        int bodyH = WikiRichTextRenderer.measureBlocksHeight(this.font, blocks, width,
+                WikiRichTextRenderer.DEFAULT_SCALE, richExpandedKeys);
         int totalH = bodyH + (!unlocked ? 75 : 0);
         int maxScrollPx = Math.max(0, totalH - textHeight);
         contentScrollOffset = Math.min(contentScrollOffset, maxScrollPx);
@@ -983,9 +1001,9 @@ public class ArchiveScreen extends Screen {
             renderTornPage(graphics, x, textStartY, width, textHeight, selectedEntry.id());
             lastContentRegions = List.of();
         } else {
-            lastContentRegions = ArchiveRichTextRenderer.renderBlocks(graphics, this.font, blocks, x,
+            lastContentRegions = WikiRichTextRenderer.renderBlocks(graphics, this.font, blocks, x,
                     textStartY, width, contentScrollOffset, textStartY, textStartY + textHeight,
-                    ArchiveRichTextRenderer.DEFAULT_SCALE, ArchivePalette.TERM, richExpandedKeys);
+                    WikiRichTextRenderer.DEFAULT_SCALE, ArchivePalette.TERM, richExpandedKeys);
             for (RichSpan.Region region : lastContentRegions) {
                 if (region.span() instanceof RichSpan.Tip tip && region.contains(contentMouseX, contentMouseY)) {
                     graphics.renderTooltip(this.font, Component.literal(tip.tooltip()), contentMouseX, contentMouseY);
@@ -1007,7 +1025,7 @@ public class ArchiveScreen extends Screen {
     private List<RichBlock> parsedContent(LoreEntry entry, boolean unlocked) {
         if (cachedContentEntry != entry || cachedContentUnlocked != unlocked) {
             String raw = unlocked ? entry.content() : entry.lockedContent();
-            cachedContentBlocks = ArchiveMarkdownParser.parse(raw == null ? "" : raw);
+            cachedContentBlocks = ArchiveMarkdown.parse(raw == null ? "" : raw);
             cachedContentEntry = entry;
             cachedContentUnlocked = unlocked;
         }
@@ -1017,7 +1035,7 @@ public class ArchiveScreen extends Screen {
     private List<RichBlock> resolveConditionals(List<RichBlock> blocks) {
         List<RichBlock> out = new ArrayList<>(blocks.size());
         for (RichBlock b : blocks) {
-            if (b instanceof RichBlock.ConditionalSection cs) {
+            if (b instanceof ArchiveConditionalSection cs) {
                 boolean met = ConditionEvaluator.evaluate(cs.condition(), this::isConditionMetClient);
                 out.addAll(resolveConditionals(met ? cs.thenChildren() : cs.elseChildren()));
             } else if (b instanceof RichBlock.Callout c) {
@@ -1156,6 +1174,26 @@ public class ArchiveScreen extends Screen {
         return CLIENT_LORE_CACHE.getBoolean(key);
     }
 
+    /** Looks an entry up by id and checks it the same way {@link #isLoreUnlockedClient} does. */
+    private boolean isEntryUnlockedById(String id) {
+        if (id == null || id.isEmpty()) return false;
+        return LoreDataLoader.LORE_ENTRIES.values().stream()
+                .filter(e -> id.equals(e.id()))
+                .findFirst()
+                .map(this::isLoreUnlockedClient)
+                .orElse(false);
+    }
+
+    /**
+     * Whether a {@code hidden} entry should currently appear in the sidebar at all -- see
+     * {@link LoreEntry#isVisibleInList}. Entries that aren't marked hidden are always visible (the
+     * pre-existing "show locked, greyed out" behavior); OPs in edit mode always see everything, so
+     * hidden/chained entries can still be found and managed.
+     */
+    private boolean isRowVisible(LoreEntry entry) {
+        return isEditMode || entry.isVisibleInList(this::isEntryUnlockedById);
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -1260,13 +1298,14 @@ public class ArchiveScreen extends Screen {
     private void duplicateEntry(LoreEntry source) {
         String newId = source.id() + "_copy";
         String newTitle = source.title() + " (copy)";
-        
+
         this.minecraft.setScreen(new ArchiveEditorScreen(this,
                 new LoreEntry(newId, newTitle, source.category(),
                         source.content(), source.iconItem(), 0,
                         source.lockedContent(), source.voiceLine(),
                         source.conditionTree(),
-                        LoreDataLoader.LORE_ENTRIES.size(), source.backgroundShader()),
+                        LoreDataLoader.LORE_ENTRIES.size(), source.backgroundShader(),
+                        source.hidden(), source.hiddenUntilId()),
                 source.category()));
     }
 
@@ -1281,7 +1320,8 @@ public class ArchiveScreen extends Screen {
                         LoreEntry updated = new LoreEntry(old.id(), old.title(), targetCategory,
                                 old.content(), old.iconItem(), old.questId(),
                                 old.lockedContent(), old.voiceLine(),
-                                old.conditionTree(), old.order(), old.backgroundShader());
+                                old.conditionTree(), old.order(), old.backgroundShader(),
+                                old.hidden(), old.hiddenUntilId());
                         LoreDataLoader.LORE_ENTRIES.put(mapEntry.getKey(), updated);
                         saveToConfig(updated, mapEntry.getKey().getPath());
                     });
@@ -1293,15 +1333,14 @@ public class ArchiveScreen extends Screen {
     }
 
     private void reorderEntryTo(LoreEntry entry, int dropIndex) {
-        
-        String targetCat = entry.category(); 
-        LoreEntry insertBefore = null;            
+        String targetCat = entry.category();
+        LoreEntry insertBefore = null;
 
         if (dropIndex >= 0 && dropIndex < sidebarRows.size()) {
             SidebarRow targetRow = sidebarRows.get(dropIndex);
             if (targetRow instanceof CatRow cr) {
                 targetCat = cr.id;
-                insertBefore = null; 
+                insertBefore = null;
             } else if (targetRow instanceof EntryRow er) {
                 targetCat = er.entry.category();
                 insertBefore = er.entry;
@@ -1309,7 +1348,7 @@ public class ArchiveScreen extends Screen {
         }
 
         final String finalTargetCat = targetCat;
-        LoreEntry resolvedEntry = entry; 
+        LoreEntry resolvedEntry = entry;
         if (!entry.category().equalsIgnoreCase(targetCat)) {
             ResourceLocation entryKey = LoreDataLoader.LORE_ENTRIES.entrySet().stream()
                     .filter(e -> e.getValue().id().equals(entry.id()))
@@ -1318,11 +1357,11 @@ public class ArchiveScreen extends Screen {
             LoreEntry moved = new LoreEntry(entry.id(), entry.title(), finalTargetCat,
                     entry.content(), entry.iconItem(), entry.questId(),
                     entry.lockedContent(), entry.voiceLine(), entry.conditionTree(), Integer.MAX_VALUE,
-                    entry.backgroundShader());
+                    entry.backgroundShader(), entry.hidden(), entry.hiddenUntilId());
             LoreDataLoader.LORE_ENTRIES.put(entryKey, moved);
             resolvedEntry = moved;
         }
-        final LoreEntry workEntry = resolvedEntry; 
+        final LoreEntry workEntry = resolvedEntry;
 
         List<LoreEntry> catEntries = LoreDataLoader.LORE_ENTRIES.values().stream()
                 .filter(e -> e.category().equalsIgnoreCase(finalTargetCat))
@@ -1331,7 +1370,7 @@ public class ArchiveScreen extends Screen {
 
         catEntries.removeIf(e -> e.id().equals(workEntry.id()));
 
-        int insertIdx = catEntries.size(); 
+        int insertIdx = catEntries.size();
         if (insertBefore != null) {
             for (int i = 0; i < catEntries.size(); i++) {
                 if (catEntries.get(i).id().equals(insertBefore.id())) {
@@ -1347,7 +1386,8 @@ public class ArchiveScreen extends Screen {
             if (e.order() == i && e.category().equalsIgnoreCase(finalTargetCat)) continue;
             LoreEntry updated = new LoreEntry(e.id(), e.title(), finalTargetCat,
                     e.content(), e.iconItem(), e.questId(),
-                    e.lockedContent(), e.voiceLine(), e.conditionTree(), i, e.backgroundShader());
+                    e.lockedContent(), e.voiceLine(), e.conditionTree(), i, e.backgroundShader(),
+                    e.hidden(), e.hiddenUntilId());
             ResourceLocation key = LoreDataLoader.LORE_ENTRIES.entrySet().stream()
                     .filter(en -> en.getValue().id().equals(e.id()))
                     .map(Map.Entry::getKey).findFirst().orElse(null);

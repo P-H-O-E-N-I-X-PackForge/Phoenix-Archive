@@ -42,7 +42,7 @@ public class QuestSelectorScreen extends Screen {
 
         this.searchBox = new EditBox(this.font, left + 10, top + 15, guiWidth - 20, 18, Component.empty());
         this.searchBox.setResponder(this::refreshList);
-        this.searchBox.setBordered(false); 
+        this.searchBox.setBordered(false);
         this.searchBox.setTextColor(ArchivePalette.TERM);
         this.addRenderableWidget(searchBox);
 
@@ -63,7 +63,6 @@ public class QuestSelectorScreen extends Screen {
     }
 
     private void refreshList(String filter) {
-
         this.list.replaceEntries(allQuests.stream()
                 .filter(q -> filter.isEmpty() || q.title().toLowerCase().contains(filter.toLowerCase()))
                 .limit(100)
@@ -89,8 +88,8 @@ public class QuestSelectorScreen extends Screen {
 
         public QuestList(Minecraft mc, int width, int height, int top, int bottom) {
             super(mc, width, height, top, bottom, 14);
-            this.setRenderBackground(false); 
-            this.setRenderTopAndBottom(false); 
+            this.setRenderBackground(false);
+            this.setRenderTopAndBottom(false);
         }
 
         public void replaceEntries(List<QuestEntry> entries) {
@@ -106,7 +105,6 @@ public class QuestSelectorScreen extends Screen {
 
         @Override
         protected int getScrollbarPosition() {
-
             return QuestSelectorScreen.this.left + QuestSelectorScreen.this.guiWidth - 10;
         }
     }

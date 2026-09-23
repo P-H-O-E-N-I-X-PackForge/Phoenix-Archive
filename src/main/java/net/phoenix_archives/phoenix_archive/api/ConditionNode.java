@@ -41,7 +41,7 @@ public sealed interface ConditionNode permits ConditionNode.Leaf, ConditionNode.
             return o.children().stream().map(c -> c.findLeafValue(type))
                     .filter(Optional::isPresent).findFirst().orElseGet(Optional::empty);
         }
-        return Optional.empty(); 
+        return Optional.empty();
     }
 
     default ConditionNode withTopLevelLeaf(String type, String value) {

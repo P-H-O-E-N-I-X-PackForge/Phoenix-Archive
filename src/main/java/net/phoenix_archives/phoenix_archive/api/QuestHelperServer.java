@@ -9,8 +9,8 @@ public class QuestHelperServer {
     public static boolean isQuestCompletedServer(ServerPlayer player, long id) {
         if (id == 0) return true;
         try {
-            
-            var file = FTBQuestsAPI.api().getQuestFile(false); 
+
+            var file = FTBQuestsAPI.api().getQuestFile(false);
             if (file == null || player == null) return false;
 
             var data = file.getOrCreateTeamData(player);

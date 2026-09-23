@@ -35,7 +35,6 @@ public class LoreTabletItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-
         int seed = Math.abs(stack.hashCode());
 
         String[] headers = {

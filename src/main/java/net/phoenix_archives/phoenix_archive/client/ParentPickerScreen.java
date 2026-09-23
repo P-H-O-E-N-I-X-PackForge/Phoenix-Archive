@@ -18,8 +18,8 @@ public class ParentPickerScreen extends Screen {
     private static final int SCROLL_BAR_W = 4;
 
     private final Screen returnTo;
-    private final String excludeId;   
-    private final Consumer<String> onPicked;    
+    private final String excludeId;
+    private final Consumer<String> onPicked;
 
     private final List<String> options = new ArrayList<>();
 
@@ -40,7 +40,7 @@ public class ParentPickerScreen extends Screen {
 
     private void buildOptions(String currentId) {
         options.clear();
-        options.add(null); 
+        options.add(null);
 
         for (String id : CategoryRegistry.getRegisteredIds()) {
             if (excludeId != null && isDescendantOrSelf(id, excludeId)) continue;
@@ -49,7 +49,7 @@ public class ParentPickerScreen extends Screen {
 
         options.subList(1, options.size()).sort(String::compareToIgnoreCase);
 
-        int selectedIdx = options.indexOf(currentId); 
+        int selectedIdx = options.indexOf(currentId);
         if (selectedIdx < 0) selectedIdx = 0;
         scrollOffset = Math.max(0, selectedIdx - 3);
     }
@@ -69,7 +69,7 @@ public class ParentPickerScreen extends Screen {
     protected void init() {
         this.clearWidgets();
         ArchivePalette.refresh(PhoenixTheme.current());
-        
+
         listW = Math.min(260, this.width - 40);
         visibleRows = Math.min(12, (this.height - 80) / ROW_H);
         listH = visibleRows * ROW_H + LIST_PADDING * 2;
@@ -167,21 +167,20 @@ public class ParentPickerScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        
         if ((keyCode == 257 || keyCode == 335) && hoveredIndex >= 0) {
             confirm(options.get(hoveredIndex));
             return true;
         }
-        
-        if (keyCode == 264 ) {
+
+        if (keyCode == 264) {
             scrollOffset = Math.min(scrollOffset + 1, Math.max(0, options.size() - visibleRows));
             return true;
         }
-        if (keyCode == 265 ) {
+        if (keyCode == 265) {
             scrollOffset = Math.max(0, scrollOffset - 1);
             return true;
         }
-        
+
         if (keyCode == 256) {
             this.minecraft.setScreen(returnTo);
             return true;
@@ -190,7 +189,7 @@ public class ParentPickerScreen extends Screen {
     }
 
     private void confirm(String chosen) {
-        onPicked.accept(chosen);               
-        this.minecraft.setScreen(returnTo);    
+        onPicked.accept(chosen);
+        this.minecraft.setScreen(returnTo);
     }
 }

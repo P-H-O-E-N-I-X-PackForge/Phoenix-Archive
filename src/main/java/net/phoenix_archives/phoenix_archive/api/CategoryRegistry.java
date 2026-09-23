@@ -68,7 +68,7 @@ public class CategoryRegistry {
             if (m == null || m.parentId() == null) break;
             current = m.parentId();
             depth++;
-            if (depth > 20) break; 
+            if (depth > 20) break;
         }
         return depth;
     }

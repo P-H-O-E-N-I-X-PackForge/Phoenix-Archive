@@ -27,7 +27,7 @@ public class ChromaticSelectorScreen extends Screen {
         int startY = 45;
 
         if (ModList.get().isLoaded("phoenix_chromatic_codes")) {
-            
+
             this.addRenderableWidget(Button.builder(Component.literal("§b>_ STATIC_SIGNATURE_ARRAY"), b -> {})
                     .bounds(centerX - 100, startY, 200, 14).build()).active = false;
 
@@ -69,7 +69,6 @@ public class ChromaticSelectorScreen extends Screen {
     }
 
     private void insertAndClose(String code) {
-
         parent.receiveCode(code);
         this.onClose();
     }

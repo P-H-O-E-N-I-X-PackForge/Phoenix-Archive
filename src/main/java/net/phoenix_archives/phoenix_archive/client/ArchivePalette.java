@@ -15,7 +15,7 @@ public class ArchivePalette {
     public static final int GOLD = 0xFFFFAA00;
     public static final int ALERT = 0xFFFF4444;
     public static final int ALERT_FILL = 0x22FF0000;
-    
+
     public static final int WHITE = 0xFFFFFFFF;
 
     public static void refresh(PhoenixTheme t) {

@@ -7,14 +7,10 @@ import java.util.List;
 public class ServerProxy implements IProxy {
 
     @Override
-    public void init() {
-        
-    }
+    public void init() {}
 
     @Override
-    public void openArchiveScreen() {
-        
-    }
+    public void openArchiveScreen() {}
 
     @Override
     public void appendPlayerTooltip(List<Component> tooltip) {}

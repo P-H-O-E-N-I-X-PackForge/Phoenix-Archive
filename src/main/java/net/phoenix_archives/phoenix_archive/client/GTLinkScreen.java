@@ -48,7 +48,7 @@ public class GTLinkScreen extends Screen {
         this.addRenderableWidget(Button.builder(Component.literal("§2[ LINK ]"), b -> {
             String id = machineInput.getValue().trim();
             if (!id.isEmpty()) {
-                
+
                 parent.setLeafValue("machine", id);
                 this.minecraft.setScreen(parent);
             }

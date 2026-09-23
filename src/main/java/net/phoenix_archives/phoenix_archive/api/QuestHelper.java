@@ -13,7 +13,7 @@ public class QuestHelper {
     public static boolean isQuestCompleted(long id) {
         if (id == 0) return true;
         try {
-            var file = FTBQuestsAPI.api().getQuestFile(true); 
+            var file = FTBQuestsAPI.api().getQuestFile(true);
             if (file == null || Minecraft.getInstance().player == null) return false;
 
             var data = file.getOrCreateTeamData(Minecraft.getInstance().player);
@@ -27,8 +27,8 @@ public class QuestHelper {
     public static boolean isQuestCompletedServer(ServerPlayer player, long id) {
         if (id == 0) return true;
         try {
-            
-            var file = FTBQuestsAPI.api().getQuestFile(false); 
+
+            var file = FTBQuestsAPI.api().getQuestFile(false);
             if (file == null || player == null) return false;
 
             var data = file.getOrCreateTeamData(player);

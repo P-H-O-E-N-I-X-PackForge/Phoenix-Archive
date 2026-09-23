@@ -14,7 +14,6 @@ public class PhoenixNetwork {
             PROTOCOL_VERSION::equals);
 
     public static void init() {
-        
         CHANNEL.registerMessage(0, SyncLorePacket.class, SyncLorePacket::encode, SyncLorePacket::decode,
                 SyncLorePacket::handle);
 

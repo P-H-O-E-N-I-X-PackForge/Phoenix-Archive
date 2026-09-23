@@ -26,7 +26,7 @@ public final class ExternalCondition {
             case "!=" -> count != threshold;
             case ">" -> count > threshold;
             case "<" -> count < threshold;
-            default -> count >= threshold; 
+            default -> count >= threshold;
         };
     }
 }

@@ -18,11 +18,11 @@ import java.io.FileWriter;
 public class CategoryManagementScreen extends Screen {
 
     private final Screen lastScreen;
-    
+
     private final String editingId;
 
     private String selectedParentId;
-    
+
     private boolean parentInitialised = false;
 
     private EditBox idBox, descBox, weightBox;
@@ -53,7 +53,7 @@ public class CategoryManagementScreen extends Screen {
                 idText = editingId;
                 descText = CategoryRegistry.getDescription(editingId);
                 weightText = String.valueOf(CategoryRegistry.getWeight(editingId));
-                selectedParentId = CategoryRegistry.getParentId(editingId); 
+                selectedParentId = CategoryRegistry.getParentId(editingId);
             } else {
                 idText = "";
                 descText = "";
@@ -111,13 +111,12 @@ public class CategoryManagementScreen extends Screen {
     }
 
     private void openParentPicker() {
-
         snapshotWidgetValues();
 
         this.minecraft.setScreen(new ParentPickerScreen(
-                this,               
-                selectedParentId,   
-                editingId,          
+                this,
+                selectedParentId,
+                editingId,
                 chosen -> {
 
                     this.selectedParentId = chosen;

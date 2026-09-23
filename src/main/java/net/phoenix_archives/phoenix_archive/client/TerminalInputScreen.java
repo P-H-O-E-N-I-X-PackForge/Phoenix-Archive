@@ -1,6 +1,7 @@
 package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -11,13 +12,20 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.phoenix_archives.phoenix_archive.client.rich.ArchiveMarkdown;
+import net.phoenixvine.wiki.client.rich.RichBlock;
+import net.phoenixvine.wiki.client.rich.RichSpan;
+import net.phoenixvine.wiki.client.rich.WikiRichTextRenderer;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class TerminalInputScreen extends Screen {
@@ -29,6 +37,16 @@ public class TerminalInputScreen extends Screen {
 
     private CustomTextArea textArea;
     private String liveValue;
+
+    /**
+     * Live markdown preview shown alongside the editor -- re-parsed only when the text actually
+     * changes (checked once per render), not every frame, since parsing runs on the render thread.
+     */
+    private List<RichBlock> previewBlocks = List.of();
+    private String previewSourceText = null;
+    private int previewX, previewY, previewW, previewH;
+    private List<RichSpan.Region> previewRegions = List.of();
+    private final Set<String> previewExpandedKeys = new HashSet<>();
 
     public TerminalInputScreen(Screen parent, String titleLabel, String initialValue, Consumer<String> onCommit) {
         super(Component.literal("Terminal Input Unit"));
@@ -44,9 +62,21 @@ public class TerminalInputScreen extends Screen {
         ArchivePalette.refresh(PhoenixTheme.current());
         String startingValue = (liveValue != null) ? liveValue : initialValue;
 
-        this.textArea = new CustomTextArea(20, 59, this.width - 40, this.height - 104, Component.empty());
+        // Split the body left/right: editable text area on the left, a live-rendered markdown
+        // preview of the same text on the right, so formatting is visible while still typing
+        // instead of only after committing and reopening the entry.
+        int bodyY = 59, bodyH = this.height - 104;
+        int totalBodyW = this.width - 40;
+        int editorW = totalBodyW / 2 - 4;
+        this.textArea = new CustomTextArea(20, bodyY, editorW, bodyH, Component.empty());
         this.textArea.setValue(startingValue);
         this.addRenderableWidget(textArea);
+
+        previewX = 20 + editorW + 8;
+        previewY = bodyY;
+        previewW = totalBodyW - editorW - 8;
+        previewH = bodyH;
+        previewSourceText = null;
 
         int startX = 20;
         int startY = 12;
@@ -145,10 +175,13 @@ public class TerminalInputScreen extends Screen {
                         .tooltip(Tooltip.create(Component.literal("Warning callout")))
                         .build());
         mdX += 20;
-        this.addRenderableWidget(Button.builder(Component.literal("[url]"), b -> insertMarkdownWrap("[", "](url)"))
-                .bounds(mdX, mdY, 34, 14)
-                .tooltip(Tooltip.create(Component.literal("Link")))
-                .build());
+        this.addRenderableWidget(
+                Button.builder(Component.literal("[url]"), b -> insertMarkdownWrap("[", "](https://)"))
+                        .bounds(mdX, mdY, 34, 14)
+                        .tooltip(Tooltip.create(Component.literal(
+                                "Link -- the target must start with http://, https://, wiki:, or quest: or it " +
+                                        "won't render as clickable")))
+                        .build());
 
         if (net.minecraftforge.fml.ModList.get().isLoaded("phoenix_chromatic_codes")) {
             this.addRenderableWidget(Button.builder(Component.literal("§z[ CHROMATIC_OS ]"), b -> {
@@ -235,7 +268,73 @@ public class TerminalInputScreen extends Screen {
         graphics.fill(10, 10, this.width - 10, this.height - 10, ArchivePalette.BG_SCRIM);
         graphics.renderOutline(10, 10, this.width - 20, this.height - 20, ArchivePalette.TERM_BRIGHT);
         graphics.drawString(this.font, titleLabel + " // ADDR: 0x7FFA", 20, 46, ArchivePalette.TERM);
+        renderPreview(graphics);
         super.render(graphics, mouseX, mouseY, partialTicks);
+    }
+
+    private void renderPreview(GuiGraphics g) {
+        if (this.textArea == null) return;
+        String text = this.textArea.getValue();
+        if (!text.equals(previewSourceText)) {
+            previewBlocks = text.isEmpty() ? List.of() : ArchiveMarkdown.parse(text);
+            previewSourceText = text;
+        }
+
+        g.fill(previewX - 2, previewY - 2, previewX + previewW + 2, previewY + previewH + 2, ArchivePalette.BG);
+        g.renderOutline(previewX - 2, previewY - 2, previewW + 4, previewH + 4, ArchivePalette.BORDER);
+        g.drawString(this.font, "§8PREVIEW", previewX, previewY - 11, ArchivePalette.TEXT_FAINT, false);
+
+        g.enableScissor(previewX, previewY, previewX + previewW, previewY + previewH);
+        previewRegions = WikiRichTextRenderer.renderBlocks(g, this.font, previewBlocks, previewX + 4,
+                previewY + 4, previewW - 8, 0, previewY, previewY + previewH,
+                WikiRichTextRenderer.DEFAULT_SCALE, ArchivePalette.TERM, previewExpandedKeys);
+        g.disableScissor();
+    }
+
+    /**
+     * Mirrors ArchiveScreen#handleContentClick/openLink so the preview panel's links, code-copy
+     * buttons, and collapsible/checklist toggles behave the same as the real entry viewer.
+     */
+    private boolean handlePreviewClick(double mouseX, double mouseY) {
+        for (RichSpan.Region region : previewRegions) {
+            if (!region.contains(mouseX, mouseY)) continue;
+            RichSpan span = region.span();
+            if (span instanceof RichSpan.Link l) {
+                openLink(l.url());
+                return true;
+            } else if (span instanceof RichSpan.CodeCopy cc) {
+                if (this.minecraft != null) this.minecraft.keyboardHandler.setClipboard(cc.code());
+                return true;
+            } else if (span instanceof RichSpan.DetailsToggle dt) {
+                if (!previewExpandedKeys.remove(dt.key())) previewExpandedKeys.add(dt.key());
+                return true;
+            } else if (span instanceof RichSpan.ChecklistToggle ct) {
+                boolean current = previewExpandedKeys.contains("CL1:" + ct.key()) ||
+                        (!previewExpandedKeys.contains("CL0:" + ct.key()) && ct.checkedDefault());
+                boolean next = !current;
+                previewExpandedKeys.remove("CL1:" + ct.key());
+                previewExpandedKeys.remove("CL0:" + ct.key());
+                previewExpandedKeys.add((next ? "CL1:" : "CL0:") + ct.key());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void openLink(String url) {
+        if (url == null || url.isEmpty()) return;
+        if (url.startsWith("wiki:") || url.startsWith("quest:")) return;
+        try {
+            Util.getPlatform().openUri(URI.create(url));
+        } catch (Exception e) {
+            net.phoenix_archives.phoenix_archive.PhoenixArchive.LOGGER.warn("Failed to open link '{}'", url, e);
+        }
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && handlePreviewClick(mouseX, mouseY)) return true;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     private class CustomTextArea extends AbstractWidget {
@@ -246,9 +345,9 @@ public class TerminalInputScreen extends Screen {
         private static final int LINE_H = 9;
 
         private int scrollLine = 0;
-        
+
         private boolean dragging = false;
-        
+
         private int selectionAnchor = 0;
 
         private int selectionStart() {

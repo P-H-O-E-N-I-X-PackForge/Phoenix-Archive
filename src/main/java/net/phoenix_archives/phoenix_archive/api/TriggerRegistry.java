@@ -74,7 +74,7 @@ public class TriggerRegistry {
             boolean alreadyUnlocked = data.isUnlocked(uuid, loreUnlockKey);
 
             if (!alreadyUnlocked) {
-                
+
                 if (isPublicArchive || isEntryCompleteServer(player, data, lore)) {
                     data.unlock(uuid, loreUnlockKey);
                     anyChange = true;
@@ -93,7 +93,7 @@ public class TriggerRegistry {
                     data.relock(uuid, loreUnlockKey);
                     anyChange = true;
                 }
-                
+
             }
         }
 

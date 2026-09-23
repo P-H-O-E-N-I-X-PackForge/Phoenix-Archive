@@ -30,7 +30,7 @@ public class LoreDataLoader extends SimpleJsonResourceReloadListener {
     public static volatile Map<ResourceLocation, LoreEntry> LORE_ENTRIES = new LinkedHashMap<>();
 
     public LoreDataLoader() {
-        super(GSON, "phoenix_lore"); 
+        super(GSON, "phoenix_lore");
     }
 
     @Override
@@ -42,7 +42,7 @@ public class LoreDataLoader extends SimpleJsonResourceReloadListener {
             try {
                 LoreEntry entry = GSON.fromJson(element, LoreEntry.class);
                 if (isValid(entry)) {
-                    
+
                     entry = ensureInternalId(entry, location.getPath());
                     newEntries.put(location, entry);
                 }
@@ -106,10 +106,11 @@ public class LoreDataLoader extends SimpleJsonResourceReloadListener {
     private LoreEntry ensureInternalId(LoreEntry entry, String fallback) {
         if (entry.id() == null || entry.id().isEmpty()) {
             return new LoreEntry(
-                    fallback, 
+                    fallback,
                     entry.title(), entry.category(), entry.content(), entry.iconItem(),
                     entry.questId(), entry.lockedContent(), entry.voiceLine(),
-                    entry.conditionTree(), entry.order(), entry.backgroundShader());
+                    entry.conditionTree(), entry.order(), entry.backgroundShader(),
+                    entry.hidden(), entry.hiddenUntilId());
         }
         return entry;
     }
@@ -131,6 +132,6 @@ public class LoreDataLoader extends SimpleJsonResourceReloadListener {
 
         return new LoreEntry(entry.id(), entry.title(), autoCategory, entry.content(), entry.iconItem(),
                 entry.questId(), entry.lockedContent(), entry.voiceLine(), entry.conditionTree(), entry.order(),
-                entry.backgroundShader());
+                entry.backgroundShader(), entry.hidden(), entry.hiddenUntilId());
     }
 }

@@ -12,7 +12,7 @@ public class BlockPlacementTracker {
 
     private static final Map<ResourceKey<Level>, Map<BlockPos, Pair<UUID, Long>>> recentPlacements = new HashMap<>();
 
-    private static final long EXPIRY_MS = 5 * 60 * 1000; 
+    private static final long EXPIRY_MS = 5 * 60 * 1000;
 
     public static void track(ResourceKey<Level> dim, BlockPos pos, UUID playerUUID) {
         recentPlacements

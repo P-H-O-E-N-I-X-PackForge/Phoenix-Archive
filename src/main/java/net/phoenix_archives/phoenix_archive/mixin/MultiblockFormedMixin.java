@@ -40,7 +40,7 @@ public class MultiblockFormedMixin {
                 .ifPresentOrElse(
                         player -> TriggerRegistry.fire(player, "machine", machineId),
                         () -> {
-                            
+
                             net.minecraft.world.entity.player.Player nearestBase = serverLevel.getNearestPlayer(
                                     state.controllerPos.getX(),
                                     state.controllerPos.getY(),

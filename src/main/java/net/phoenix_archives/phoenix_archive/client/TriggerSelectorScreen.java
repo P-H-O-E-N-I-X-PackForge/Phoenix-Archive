@@ -27,7 +27,7 @@ public class TriggerSelectorScreen extends Screen {
         }).bounds(x, y, 160, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("WORLD: BIOME"), b -> {
-            
+
         }).bounds(x, y + 25, 160, 20).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("CANCEL"), b -> {

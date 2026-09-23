@@ -13,9 +13,7 @@ import java.util.List;
 public class ClientProxy implements IProxy {
 
     @Override
-    public void init() {
-        
-    }
+    public void init() {}
 
     @Override
     public void appendPlayerTooltip(List<Component> tooltip) {

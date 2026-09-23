@@ -12,7 +12,7 @@ public class SyncLorePacket {
 
     private final String hardwareId;
     private final boolean state;
-    private final boolean playSound; 
+    private final boolean playSound;
 
     public SyncLorePacket(String hardwareId, boolean state, boolean playSound) {
         this.hardwareId = hardwareId;
@@ -34,7 +34,7 @@ public class SyncLorePacket {
         ctx.get().enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player != null) {
-                
+
                 CompoundTag forgeData = mc.player.getPersistentData();
                 CompoundTag phoenixData = forgeData.getCompound("PhoenixArchive");
                 phoenixData.putBoolean(msg.hardwareId, msg.state);

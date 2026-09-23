@@ -19,8 +19,7 @@ public class ClientPacketHandler {
 
         mc.getToasts().addToast(new SystemToast(
                 SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
-                Component.literal("§6§lPHOENIX_OS"), 
-                Component.literal("§fDecrypted: " + title) 
-        ));
+                Component.literal("§6§lPHOENIX_OS"),
+                Component.literal("§fDecrypted: " + title)));
     }
 }

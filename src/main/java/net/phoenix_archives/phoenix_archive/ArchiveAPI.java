@@ -2,7 +2,6 @@ package net.phoenix_archives.phoenix_archive;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
-import net.phoenix_archives.phoenix_archive.api.ExternalCondition;
 import net.phoenix_archives.phoenix_archive.api.TriggerRegistry;
 import net.phoenix_archives.phoenix_archive.common.LoreSavedData;
 import net.phoenix_archives.phoenix_archive.network.PhoenixNetwork;
@@ -11,7 +10,6 @@ import net.phoenix_archives.phoenix_archive.network.SyncLorePacket;
 public class ArchiveAPI {
 
     public static void unlockEntry(ServerPlayer player, String entryId) {
-        
         LoreSavedData data = LoreSavedData.get(player.serverLevel());
         data.unlock(player.getUUID(), entryId);
 
@@ -25,7 +23,6 @@ public class ArchiveAPI {
 
     public static void fireTrigger(ServerPlayer player, String type, Object value) {
         TriggerRegistry.fire(player, type, value);
-
     }
 
     public static void fireExternal(ServerPlayer player, String triggerId) {

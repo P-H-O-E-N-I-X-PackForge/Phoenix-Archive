@@ -1,4 +1,3 @@
-
 package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.client.Minecraft;

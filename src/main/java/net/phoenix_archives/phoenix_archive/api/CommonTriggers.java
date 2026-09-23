@@ -14,21 +14,21 @@ public class CommonTriggers {
     @SubscribeEvent
     public static void onItemPickup(PlayerEvent.ItemPickupEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            TriggerRegistry.fireItem(player, event.getStack()); 
+            TriggerRegistry.fireItem(player, event.getStack());
         }
     }
 
     @SubscribeEvent
     public static void onItemCrafted(PlayerEvent.ItemCraftedEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            TriggerRegistry.fireItem(player, event.getCrafting()); 
+            TriggerRegistry.fireItem(player, event.getCrafting());
         }
     }
 
     @SubscribeEvent
     public static void onMobKill(LivingDeathEvent event) {
         if (event.getSource().getEntity() instanceof ServerPlayer player) {
-            
+
             ResourceLocation mobKey = ForgeRegistries.ENTITY_TYPES.getKey(event.getEntity().getType());
             if (mobKey != null) {
                 TriggerRegistry.fire(player, "kill", mobKey);

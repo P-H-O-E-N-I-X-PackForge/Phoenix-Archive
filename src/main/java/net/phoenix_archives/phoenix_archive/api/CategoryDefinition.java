@@ -4,8 +4,7 @@ public record CategoryDefinition(
                                  String id,
                                  String description,
                                  int weight,
-                                 String parentId   
-) {
+                                 String parentId) {
 
     public CategoryDefinition(String id, String description, int weight) {
         this(id, description, weight, null);

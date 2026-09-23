@@ -32,7 +32,7 @@ public class ArchiveEditorScreen extends Screen {
 
     private final LoreEntry editingEntry;
     private final String initialCategory;
-    
+
     private final Screen parent;
 
     private EditBox titleBox, iconBox, voiceLineBox, idBox, shaderBox;
@@ -50,15 +50,17 @@ public class ArchiveEditorScreen extends Screen {
     public String savedLockedContent = "";
     public String savedVoiceLine = "";
     public String savedBackgroundShader = "";
+    public boolean savedHidden = false;
+    public String savedHiddenUntilId = "";
     public long questId = 0;
     public String questName = "None Selected";
-    
+
     public String chroniclesQuestName = "";
     private int currentOrder = -1;
     public ConditionNode currentConditionTree = ConditionNode.EMPTY;
 
     private boolean isDirty = false;
-    
+
     private boolean suppressDirtyGuard = false;
 
     public ArchiveEditorScreen(Screen parent, LoreEntry existing, String defaultCategory) {
@@ -84,6 +86,8 @@ public class ArchiveEditorScreen extends Screen {
         this.savedLockedContent = entry.lockedContent() != null ? entry.lockedContent().replace("§", "&") : "";
         this.savedVoiceLine = entry.voiceLine() != null ? entry.voiceLine() : "";
         this.savedBackgroundShader = entry.backgroundShader() != null ? entry.backgroundShader() : "";
+        this.savedHidden = entry.hidden();
+        this.savedHiddenUntilId = entry.hiddenUntilId() != null ? entry.hiddenUntilId() : "";
         this.questId = entry.questId();
         this.currentOrder = entry.order();
         this.currentConditionTree = entry.conditionTree();
@@ -159,12 +163,12 @@ public class ArchiveEditorScreen extends Screen {
 
         String currentCat = getCurrentCategory();
         int currentDepth = CategoryRegistry.getDepth(currentCat);
-        String depthPrefix = "  ".repeat(currentDepth);  
+        String depthPrefix = "  ".repeat(currentDepth);
         String cycleLbl = "§8< §7" + depthPrefix + currentCat + " §8>";
 
         this.addRenderableWidget(Button.builder(Component.literal(cycleLbl), b -> {
             updateSavedValues();
-            
+
             categoryIndex = (categoryIndex + 1) % Math.max(1, categoryList.size() - 1);
             this.init(this.minecraft, this.width, this.height);
         }).bounds(x, 60, 170, 20).build());
@@ -280,8 +284,46 @@ public class ArchiveEditorScreen extends Screen {
                 .tooltip(Tooltip.create(Component.literal("Browse Shaders")))
                 .build());
 
+        this.addRenderableWidget(Button.builder(
+                Component.literal(savedHidden ? "§eHidden From List: ON" : "§8Hidden From List: OFF"),
+                b -> {
+                    savedHidden = !savedHidden;
+                    isDirty = true;
+                    this.init(this.minecraft, this.width, this.height);
+                })
+                .bounds(x, 215, 200, 16)
+                .tooltip(Tooltip.create(Component.literal(
+                        "When ON, this entry is left out of the sidebar entirely (instead of showing\n" +
+                                "greyed-out with its locked text) until the unlock check below passes.")))
+                .build());
+
+        String unlockLabel = savedHiddenUntilId.isEmpty() ? "§8(this entry's own unlock)" : "§f" + savedHiddenUntilId;
+        int unlockBtnW = savedHiddenUntilId.isEmpty() ? 200 : 178;
+        this.addRenderableWidget(Button.builder(Component.literal("§6UNLOCK_CHECK: " + unlockLabel), b -> {
+            updateSavedValues();
+            this.minecraft.setScreen(new ArchiveEntryPickerScreen(this, savedId, id -> {
+                this.savedHiddenUntilId = id;
+                this.isDirty = true;
+                this.init(this.minecraft, this.width, this.height);
+            }));
+        }).bounds(x, 234, unlockBtnW, 16)
+                .tooltip(Tooltip.create(Component.literal(
+                        "Which entry's unlock state gates this one appearing (used with Hidden From " +
+                                "List above). Defaults to this entry's own unlock if none is picked.")))
+                .build());
+
+        if (!savedHiddenUntilId.isEmpty()) {
+            this.addRenderableWidget(Button.builder(Component.literal("§4X"), b -> {
+                savedHiddenUntilId = "";
+                isDirty = true;
+                this.init(this.minecraft, this.width, this.height);
+            }).bounds(x + 181, 234, 19, 16)
+                    .tooltip(Tooltip.create(Component.literal("Clear (gate on this entry's own unlock)")))
+                    .build());
+        }
+
         this.addRenderableWidget(Button.builder(Component.literal("§2SAVE PACKET"), b -> saveEntry())
-                .bounds(x, 215, 200, 20)
+                .bounds(x, 258, 200, 20)
                 .tooltip(Tooltip.create(Component.literal("Save Archive Entry")))
                 .build());
     }
@@ -388,14 +430,16 @@ public class ArchiveEditorScreen extends Screen {
                 savedId,
                 savedTitle,
                 finalCategory,
-                savedContent.replace("&", "§"),
+                savedContent,
                 savedIcon,
                 (int) questId,
-                savedLockedContent.replace("&", "§"),
+                savedLockedContent,
                 savedVoiceLine,
                 currentConditionTree,
                 finalOrder,
-                savedBackgroundShader.trim());
+                savedBackgroundShader.trim(),
+                savedHidden,
+                savedHiddenUntilId.trim());
 
         String fileName = (editingEntry != null) ? savedId : savedTitle.toLowerCase().replaceAll("[^a-z0-9]", "_");
         Path path = Minecraft.getInstance().gameDirectory.toPath().resolve("config/phoenix_archive/lore");
@@ -509,7 +553,6 @@ public class ArchiveEditorScreen extends Screen {
     }
 
     private void openQuestSelector() {
-
         List<QuestSelectorScreen.PickableQuest> combined = new ArrayList<>();
         addChroniclesQuests(combined);
         addFtbQuests(combined);

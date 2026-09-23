@@ -12,9 +12,12 @@ import net.phoenix_archives.phoenix_archive.PhoenixArchive;
 import net.phoenix_archives.phoenix_archive.api.LoreDataLoader;
 import net.phoenix_archives.phoenix_archive.api.LoreEntry;
 import net.phoenix_archives.phoenix_archive.client.render.shader.ArchiveShaderManager;
+import net.phoenix_archives.phoenix_archive.client.rich.ArchiveConditionalBlockParser;
 import net.phoenixvine.chronicles.client.screen.ChronicleOverviewScreen;
 import net.phoenixvine.chronicles.model.QuestNode;
 import net.phoenixvine.chronicles.registry.QuestTreeRegistry;
+import net.phoenixvine.wiki.client.rich.markdown.BlockParserRegistry;
+import net.phoenixvine.wiki.client.rich.markdown.inline.handlers.LinkTargetHandler;
 import net.phoenixvine.wiki.client.suite.SuiteHudBar;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
@@ -73,6 +76,11 @@ public class ArchiveClient {
 
         ArchiveShaderManager.ensureDefault(TORN_PAGE_SHADER_ID, TORN_PAGE_SHADER_SOURCE);
 
+        // Archive's own :::if/:::else conditional-content block, and the quest: link scheme for
+        // deep-linking into Chronicles -- see ArchiveConditionalBlockParser and openLink() below.
+        BlockParserRegistry.DEFAULT.registerFirst(new ArchiveConditionalBlockParser());
+        LinkTargetHandler.registerScheme("quest:");
+
         registerHudBar(mc);
     }
 
@@ -123,9 +131,14 @@ public class ArchiveClient {
     }
 
     private static void registerHudBar(Minecraft mc) {
+        // A plain static 16x16 crop of lore_terminal.png's first frame -- the HUD bar blits this
+        // raw texture directly (not through the item/block atlas), and the source item texture's
+        // animation .mcmeta made that raw blit sample garbage in a packaged environment (the atlas
+        // handles animated item textures fine for real item rendering, but a manual UV-sliced blit
+        // of a multi-frame strip isn't guaranteed a clean single frame outside dev).
         ResourceLocation iconPath = ResourceLocation.fromNamespaceAndPath(
                 MOD_ID,
-                "textures/item/lore_terminal.png");
+                "textures/gui/lore_terminal_icon.png");
 
         SuiteHudBar.register(
                 MOD_ID,
@@ -135,7 +148,7 @@ public class ArchiveClient {
                 () -> 1,
                 () -> mc.setScreen(new ArchiveScreen(mc.screen)),
                 16,
-                112,
+                16,
                 false);
     }
 }
