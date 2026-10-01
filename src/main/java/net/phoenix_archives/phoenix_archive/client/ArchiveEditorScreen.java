@@ -9,6 +9,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.fml.ModList;
 import net.phoenix_archives.phoenix_archive.api.CategoryDefinition;
 import net.phoenix_archives.phoenix_archive.api.CategoryRegistry;
@@ -63,6 +64,24 @@ public class ArchiveEditorScreen extends Screen {
     private boolean isDirty = false;
 
     private boolean suppressDirtyGuard = false;
+
+    // ---- Responsive layout (recomputed on every init / window resize) ----
+    private static final int MARGIN = 6;
+    private static final int STATUS_MAX_LINES_PER_ENTRY = 2;
+
+    private int termX, termW;
+    private int fieldX, fieldW;
+    private int rightX, rightW;
+
+    private int rowH = 20;
+    private int idY, titleY, catY, iconY, voiceY;
+    private int contentY, contentH, lockedY, lockedH;
+    private int hiddenY, unlockY, saveY;
+
+    private int triggerY;
+    private int statusStartY;
+    private int shaderLabelY, shaderBoxY;
+    private List<String> statusEntries = List.of();
 
     public ArchiveEditorScreen(Screen parent, LoreEntry existing, String defaultCategory) {
         super(Component.literal("Archive Editor"));
@@ -124,6 +143,122 @@ public class ArchiveEditorScreen extends Screen {
         this.isDirty = true;
     }
 
+    /**
+     * Works out every position from the current window size. Horizontal: terminal buttons | fields |
+     * trigger-logic column, shrinking proportionally when the window is narrow. Vertical: rows compress
+     * (20px/5px gaps -> 16px/3px gaps) when short, and the two text boxes absorb whatever height is left.
+     */
+    private void computeLayout() {
+        // ---- horizontal ----
+        int remaining = Math.max(200, (this.width - 16) - 10); // 16 = side margins, 10 = two 5px gaps
+        if (remaining >= 375) {
+            termW = 80;
+            fieldW = 200;
+            rightW = 95;
+        } else {
+            termW = Math.max(48, remaining * 80 / 375);
+            rightW = Math.max(66, remaining * 95 / 375);
+            fieldW = Math.max(100, remaining - termW - rightW);
+        }
+        int blockW = termW + 5 + fieldW + 5 + rightW;
+        termX = (this.width - blockW) / 2;
+        fieldX = termX + termW + 5;
+        rightX = fieldX + fieldW + 5;
+
+        // ---- vertical ----
+        int avail = this.height - 2 * MARGIN;
+        // 6 full-height rows (id, title, category, icon, voice, save) + 2 small rows (hidden, unlock) + 9 gaps
+        boolean roomy = avail - (6 * 20 + 2 * 16 + 9 * 5) >= 70;
+        rowH = roomy ? 20 : 16;
+        int gap = roomy ? 5 : 3;
+        int fixed = 6 * rowH + 2 * 16 + 9 * gap;
+        int flex = Math.max(50, avail - fixed);
+        contentH = Math.min(140, Math.max(30, flex * 64 / 100));
+        lockedH = Math.min(70, Math.max(20, flex - contentH));
+
+        int used = fixed + contentH + lockedH;
+        int y = Math.max(MARGIN, (this.height - used) / 2);
+
+        idY = y;
+        y += rowH + gap;
+        titleY = y;
+        y += rowH + gap;
+        catY = y;
+        y += rowH + gap;
+        iconY = y;
+        y += rowH + gap;
+        voiceY = y;
+        y += rowH + gap;
+        contentY = y;
+        y += contentH + gap;
+        lockedY = y;
+        y += lockedH + gap;
+        hiddenY = y;
+        y += 16 + gap;
+        unlockY = y;
+        y += 16 + gap;
+        saveY = y;
+
+        // ---- trigger-logic column: status lines wrap, and the shader row sits below them ----
+        triggerY = iconY;
+        statusStartY = triggerY + 15;
+        statusEntries = buildStatusEntries();
+        int statusLines = 0;
+        for (String entry : statusEntries) statusLines += wrapStatus(entry).size();
+
+        int labelY = Math.max(triggerY + 48, statusStartY + statusLines * 10 + 4);
+        int boxY = labelY + 12;
+        int maxBoxY = this.height - MARGIN - 16;
+        if (boxY > maxBoxY) {
+            boxY = maxBoxY;
+            labelY = boxY - 12;
+        }
+        shaderLabelY = labelY;
+        shaderBoxY = boxY;
+    }
+
+    private int statusWidth() {
+        return Math.max(40, this.width - MARGIN - rightX);
+    }
+
+    private List<FormattedCharSequence> wrapStatus(String text) {
+        List<FormattedCharSequence> lines = this.font.split(Component.literal(text), statusWidth());
+        return lines.size() > STATUS_MAX_LINES_PER_ENTRY ? lines.subList(0, STATUS_MAX_LINES_PER_ENTRY) : lines;
+    }
+
+    private List<String> buildStatusEntries() {
+        List<String> out = new ArrayList<>();
+        boolean hasAnything = questId != 0 || !currentConditionTree.isEmpty();
+
+        if (!hasAnything) {
+            out.add("§8(Manual Only)");
+            return out;
+        }
+
+        if (questId != 0) {
+            out.add("§b• Quest: " + questName + " §8(ftb_quest:" + questId + ")");
+        }
+
+        for (var nl : currentConditionTree.collectLeaves()) {
+            String value = nl.leaf().value();
+            if (value == null || value.isEmpty()) continue;
+            if (!nl.negated() && nl.leaf().type().equals("chronicles_quest")) {
+                String name = chroniclesQuestName.isEmpty() ? value : chroniclesQuestName;
+                out.add("§d• Chronicles Quest: " + name + " §8(chronicles_quest:" + value + ")");
+                continue;
+            }
+            if (nl.leaf().type().equals("external")) {
+                out.add((nl.negated() ? "§c• NOT External: " : "§e• External: ") +
+                        ArchiveScreen.externalProgressLabel(value));
+                continue;
+            }
+            String typeLabel = getConditionTypeLabel(nl.leaf().type());
+            String prefix = (nl.negated() ? "§c• NOT " : "§e• ") + typeLabel + ": ";
+            out.add(conditionLine(prefix, value));
+        }
+        return out;
+    }
+
     @Override
     protected void init() {
         this.clearWidgets();
@@ -131,29 +266,31 @@ public class ArchiveEditorScreen extends Screen {
         if (idBox != null) updateSavedValues();
 
         buildCategoryList();
+        computeLayout();
 
-        int x = this.width / 2 - 100;
-        int rightX = x + 205;
+        int x = fieldX;
+        int w = fieldW;
+        String termLabel = termW >= 72 ? "TERMINAL >_" : "TERM >_";
 
-        idBox = new EditBox(this.font, x, 10, 200, 20, Component.empty());
+        idBox = new EditBox(this.font, x, idY, w, rowH, Component.empty());
         idBox.setHint(Component.literal("§6Permanent ID (e.g. log_001)"));
         idBox.setValue(savedId);
         idBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(idBox);
 
-        titleBox = new EditBox(this.font, x, 35, 200, 20, Component.empty());
+        titleBox = new EditBox(this.font, x, titleY, w, rowH, Component.empty());
         titleBox.setHint(Component.literal("§8Title..."));
         titleBox.setValue(savedTitle);
         titleBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(titleBox);
 
-        this.addRenderableWidget(Button.builder(Component.literal("TERMINAL >_"), b -> {
-            updateSavedValues();
-            this.minecraft.setScreen(new TerminalInputScreen(this, "ENTRY_TITLE", this.savedTitle, (val) -> {
-                this.savedTitle = val;
-                this.titleBox.setValue(val);
-            }));
-        }).bounds(x - 85, 35, 80, 20)
+        this.addRenderableWidget(Button.builder(Component.literal(termLabel), b -> {
+                    updateSavedValues();
+                    this.minecraft.setScreen(new TerminalInputScreen(this, "ENTRY_TITLE", this.savedTitle, (val) -> {
+                        this.savedTitle = val;
+                        this.titleBox.setValue(val);
+                    }));
+                }).bounds(termX, titleY, termW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Title")))
                 .build());
 
@@ -167,101 +304,102 @@ public class ArchiveEditorScreen extends Screen {
 
             categoryIndex = (categoryIndex + 1) % Math.max(1, categoryList.size() - 1);
             this.init(this.minecraft, this.width, this.height);
-        }).bounds(x, 60, 170, 20).build());
+        }).bounds(x, catY, w - 30, rowH).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("§a+"), b -> {
-            updateSavedValues();
-            this.minecraft.setScreen(new TerminalInputScreen(this, "NEW_CATEGORY", "", (res) -> {
-                if (res != null && !res.isEmpty()) {
-                    CategoryRegistry.register(res, "", 50, null);
-                    saveCategoryToDisk(res);
-                    buildCategoryList();
-                    for (int i = 0; i < categoryList.size(); i++) {
-                        if (categoryList.get(i).equalsIgnoreCase(res)) {
-                            categoryIndex = i;
-                            break;
+                    updateSavedValues();
+                    this.minecraft.setScreen(new TerminalInputScreen(this, "NEW_CATEGORY", "", (res) -> {
+                        if (res != null && !res.isEmpty()) {
+                            CategoryRegistry.register(res, "", 50, null);
+                            saveCategoryToDisk(res);
+                            buildCategoryList();
+                            for (int i = 0; i < categoryList.size(); i++) {
+                                if (categoryList.get(i).equalsIgnoreCase(res)) {
+                                    categoryIndex = i;
+                                    break;
+                                }
+                            }
                         }
-                    }
-                }
-                this.init(this.minecraft, this.width, this.height);
-            }));
-        }).bounds(x + 172, 60, 28, 20)
+                        this.init(this.minecraft, this.width, this.height);
+                    }));
+                }).bounds(x + w - 28, catY, 28, rowH)
                 .tooltip(Tooltip.create(Component.literal("Make a New Category")))
                 .build());
 
-        iconBox = new EditBox(this.font, x, 85, 200, 20, Component.empty());
+        iconBox = new EditBox(this.font, x, iconY, w, rowH, Component.empty());
         iconBox.setMaxLength(512);
         iconBox.setHint(Component.literal("§8Icon (minecraft:apple)"));
         iconBox.setValue(savedIcon);
         iconBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(iconBox);
 
-        voiceLineBox = new EditBox(this.font, x, 110, 200, 20, Component.empty());
+        voiceLineBox = new EditBox(this.font, x, voiceY, w, rowH, Component.empty());
         voiceLineBox.setHint(Component.literal("§dVoice (phoenix_archive:voice.filename)"));
         voiceLineBox.setValue(savedVoiceLine);
         voiceLineBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(voiceLineBox);
 
-        contentBox = new MultiLineEditBox(this.font, x, 135, 200, 45, Component.empty(), Component.empty());
+        contentBox = new MultiLineEditBox(this.font, x, contentY, w, contentH, Component.empty(),
+                Component.empty());
         contentBox.setValue(savedContent);
         contentBox.setValueListener(v -> isDirty = true);
         this.addRenderableWidget(contentBox);
 
-        lockedContentBox = new MultiLineEditBox(this.font, x, 185, 200, 25, Component.empty(), Component.empty());
+        lockedContentBox = new MultiLineEditBox(this.font, x, lockedY, w, lockedH, Component.empty(),
+                Component.empty());
         lockedContentBox.setValue(savedLockedContent);
         lockedContentBox.setValueListener(v -> isDirty = true);
         this.addRenderableWidget(lockedContentBox);
 
-        int btnWidth = 80;
-        this.addRenderableWidget(Button.builder(Component.literal("TERMINAL >_"), b -> {
-            updateSavedValues();
-            this.minecraft.setScreen(new TerminalInputScreen(this, "UNLOCKED_DATA", this.savedContent, (val) -> {
-                this.savedContent = val;
-                this.contentBox.setValue(val);
-            }));
-        }).bounds(x - 85, 135, btnWidth, 20)
+        this.addRenderableWidget(Button.builder(Component.literal(termLabel), b -> {
+                    updateSavedValues();
+                    this.minecraft.setScreen(new TerminalInputScreen(this, "UNLOCKED_DATA", this.savedContent, (val) -> {
+                        this.savedContent = val;
+                        this.contentBox.setValue(val);
+                    }));
+                }).bounds(termX, contentY, termW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Unlocked Content")))
                 .build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("TERMINAL >_"), b -> {
-            updateSavedValues();
-            this.minecraft
-                    .setScreen(new TerminalInputScreen(this, "ENCRYPTED_SIGNAL", this.savedLockedContent, (val) -> {
-                        this.savedLockedContent = val;
-                        this.lockedContentBox.setValue(val);
-                    }));
-        }).bounds(x - 85, 185, btnWidth, 20)
+        this.addRenderableWidget(Button.builder(Component.literal(termLabel), b -> {
+                    updateSavedValues();
+                    this.minecraft
+                            .setScreen(new TerminalInputScreen(this, "ENCRYPTED_SIGNAL", this.savedLockedContent, (val) -> {
+                                this.savedLockedContent = val;
+                                this.lockedContentBox.setValue(val);
+                            }));
+                }).bounds(termX, lockedY, termW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Locked Content")))
                 .build());
 
         this.addRenderableWidget(Button.builder(Component.literal("§6EDIT_LOGIC"), b -> {
-            updateSavedValues();
-            this.minecraft.setScreen(new ConditionTunerScreen(this, this.currentConditionTree));
-        }).bounds(rightX, 60, 95, 20)
+                    updateSavedValues();
+                    this.minecraft.setScreen(new ConditionTunerScreen(this, this.currentConditionTree));
+                }).bounds(rightX, catY, rightW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Add/Remove Entry Conditions")))
                 .build());
 
         this.addRenderableWidget(Button.builder(Component.literal("SELECT_QUEST"), b -> {
-            updateSavedValues();
-            openQuestSelector();
-        }).bounds(rightX, 35, 95, 20)
+                    updateSavedValues();
+                    openQuestSelector();
+                }).bounds(rightX, titleY, rightW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Open Quest Selector (Chronicles + FTB Quests)")))
                 .build());
 
         boolean hasChroniclesQuest = !getLeafValue("chronicles_quest").isEmpty();
         if (questId != 0 || hasChroniclesQuest) {
             this.addRenderableWidget(Button.builder(Component.literal("§4CLEAR QUEST"), b -> {
-                this.questId = 0;
-                this.questName = "None Selected";
-                this.chroniclesQuestName = "";
-                setLeafValue("chronicles_quest", "");
-                this.init(this.minecraft, this.width, this.height);
-            }).bounds(rightX, 17, 95, 16)
+                        this.questId = 0;
+                        this.questName = "None Selected";
+                        this.chroniclesQuestName = "";
+                        setLeafValue("chronicles_quest", "");
+                        this.init(this.minecraft, this.width, this.height);
+                    }).bounds(rightX, idY + (rowH - 16) / 2, rightW, 16)
                     .tooltip(Tooltip.create(Component.literal("Clear Selected Quest")))
                     .build());
         }
 
-        shaderBox = new EditBox(this.font, rightX, 145, 74, 16, Component.empty());
+        shaderBox = new EditBox(this.font, rightX, shaderBoxY, rightW - 21, 16, Component.empty());
         shaderBox.setMaxLength(64);
         shaderBox.setHint(Component.literal("§8bg shader id"));
         shaderBox.setValue(savedBackgroundShader);
@@ -269,40 +407,40 @@ public class ArchiveEditorScreen extends Screen {
         this.addRenderableWidget(shaderBox);
 
         this.addRenderableWidget(Button.builder(Component.literal("..."), b -> {
-            updateSavedValues();
-            this.minecraft.setScreen(new ArchiveShaderPickerScreen(this, id -> {
-                this.savedBackgroundShader = id;
+                    updateSavedValues();
+                    this.minecraft.setScreen(new ArchiveShaderPickerScreen(this, id -> {
+                        this.savedBackgroundShader = id;
 
-                if (this.shaderBox != null) this.shaderBox.setValue(id);
-                this.isDirty = true;
-            }));
-        }).bounds(rightX + 77, 145, 18, 16)
+                        if (this.shaderBox != null) this.shaderBox.setValue(id);
+                        this.isDirty = true;
+                    }));
+                }).bounds(rightX + rightW - 18, shaderBoxY, 18, 16)
                 .tooltip(Tooltip.create(Component.literal("Browse Shaders")))
                 .build());
 
         this.addRenderableWidget(Button.builder(
-                Component.literal(savedHidden ? "§eHidden From List: ON" : "§8Hidden From List: OFF"),
-                b -> {
-                    savedHidden = !savedHidden;
-                    isDirty = true;
-                    this.init(this.minecraft, this.width, this.height);
-                })
-                .bounds(x, 215, 200, 16)
+                        Component.literal(savedHidden ? "§eHidden From List: ON" : "§8Hidden From List: OFF"),
+                        b -> {
+                            savedHidden = !savedHidden;
+                            isDirty = true;
+                            this.init(this.minecraft, this.width, this.height);
+                        })
+                .bounds(x, hiddenY, w, 16)
                 .tooltip(Tooltip.create(Component.literal(
                         "When ON, this entry is left out of the sidebar entirely (instead of showing\n" +
                                 "greyed-out with its locked text) until the unlock check below passes.")))
                 .build());
 
         String unlockLabel = savedHiddenUntilId.isEmpty() ? "§8(this entry's own unlock)" : "§f" + savedHiddenUntilId;
-        int unlockBtnW = savedHiddenUntilId.isEmpty() ? 200 : 178;
+        int unlockBtnW = savedHiddenUntilId.isEmpty() ? w : w - 22;
         this.addRenderableWidget(Button.builder(Component.literal("§6UNLOCK_CHECK: " + unlockLabel), b -> {
-            updateSavedValues();
-            this.minecraft.setScreen(new ArchiveEntryPickerScreen(this, savedId, id -> {
-                this.savedHiddenUntilId = id;
-                this.isDirty = true;
-                this.init(this.minecraft, this.width, this.height);
-            }));
-        }).bounds(x, 234, unlockBtnW, 16)
+                    updateSavedValues();
+                    this.minecraft.setScreen(new ArchiveEntryPickerScreen(this, savedId, id -> {
+                        this.savedHiddenUntilId = id;
+                        this.isDirty = true;
+                        this.init(this.minecraft, this.width, this.height);
+                    }));
+                }).bounds(x, unlockY, unlockBtnW, 16)
                 .tooltip(Tooltip.create(Component.literal(
                         "Which entry's unlock state gates this one appearing (used with Hidden From " +
                                 "List above). Defaults to this entry's own unlock if none is picked.")))
@@ -310,16 +448,16 @@ public class ArchiveEditorScreen extends Screen {
 
         if (!savedHiddenUntilId.isEmpty()) {
             this.addRenderableWidget(Button.builder(Component.literal("§4X"), b -> {
-                savedHiddenUntilId = "";
-                isDirty = true;
-                this.init(this.minecraft, this.width, this.height);
-            }).bounds(x + 181, 234, 19, 16)
+                        savedHiddenUntilId = "";
+                        isDirty = true;
+                        this.init(this.minecraft, this.width, this.height);
+                    }).bounds(x + w - 19, unlockY, 19, 16)
                     .tooltip(Tooltip.create(Component.literal("Clear (gate on this entry's own unlock)")))
                     .build());
         }
 
         this.addRenderableWidget(Button.builder(Component.literal("§2SAVE PACKET"), b -> saveEntry())
-                .bounds(x, 258, 200, 20)
+                .bounds(x, saveY, w, rowH)
                 .tooltip(Tooltip.create(Component.literal("Save Archive Entry")))
                 .build());
     }
@@ -347,7 +485,7 @@ public class ArchiveEditorScreen extends Screen {
 
         String wantedCat = (editingEntry != null && savedTitle.equals(editingEntry.title())) ?
                 editingEntry.category().toUpperCase() : (ordered.contains(initialCategory.toUpperCase()) ?
-                        initialCategory.toUpperCase() : (ordered.isEmpty() ? "GENERAL" : ordered.get(0)));
+                initialCategory.toUpperCase() : (ordered.isEmpty() ? "GENERAL" : ordered.get(0)));
 
         int foundIndex = ordered.indexOf(wantedCat);
         if (foundIndex >= 0) {
@@ -471,53 +609,26 @@ public class ArchiveEditorScreen extends Screen {
         this.renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTicks);
 
-        int rightX = (this.width / 2 - 100) + 205;
-        graphics.drawString(this.font, "§6TRIGGER_LOGIC:", rightX, 85, ArchivePalette.TERM_BRIGHT);
-        graphics.fill(rightX, 95, rightX + 110, 96, ArchivePalette.withAlpha(ArchivePalette.TERM_BRIGHT, 0x44));
+        graphics.drawString(this.font, "§6TRIGGER_LOGIC:", rightX, triggerY, ArchivePalette.TERM_BRIGHT);
+        int lineW = Math.min(110, this.width - MARGIN - rightX);
+        graphics.fill(rightX, triggerY + 10, rightX + lineW, triggerY + 11,
+                ArchivePalette.withAlpha(ArchivePalette.TERM_BRIGHT, 0x44));
 
-        int statusY = 100;
-
-        boolean hasAnything = questId != 0 || !currentConditionTree.isEmpty();
-
-        if (!hasAnything) {
-            graphics.drawString(this.font, "§8(Manual Only)", rightX, statusY, ArchivePalette.TEXT_DIM);
-        } else {
-            if (questId != 0) {
-                graphics.drawString(this.font, "§b• Quest: " + questName + " §8(ftb_quest:" + questId + ")",
-                        rightX, statusY, ArchivePalette.TEXT_DIM);
-                statusY += 10;
-            }
-
-            for (var nl : currentConditionTree.collectLeaves()) {
-                String value = nl.leaf().value();
-                if (value == null || value.isEmpty()) continue;
-                if (!nl.negated() && nl.leaf().type().equals("chronicles_quest")) {
-                    String name = chroniclesQuestName.isEmpty() ? value : chroniclesQuestName;
-                    graphics.drawString(this.font,
-                            "§d• Chronicles Quest: " + name + " §8(chronicles_quest:" + value + ")",
-                            rightX, statusY, ArchivePalette.TEXT_DIM);
-                    statusY += 10;
-                    continue;
-                }
-                if (nl.leaf().type().equals("external")) {
-                    graphics.drawString(this.font,
-                            (nl.negated() ? "§c• NOT External: " : "§e• External: ") +
-                                    ArchiveScreen.externalProgressLabel(value),
-                            rightX, statusY, ArchivePalette.TEXT_DIM);
-                    statusY += 10;
-                    continue;
-                }
-                String typeLabel = getConditionTypeLabel(nl.leaf().type());
-                String prefix = (nl.negated() ? "§c• NOT " : "§e• ") + typeLabel + ": ";
-                renderCondition(graphics, prefix, value, rightX, statusY);
+        int statusY = statusStartY;
+        for (String entry : statusEntries) {
+            for (FormattedCharSequence line : wrapStatus(entry)) {
+                graphics.drawString(this.font, line, rightX, statusY, ArchivePalette.TEXT_DIM);
                 statusY += 10;
             }
         }
 
-        graphics.drawString(this.font, "§6BG_SHADER:", rightX, 133, ArchivePalette.TERM_BRIGHT);
+        graphics.drawString(this.font, "§6BG_SHADER:", rightX, shaderLabelY, ArchivePalette.TERM_BRIGHT);
 
-        graphics.drawString(this.font, "> " + ArchiveConfigs.INSTANCE.general.mainMenuName + "Lore_Dev",
-                10, 10, ArchivePalette.TERM);
+        // Header tag: only drawn when it fits to the left of the ID box
+        String tag = "> " + ArchiveConfigs.INSTANCE.general.mainMenuName + "Lore_Dev";
+        if (10 + this.font.width(tag) < fieldX - 4) {
+            graphics.drawString(this.font, tag, 10, idY + (rowH - 8) / 2, ArchivePalette.TERM);
+        }
     }
 
     private String getConditionTypeLabel(String key) {
@@ -533,11 +644,11 @@ public class ArchiveEditorScreen extends Screen {
         };
     }
 
-    private void renderCondition(GuiGraphics g, String prefix, String id, int x, int y) {
-        if (id == null || id.isEmpty()) return;
+    private String conditionLine(String prefix, String id) {
+        if (id == null || id.isEmpty()) return prefix;
         String displayName = prettifyId(id);
         String finalName = displayName.length() > 20 ? displayName.substring(0, 18) + ".." : displayName;
-        g.drawString(this.font, prefix + "§f" + finalName, x, y, ArchivePalette.TERM_BRIGHT);
+        return prefix + "§f" + finalName;
     }
 
     private String prettifyId(String id) {

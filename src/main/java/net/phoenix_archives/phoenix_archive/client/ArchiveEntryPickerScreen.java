@@ -4,7 +4,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.phoenix_archives.phoenix_archive.api.LoreDataLoader;
 import net.phoenix_archives.phoenix_archive.api.LoreEntry;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
@@ -36,6 +38,9 @@ public class ArchiveEntryPickerScreen extends Screen {
     private int scrollY = 0;
     private int hoveredIdx = -1;
 
+    // Responsive search bar (recomputed in init)
+    private int searchX, searchW;
+
     public ArchiveEntryPickerScreen(Screen parent, String excludeId, Consumer<String> onSelect) {
         super(Component.literal("Entry Browser"));
         this.parent = parent;
@@ -53,8 +58,14 @@ public class ArchiveEntryPickerScreen extends Screen {
                 .filter(e -> !e.id().equals(excludeId))
                 .toList();
         applyFilter();
+        clampScroll();
 
-        searchBox = new EditBox(font, width / 2 - 100, HEADER_H / 2 - 5, 200, 14, Component.empty());
+        // Leave room on the left for the "Search:" label
+        int labelW = font.width("Search: ");
+        searchW = Math.max(100, Math.min(200, width - 2 * (labelW + 16)));
+        searchX = (width - searchW) / 2;
+
+        searchBox = new EditBox(font, searchX, HEADER_H / 2 - 5, searchW, 14, Component.empty());
         searchBox.setHint(Component.literal("§8Search…"));
         searchBox.setValue(query);
         searchBox.setResponder(q -> {
@@ -78,7 +89,7 @@ public class ArchiveEntryPickerScreen extends Screen {
         g.fill(0, 0, width, HEADER_H, ArchivePalette.PANEL);
         g.fill(0, HEADER_H - 1, width, HEADER_H, ArchivePalette.BORDER);
         g.drawCenteredString(font, "§fEntry Browser", width / 2, 6, ArchivePalette.TERM_BRIGHT);
-        g.drawString(font, "§8Search:", width / 2 - 100 - font.width("Search: "), HEADER_H / 2 - 3,
+        g.drawString(font, "§8Search:", searchX - font.width("Search: "), HEADER_H / 2 - 3,
                 ArchivePalette.TEXT_FAINT, false);
 
         int fy = height - FOOTER_H;
@@ -102,7 +113,10 @@ public class ArchiveEntryPickerScreen extends Screen {
             }
 
             LoreEntry entry = filtered.get(i);
-            g.drawString(font, "§f" + entry.title() + " §8(" + entry.id() + ")", 12, ty + 4,
+            // Trim long "title (id)" rows so they never run off the right edge
+            FormattedText row = font.substrByWidth(
+                    Component.literal("§f" + entry.title() + " §8(" + entry.id() + ")"), width - 28);
+            g.drawString(font, Language.getInstance().getVisualOrder(row), 12, ty + 4,
                     ArchivePalette.TERM_BRIGHT, false);
         }
 
@@ -129,9 +143,8 @@ public class ArchiveEntryPickerScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
-        int totalH = filtered.size() * ROW_H;
-        int visible = height - HEADER_H - FOOTER_H;
-        scrollY = (int) Math.max(0, Math.min(scrollY - delta * 20, Math.max(0, totalH - visible)));
+        scrollY = (int) (scrollY - delta * 20);
+        clampScroll();
         return true;
     }
 
@@ -147,6 +160,12 @@ public class ArchiveEntryPickerScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    private void clampScroll() {
+        int totalH = filtered.size() * ROW_H + 4;
+        int visible = height - HEADER_H - FOOTER_H;
+        scrollY = Math.max(0, Math.min(scrollY, Math.max(0, totalH - visible)));
     }
 
     private void applyFilter() {

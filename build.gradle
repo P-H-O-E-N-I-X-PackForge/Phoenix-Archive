@@ -139,7 +139,7 @@ dependencies {
 
     jarJar(modImplementation("net.phoenixvine.wiki:phoenix_wiki:0.5.5"))
 
-    modCompileOnly 'net.phoenixvine.chronicles:phoenix_chronicles:7.0.4'
+    modCompileOnly 'net.phoenixvine.chronicles:phoenix_chronicles:8.0.1'
 
     jarJar("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
 

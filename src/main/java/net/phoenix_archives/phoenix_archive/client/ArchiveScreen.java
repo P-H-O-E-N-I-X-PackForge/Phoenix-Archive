@@ -103,9 +103,37 @@ public class ArchiveScreen extends Screen {
     private SoundInstance currentVoice = null;
     private static final Gson GSON = ConditionNodeAdapter.register(new GsonBuilder().setPrettyPrinting()).create();
 
+    // ---- Responsive layout ----
+    private static final int MAX_GUI_W = 420;
+    private static final int MAX_GUI_H = 240;
+    private static final int GUI_MARGIN = 6;
+
     private int guiX, guiY;
-    private int guiWidth = 420;
-    private int guiHeight = 240;
+    private int guiWidth = MAX_GUI_W;
+    private int guiHeight = MAX_GUI_H;
+    private int sidebarWidth = 140;
+
+    /** Recomputes panel size/position from the current window. Called at the top of {@link #init()}. */
+    private void computeLayout() {
+        guiWidth = Math.max(160, Math.min(MAX_GUI_W, this.width - GUI_MARGIN * 2));
+        guiHeight = Math.max(120, Math.min(MAX_GUI_H, this.height - GUI_MARGIN * 2));
+        sidebarWidth = Math.max(90, Math.min(140, guiWidth / 3)); // 140 at full size
+        guiX = (this.width - guiWidth) / 2;
+        guiY = (this.height - guiHeight) / 2;
+    }
+
+    private int contentWidth() {
+        return guiWidth - sidebarWidth - 25;
+    }
+
+    private int sidebarVisibleRows() {
+        return Math.max(1, (guiHeight - 40) / 12);
+    }
+
+    private void clampSidebarScroll() {
+        int max = Math.max(0, sidebarRows.size() - sidebarVisibleRows());
+        scrollOffset = Math.max(0, Math.min(scrollOffset, max));
+    }
 
     private interface SidebarRow {}
 
@@ -174,8 +202,7 @@ public class ArchiveScreen extends Screen {
         super.init();
         this.clearWidgets();
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.guiX = (this.width - this.guiWidth) / 2;
-        this.guiY = (this.height - this.guiHeight) / 2;
+        computeLayout();
 
         if (pendingPreselect != null) {
             this.selectedEntry = pendingPreselect;
@@ -184,8 +211,9 @@ public class ArchiveScreen extends Screen {
         }
 
         refreshGroups();
+        clampSidebarScroll();
 
-        searchBox = new EditBox(this.font, guiX + 2, guiY + 18, 136, 10, Component.empty());
+        searchBox = new EditBox(this.font, guiX + 2, guiY + 18, sidebarWidth - 4, 10, Component.empty());
         searchBox.setHint(Component.literal("§8search..."));
         searchBox.setValue(searchQuery);
         searchBox.setMaxLength(64);
@@ -196,17 +224,22 @@ public class ArchiveScreen extends Screen {
         });
         this.addRenderableWidget(searchBox);
 
-        int sidebarWidth = 140;
         int contentXOffset = sidebarWidth + 20;
         boolean isOp = this.minecraft != null && this.minecraft.player != null &&
                 this.minecraft.player.hasPermissions(2);
+
+        // Bottom button row: voice + quest buttons share whatever space is left of the star/copy buttons
+        int bottomAvail = guiWidth - contentXOffset - 48;
+        int btnW = Math.max(44, Math.min(100, (bottomAvail - 4) / 2));
+        boolean shortLabels = btnW < 84;
 
         if (selectedEntry != null && isLoreUnlockedClient(selectedEntry) && selectedEntry.voiceLine() != null &&
                 !selectedEntry.voiceLine().isEmpty()) {
             final LoreEntry voiceTarget = selectedEntry;
             this.addRenderableWidget(
-                    Button.builder(Component.literal("▶ PLAY VOICE"), b -> playLoreVoice(voiceTarget.voiceLine()))
-                            .bounds(guiX + contentXOffset, guiY + guiHeight - 25, 100, 16)
+                    Button.builder(Component.literal(shortLabels ? "▶ VOICE" : "▶ PLAY VOICE"),
+                            b -> playLoreVoice(voiceTarget.voiceLine()))
+                            .bounds(guiX + contentXOffset, guiY + guiHeight - 25, btnW, 16)
                             .tooltip(Tooltip.create(Component.literal("Play Voice Entry")))
                             .build());
         }
@@ -215,9 +248,9 @@ public class ArchiveScreen extends Screen {
                 ModList.get().isLoaded("phoenix_chronicles")) {
             String chroniclesQuestId = selectedEntry.conditionTree().findLeafValue("chronicles_quest").orElse(null);
             if (chroniclesQuestId != null && !chroniclesQuestId.isEmpty()) {
-                this.addRenderableWidget(Button.builder(Component.literal("§b→ QUEST TREE"),
+                this.addRenderableWidget(Button.builder(Component.literal(shortLabels ? "§b→ QUEST" : "§b→ QUEST TREE"),
                         b -> ArchiveClient.openChroniclesQuest(this, chroniclesQuestId))
-                        .bounds(guiX + contentXOffset + 104, guiY + guiHeight - 25, 100, 16)
+                        .bounds(guiX + contentXOffset + btnW + 4, guiY + guiHeight - 25, btnW, 16)
                         .tooltip(Tooltip.create(Component.literal("Jump to this quest in Chronicles")))
                         .build());
             }
@@ -254,28 +287,39 @@ public class ArchiveScreen extends Screen {
                 .build());
 
         if (isOp) {
+            // Header buttons laid out from the right edge; compact labels when the title would be crowded
+            int titleW = this.font.width("> " + ArchiveConfigs.INSTANCE.general.mainMenuName) + 14;
+            boolean compact = guiWidth < titleW + 70 + 64 + 72 + 12;
+
+            int right = guiX + guiWidth - 5;
+            int editX = right - 70;
+            int entryW = compact ? 44 : 64;
+            int entryX = editX - 4 - entryW;
+            int catW = compact ? 36 : 72;
+            int catX = entryX - 4 - catW;
+
             this.addRenderableWidget(Button.builder(
                     Component.literal(isEditMode ? "§c[EDIT: ON]" : "§7[EDIT: OFF]"),
                     b -> {
                         this.isEditMode = !this.isEditMode;
                         this.minecraft.tell(() -> this.init(this.minecraft, this.width, this.height));
-                    }).bounds(guiX + guiWidth - 75, guiY + 6, 70, 14)
+                    }).bounds(editX, guiY + 6, 70, 14)
                     .tooltip(Tooltip.create(Component.literal("Toggle Editing Mode")))
                     .build());
 
             if (isEditMode) {
-                this.addRenderableWidget(Button.builder(Component.literal("New Category"),
+                this.addRenderableWidget(Button.builder(Component.literal(compact ? "+Cat" : "New Category"),
                         b -> this.minecraft.setScreen(new CategoryManagementScreen(this)))
-                        .bounds(guiX + guiWidth - 220, guiY + 6, 72, 14)
+                        .bounds(catX, guiY + 6, catW, 14)
                         .tooltip(Tooltip.create(Component.literal("Open New Category Screen")))
                         .build());
 
                 int ctrlX = guiX + guiWidth - 22;
                 final String pinnedCat = selectedCategory;
 
-                this.addRenderableWidget(Button.builder(Component.literal("New Entry"),
+                this.addRenderableWidget(Button.builder(Component.literal(compact ? "+Entry" : "New Entry"),
                         b -> this.minecraft.setScreen(new ArchiveEditorScreen(this, null, pinnedCat)))
-                        .bounds(guiX + guiWidth - 146, guiY + 6, 64, 14)
+                        .bounds(entryX, guiY + 6, entryW, 14)
                         .tooltip(Tooltip.create(Component.literal("Open New Entry Screen")))
                         .build());
 
@@ -316,13 +360,14 @@ public class ArchiveScreen extends Screen {
                             .bounds(ctrlX - 36, guiY + 87, 55, 14).build());
                 }
 
+                int bulkToggleX = ctrlX - 55;
                 String bulkLabel = bulkMode ? "§e[BULK: ON]" : "§8[BULK: OFF]";
                 this.addRenderableWidget(Button.builder(Component.literal(bulkLabel), b -> {
                     bulkMode = !bulkMode;
                     if (!bulkMode) bulkSelected.clear();
                     this.init(this.minecraft, this.width, this.height);
                 })
-                        .bounds(ctrlX - 55, guiY + guiHeight - 40, 74, 14)
+                        .bounds(bulkToggleX, guiY + guiHeight - 40, 74, 14)
                         .tooltip(Tooltip.create(Component.literal(
                                 "Toggle bulk-select mode. Check entries in the sidebar, then click a category to assign.")))
                         .build());
@@ -330,8 +375,8 @@ public class ArchiveScreen extends Screen {
                 if (bulkMode && !bulkSelected.isEmpty() && selectedCategory != null &&
                         !BOOKMARK_CAT_ID.equals(selectedCategory)) {
                     final String bulkTarget = selectedCategory;
-                    int assignX = guiX + 144;
-                    int assignW = guiWidth - 144 - 25;
+                    int assignX = guiX + sidebarWidth + 4;
+                    int assignW = Math.max(40, bulkToggleX - assignX - 4);
                     this.addRenderableWidget(Button.builder(
                             Component.literal("§6► Move " + bulkSelected.size() + " entr" +
                                     (bulkSelected.size() == 1 ? "y" : "ies") +
@@ -518,16 +563,15 @@ public class ArchiveScreen extends Screen {
         ArchivePalette.refresh(PhoenixTheme.current());
         this.renderBackground(graphics);
 
-        int sidebarWidth = 140;
         int contentX = guiX + sidebarWidth + 12;
-        int contentWidth = guiWidth - sidebarWidth - 25;
+        int contentWidth = contentWidth();
 
         graphics.fill(guiX, guiY, guiX + guiWidth, guiY + guiHeight, ArchivePalette.BG_SCRIM);
         graphics.renderOutline(guiX, guiY, guiWidth, guiHeight, ArchivePalette.TERM_BRIGHT);
         graphics.drawString(this.font, "> " + ArchiveConfigs.INSTANCE.general.mainMenuName, guiX + 10, guiY + 8,
                 ArchivePalette.TERM);
 
-        graphics.fill(guiX + 2, guiY + 29, guiX + 138, guiY + 30,
+        graphics.fill(guiX + 2, guiY + 29, guiX + sidebarWidth - 2, guiY + 30,
                 ArchivePalette.withAlpha(ArchivePalette.TERM_BRIGHT, 0x44));
 
         int windowTop = guiY + 33;
@@ -676,19 +720,17 @@ public class ArchiveScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        int listWidth = 140;
-        if (mouseX < guiX + listWidth) {
-            int totalLines = sidebarRows.size();
-            int max = Math.max(0, totalLines - ((guiHeight - 40) / 12));
+        if (mouseX < guiX + sidebarWidth) {
+            int max = Math.max(0, sidebarRows.size() - sidebarVisibleRows());
             scrollOffset = (int) Math.max(0, Math.min(scrollOffset - (int) delta, max));
             return true;
         }
 
         if (selectedEntry != null) {
             boolean unlocked = isLoreUnlockedClient(selectedEntry);
-            int contentWidth = guiWidth - listWidth - 25;
             List<RichBlock> blocks = resolveConditionals(parsedContent(selectedEntry, unlocked));
-            int bodyH = WikiRichTextRenderer.measureBlocksHeight(this.font, blocks, contentWidth);
+            int bodyH = WikiRichTextRenderer.measureBlocksHeight(this.font, blocks, contentWidth(),
+                    WikiRichTextRenderer.DEFAULT_SCALE, richExpandedKeys);
             int totalH = bodyH + (!unlocked ? 75 : 0);
             int maxPx = Math.max(0, totalH - (guiHeight - 90));
             int step = WikiRichTextRenderer.LINE_H;
@@ -702,7 +744,6 @@ public class ArchiveScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && handleContentClick(mouseX, mouseY)) return true;
 
-        int sidebarWidth = 140;
         int currentY = guiY + 33 - (scrollOffset * 12);
 
         for (int rowIdx = 0; rowIdx < sidebarRows.size(); rowIdx++) {
@@ -968,7 +1009,7 @@ public class ArchiveScreen extends Screen {
         String iconItemStr = selectedEntry.iconItem();
         if (iconItemStr != null && !iconItemStr.isEmpty()) {
             try {
-                ResourceLocation iconRes = new ResourceLocation(iconItemStr);
+                ResourceLocation iconRes = ResourceLocation.parse(iconItemStr);
                 var item = ForgeRegistries.ITEMS.getValue(iconRes);
                 if (item != null && item != Items.AIR) {
                     graphics.renderFakeItem(new ItemStack(item), x, guiY + 28);
@@ -983,11 +1024,15 @@ public class ArchiveScreen extends Screen {
             } catch (Exception ignored) {}
         }
 
-        graphics.drawString(this.font, unlocked ? "§6" + selectedEntry.title().toUpperCase() : "§4[ENCRYPTED]",
-                titleX, guiY + 30, ArchivePalette.TERM_BRIGHT);
+        // Trim title/breadcrumb so they never run under the THEME button or past the panel edge
+        int titleMaxW = (guiX + guiWidth - 80) - titleX;
+        String shownTitle = unlocked ?
+                "§6" + this.font.plainSubstrByWidth(selectedEntry.title().toUpperCase(), titleMaxW) : "§4[ENCRYPTED]";
+        graphics.drawString(this.font, shownTitle, titleX, guiY + 30, ArchivePalette.TERM_BRIGHT);
 
-        graphics.drawString(this.font, "§8CAT: " + buildBreadcrumb(selectedEntry.category()),
-                titleX, guiY + 40, ArchivePalette.TEXT_FAINT);
+        String crumb = this.font.plainSubstrByWidth("CAT: " + buildBreadcrumb(selectedEntry.category()),
+                guiX + guiWidth - 10 - titleX);
+        graphics.drawString(this.font, "§8" + crumb, titleX, guiY + 40, ArchivePalette.TEXT_FAINT);
 
         List<RichBlock> blocks = resolveConditionals(parsedContent(selectedEntry, unlocked));
         int bodyH = WikiRichTextRenderer.measureBlocksHeight(this.font, blocks, width,
@@ -1216,8 +1261,8 @@ public class ArchiveScreen extends Screen {
             currentVoice = null;
         }
 
-        ResourceLocation res = soundLocation.contains(":") ? new ResourceLocation(soundLocation) :
-                new ResourceLocation("phoenix_archive", soundLocation);
+        ResourceLocation res = soundLocation.contains(":") ? ResourceLocation.parse(soundLocation) :
+                ResourceLocation.fromNamespaceAndPath("phoenix_archive", soundLocation);
 
         SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(res);
         if (event == null) {
