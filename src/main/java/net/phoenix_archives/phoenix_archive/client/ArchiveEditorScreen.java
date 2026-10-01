@@ -285,12 +285,12 @@ public class ArchiveEditorScreen extends Screen {
         this.addRenderableWidget(titleBox);
 
         this.addRenderableWidget(Button.builder(Component.literal(termLabel), b -> {
-                    updateSavedValues();
-                    this.minecraft.setScreen(new TerminalInputScreen(this, "ENTRY_TITLE", this.savedTitle, (val) -> {
-                        this.savedTitle = val;
-                        this.titleBox.setValue(val);
-                    }));
-                }).bounds(termX, titleY, termW, rowH)
+            updateSavedValues();
+            this.minecraft.setScreen(new TerminalInputScreen(this, "ENTRY_TITLE", this.savedTitle, (val) -> {
+                this.savedTitle = val;
+                this.titleBox.setValue(val);
+            }));
+        }).bounds(termX, titleY, termW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Title")))
                 .build());
 
@@ -307,22 +307,22 @@ public class ArchiveEditorScreen extends Screen {
         }).bounds(x, catY, w - 30, rowH).build());
 
         this.addRenderableWidget(Button.builder(Component.literal("§a+"), b -> {
-                    updateSavedValues();
-                    this.minecraft.setScreen(new TerminalInputScreen(this, "NEW_CATEGORY", "", (res) -> {
-                        if (res != null && !res.isEmpty()) {
-                            CategoryRegistry.register(res, "", 50, null);
-                            saveCategoryToDisk(res);
-                            buildCategoryList();
-                            for (int i = 0; i < categoryList.size(); i++) {
-                                if (categoryList.get(i).equalsIgnoreCase(res)) {
-                                    categoryIndex = i;
-                                    break;
-                                }
-                            }
+            updateSavedValues();
+            this.minecraft.setScreen(new TerminalInputScreen(this, "NEW_CATEGORY", "", (res) -> {
+                if (res != null && !res.isEmpty()) {
+                    CategoryRegistry.register(res, "", 50, null);
+                    saveCategoryToDisk(res);
+                    buildCategoryList();
+                    for (int i = 0; i < categoryList.size(); i++) {
+                        if (categoryList.get(i).equalsIgnoreCase(res)) {
+                            categoryIndex = i;
+                            break;
                         }
-                        this.init(this.minecraft, this.width, this.height);
-                    }));
-                }).bounds(x + w - 28, catY, 28, rowH)
+                    }
+                }
+                this.init(this.minecraft, this.width, this.height);
+            }));
+        }).bounds(x + w - 28, catY, 28, rowH)
                 .tooltip(Tooltip.create(Component.literal("Make a New Category")))
                 .build());
 
@@ -352,49 +352,49 @@ public class ArchiveEditorScreen extends Screen {
         this.addRenderableWidget(lockedContentBox);
 
         this.addRenderableWidget(Button.builder(Component.literal(termLabel), b -> {
-                    updateSavedValues();
-                    this.minecraft.setScreen(new TerminalInputScreen(this, "UNLOCKED_DATA", this.savedContent, (val) -> {
-                        this.savedContent = val;
-                        this.contentBox.setValue(val);
-                    }));
-                }).bounds(termX, contentY, termW, rowH)
+            updateSavedValues();
+            this.minecraft.setScreen(new TerminalInputScreen(this, "UNLOCKED_DATA", this.savedContent, (val) -> {
+                this.savedContent = val;
+                this.contentBox.setValue(val);
+            }));
+        }).bounds(termX, contentY, termW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Unlocked Content")))
                 .build());
 
         this.addRenderableWidget(Button.builder(Component.literal(termLabel), b -> {
-                    updateSavedValues();
-                    this.minecraft
-                            .setScreen(new TerminalInputScreen(this, "ENCRYPTED_SIGNAL", this.savedLockedContent, (val) -> {
-                                this.savedLockedContent = val;
-                                this.lockedContentBox.setValue(val);
-                            }));
-                }).bounds(termX, lockedY, termW, rowH)
+            updateSavedValues();
+            this.minecraft
+                    .setScreen(new TerminalInputScreen(this, "ENCRYPTED_SIGNAL", this.savedLockedContent, (val) -> {
+                        this.savedLockedContent = val;
+                        this.lockedContentBox.setValue(val);
+                    }));
+        }).bounds(termX, lockedY, termW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Locked Content")))
                 .build());
 
         this.addRenderableWidget(Button.builder(Component.literal("§6EDIT_LOGIC"), b -> {
-                    updateSavedValues();
-                    this.minecraft.setScreen(new ConditionTunerScreen(this, this.currentConditionTree));
-                }).bounds(rightX, catY, rightW, rowH)
+            updateSavedValues();
+            this.minecraft.setScreen(new ConditionTunerScreen(this, this.currentConditionTree));
+        }).bounds(rightX, catY, rightW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Add/Remove Entry Conditions")))
                 .build());
 
         this.addRenderableWidget(Button.builder(Component.literal("SELECT_QUEST"), b -> {
-                    updateSavedValues();
-                    openQuestSelector();
-                }).bounds(rightX, titleY, rightW, rowH)
+            updateSavedValues();
+            openQuestSelector();
+        }).bounds(rightX, titleY, rightW, rowH)
                 .tooltip(Tooltip.create(Component.literal("Open Quest Selector (Chronicles + FTB Quests)")))
                 .build());
 
         boolean hasChroniclesQuest = !getLeafValue("chronicles_quest").isEmpty();
         if (questId != 0 || hasChroniclesQuest) {
             this.addRenderableWidget(Button.builder(Component.literal("§4CLEAR QUEST"), b -> {
-                        this.questId = 0;
-                        this.questName = "None Selected";
-                        this.chroniclesQuestName = "";
-                        setLeafValue("chronicles_quest", "");
-                        this.init(this.minecraft, this.width, this.height);
-                    }).bounds(rightX, idY + (rowH - 16) / 2, rightW, 16)
+                this.questId = 0;
+                this.questName = "None Selected";
+                this.chroniclesQuestName = "";
+                setLeafValue("chronicles_quest", "");
+                this.init(this.minecraft, this.width, this.height);
+            }).bounds(rightX, idY + (rowH - 16) / 2, rightW, 16)
                     .tooltip(Tooltip.create(Component.literal("Clear Selected Quest")))
                     .build());
         }
@@ -407,24 +407,24 @@ public class ArchiveEditorScreen extends Screen {
         this.addRenderableWidget(shaderBox);
 
         this.addRenderableWidget(Button.builder(Component.literal("..."), b -> {
-                    updateSavedValues();
-                    this.minecraft.setScreen(new ArchiveShaderPickerScreen(this, id -> {
-                        this.savedBackgroundShader = id;
+            updateSavedValues();
+            this.minecraft.setScreen(new ArchiveShaderPickerScreen(this, id -> {
+                this.savedBackgroundShader = id;
 
-                        if (this.shaderBox != null) this.shaderBox.setValue(id);
-                        this.isDirty = true;
-                    }));
-                }).bounds(rightX + rightW - 18, shaderBoxY, 18, 16)
+                if (this.shaderBox != null) this.shaderBox.setValue(id);
+                this.isDirty = true;
+            }));
+        }).bounds(rightX + rightW - 18, shaderBoxY, 18, 16)
                 .tooltip(Tooltip.create(Component.literal("Browse Shaders")))
                 .build());
 
         this.addRenderableWidget(Button.builder(
-                        Component.literal(savedHidden ? "§eHidden From List: ON" : "§8Hidden From List: OFF"),
-                        b -> {
-                            savedHidden = !savedHidden;
-                            isDirty = true;
-                            this.init(this.minecraft, this.width, this.height);
-                        })
+                Component.literal(savedHidden ? "§eHidden From List: ON" : "§8Hidden From List: OFF"),
+                b -> {
+                    savedHidden = !savedHidden;
+                    isDirty = true;
+                    this.init(this.minecraft, this.width, this.height);
+                })
                 .bounds(x, hiddenY, w, 16)
                 .tooltip(Tooltip.create(Component.literal(
                         "When ON, this entry is left out of the sidebar entirely (instead of showing\n" +
@@ -434,13 +434,13 @@ public class ArchiveEditorScreen extends Screen {
         String unlockLabel = savedHiddenUntilId.isEmpty() ? "§8(this entry's own unlock)" : "§f" + savedHiddenUntilId;
         int unlockBtnW = savedHiddenUntilId.isEmpty() ? w : w - 22;
         this.addRenderableWidget(Button.builder(Component.literal("§6UNLOCK_CHECK: " + unlockLabel), b -> {
-                    updateSavedValues();
-                    this.minecraft.setScreen(new ArchiveEntryPickerScreen(this, savedId, id -> {
-                        this.savedHiddenUntilId = id;
-                        this.isDirty = true;
-                        this.init(this.minecraft, this.width, this.height);
-                    }));
-                }).bounds(x, unlockY, unlockBtnW, 16)
+            updateSavedValues();
+            this.minecraft.setScreen(new ArchiveEntryPickerScreen(this, savedId, id -> {
+                this.savedHiddenUntilId = id;
+                this.isDirty = true;
+                this.init(this.minecraft, this.width, this.height);
+            }));
+        }).bounds(x, unlockY, unlockBtnW, 16)
                 .tooltip(Tooltip.create(Component.literal(
                         "Which entry's unlock state gates this one appearing (used with Hidden From " +
                                 "List above). Defaults to this entry's own unlock if none is picked.")))
@@ -448,10 +448,10 @@ public class ArchiveEditorScreen extends Screen {
 
         if (!savedHiddenUntilId.isEmpty()) {
             this.addRenderableWidget(Button.builder(Component.literal("§4X"), b -> {
-                        savedHiddenUntilId = "";
-                        isDirty = true;
-                        this.init(this.minecraft, this.width, this.height);
-                    }).bounds(x + w - 19, unlockY, 19, 16)
+                savedHiddenUntilId = "";
+                isDirty = true;
+                this.init(this.minecraft, this.width, this.height);
+            }).bounds(x + w - 19, unlockY, 19, 16)
                     .tooltip(Tooltip.create(Component.literal("Clear (gate on this entry's own unlock)")))
                     .build());
         }
@@ -485,7 +485,7 @@ public class ArchiveEditorScreen extends Screen {
 
         String wantedCat = (editingEntry != null && savedTitle.equals(editingEntry.title())) ?
                 editingEntry.category().toUpperCase() : (ordered.contains(initialCategory.toUpperCase()) ?
-                initialCategory.toUpperCase() : (ordered.isEmpty() ? "GENERAL" : ordered.get(0)));
+                        initialCategory.toUpperCase() : (ordered.isEmpty() ? "GENERAL" : ordered.get(0)));
 
         int foundIndex = ordered.indexOf(wantedCat);
         if (foundIndex >= 0) {
