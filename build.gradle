@@ -137,10 +137,9 @@ dependencies {
     modImplementation("com.tterrag.registrate:Registrate:${registrate_version}")
     modImplementation("curse.maven:phoenixs-chromatic-colors-1483210:7863211")
 
-    jarJar(modImplementation("net.phoenixvine.wiki:phoenix_wiki:0.4.7"))
+    jarJar(modImplementation("net.phoenixvine.wiki:phoenix_wiki:0.5.5"))
 
-    modCompileOnly 'curse.maven:phoenix-chronicles-quests-1614113:8751236'
-    modRuntimeOnly 'curse.maven:phoenix-chronicles-quests-1614113:8751236'
+    modCompileOnly 'net.phoenixvine.chronicles:phoenix_chronicles:7.0.4'
 
     jarJar("dev.toma.configuration:configuration-forge-${minecraft_version}:${configuration_version}")
 

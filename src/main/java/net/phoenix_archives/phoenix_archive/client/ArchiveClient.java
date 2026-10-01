@@ -6,16 +6,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.phoenix_archives.phoenix_archive.PhoenixArchive;
+import net.phoenix_archives.phoenix_archive.api.ChroniclesQuestBridge;
 import net.phoenix_archives.phoenix_archive.api.LoreDataLoader;
 import net.phoenix_archives.phoenix_archive.api.LoreEntry;
 import net.phoenix_archives.phoenix_archive.client.render.shader.ArchiveShaderManager;
 import net.phoenix_archives.phoenix_archive.client.rich.ArchiveConditionalBlockParser;
-import net.phoenixvine.chronicles.client.screen.ChronicleOverviewScreen;
-import net.phoenixvine.chronicles.model.QuestNode;
-import net.phoenixvine.chronicles.registry.QuestTreeRegistry;
 import net.phoenixvine.wiki.client.rich.markdown.BlockParserRegistry;
 import net.phoenixvine.wiki.client.rich.markdown.inline.handlers.LinkTargetHandler;
 import net.phoenixvine.wiki.client.suite.SuiteHudBar;
@@ -119,15 +116,7 @@ public class ArchiveClient {
     }
 
     public static void openChroniclesQuest(Screen returnTo, String chroniclesQuestId) {
-        if (!ModList.get().isLoaded("phoenix_chronicles")) return;
-        ResourceLocation id = ResourceLocation.tryParse(chroniclesQuestId);
-        if (id == null) return;
-        QuestNode node = QuestTreeRegistry.getQuest(id);
-        if (node == null) return;
-
-        ChronicleOverviewScreen screen = new ChronicleOverviewScreen(returnTo);
-        Minecraft.getInstance().setScreen(screen);
-        screen.navigateToNode(node);
+        ChroniclesQuestBridge.openQuest(returnTo, chroniclesQuestId);
     }
 
     private static void registerHudBar(Minecraft mc) {

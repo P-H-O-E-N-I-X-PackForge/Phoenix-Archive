@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModList;
 import net.phoenix_archives.phoenix_archive.api.CategoryDefinition;
 import net.phoenix_archives.phoenix_archive.api.CategoryRegistry;
+import net.phoenix_archives.phoenix_archive.api.ChroniclesQuestBridge;
 import net.phoenix_archives.phoenix_archive.api.ConditionNode;
 import net.phoenix_archives.phoenix_archive.api.ConditionNodeAdapter;
 import net.phoenix_archives.phoenix_archive.api.LoreDataLoader;
@@ -96,13 +97,8 @@ public class ArchiveEditorScreen extends Screen {
     }
 
     private String resolveChroniclesQuestTitle(String rawId) {
-        if (rawId == null || rawId.isEmpty() || !ModList.get().isLoaded("phoenix_chronicles")) return "";
-        try {
-            for (var quest : net.phoenixvine.chronicles.registry.QuestTreeRegistry.getAllQuests().values()) {
-                if (quest.getId().toString().equals(rawId)) return quest.getTitle().getString();
-            }
-        } catch (Exception ignored) {}
-        return "";
+        if (rawId == null || rawId.isEmpty()) return "";
+        return ChroniclesQuestBridge.titleOf(rawId);
     }
 
     private String getCurrentCategory() {
@@ -563,13 +559,9 @@ public class ArchiveEditorScreen extends Screen {
     }
 
     private void addChroniclesQuests(List<QuestSelectorScreen.PickableQuest> out) {
-        if (!ModList.get().isLoaded("phoenix_chronicles")) return;
-        try {
-            for (var quest : net.phoenixvine.chronicles.registry.QuestTreeRegistry.getAllQuests().values()) {
-                out.add(new QuestSelectorScreen.PickableQuest(true, quest.getId().toString(),
-                        quest.getTitle().getString(), false));
-            }
-        } catch (Exception ignored) {}
+        for (var quest : ChroniclesQuestBridge.allQuests()) {
+            out.add(new QuestSelectorScreen.PickableQuest(true, quest.id(), quest.title(), false));
+        }
     }
 
     private void addFtbQuests(List<QuestSelectorScreen.PickableQuest> out) {
