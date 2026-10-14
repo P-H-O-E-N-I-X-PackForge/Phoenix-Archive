@@ -2,8 +2,8 @@ package net.phoenix_archives.phoenix_archive.proxy;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.phoenix_archives.phoenix_archive.client.ArchiveScreen;
 import net.phoenix_archives.phoenix_archive.client.ClientHelper;
 

@@ -1,14 +1,25 @@
 package net.phoenix_archives.phoenix_archive.network;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.phoenix_archives.phoenix_archive.api.ServerEvents;
 import net.phoenix_archives.phoenix_archive.common.LoreSavedData;
 
-import java.util.function.Supplier;
+public class BookmarkPacket implements CustomPacketPayload {
 
-public class BookmarkPacket {
+    public static final Type<BookmarkPacket> TYPE = new Type<>(
+            ResourceLocation.fromNamespaceAndPath("phoenix_archive", "bookmark"));
+    public static final StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, BookmarkPacket> STREAM_CODEC = StreamCodec
+            .of((buf, msg) -> encode(msg, buf), buf -> decode(buf));
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 
     private final String entryId;
     private final boolean bookmarked;
@@ -27,9 +38,9 @@ public class BookmarkPacket {
         return new BookmarkPacket(buffer.readUtf(), buffer.readBoolean());
     }
 
-    public static void handle(BookmarkPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
+    public static void handle(BookmarkPacket msg, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            ServerPlayer player = (net.minecraft.server.level.ServerPlayer) context.player();
             if (player == null) return;
 
             String key = "bookmark:" + msg.entryId;
@@ -43,6 +54,5 @@ public class BookmarkPacket {
 
             ServerEvents.syncAllLore(player);
         });
-        ctx.get().setPacketHandled(true);
     }
 }

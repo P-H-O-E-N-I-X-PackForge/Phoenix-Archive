@@ -2,8 +2,8 @@ package net.phoenix_archives.phoenix_archive.api;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 

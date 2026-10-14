@@ -1,21 +1,20 @@
 package net.phoenix_archives.phoenix_archive.api;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.phoenix_archives.phoenix_archive.PhoenixArchive;
 import net.phoenix_archives.phoenix_archive.common.LoreSavedData;
 import net.phoenix_archives.phoenix_archive.network.BulkSyncLorePacket;
-import net.phoenix_archives.phoenix_archive.network.PhoenixNetwork;
 
-@Mod.EventBusSubscriber(modid = PhoenixArchive.MOD_ID)
+@EventBusSubscriber(modid = PhoenixArchive.MOD_ID)
 public class ServerEvents {
 
     @SubscribeEvent
@@ -49,14 +48,13 @@ public class ServerEvents {
         CompoundTag masterTag = data.getRawDataForPlayer(player.getUUID());
 
         player.getPersistentData().put("PhoenixArchive", masterTag.copy());
-        PhoenixNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
-                new BulkSyncLorePacket(masterTag.copy()));
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new BulkSyncLorePacket(masterTag.copy()));
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.side.isServer() && event.phase == TickEvent.Phase.END && event.player.tickCount % 40 == 0) {
-            if (event.player instanceof ServerPlayer player) {
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!event.getEntity().level().isClientSide && event.getEntity().tickCount % 40 == 0) {
+            if (event.getEntity() instanceof ServerPlayer player) {
                 LoreSavedData data = LoreSavedData.get(player.serverLevel());
                 TriggerRegistry.checkForNewCompletions(player, data);
 
@@ -85,7 +83,7 @@ public class ServerEvents {
     @SubscribeEvent
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && !player.level().isClientSide) {
-            ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(event.getState().getBlock());
+            ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(event.getState().getBlock());
             if (blockId != null) {
                 TriggerRegistry.fire(player, "machine", blockId);
             }

@@ -1,14 +1,12 @@
 {
   "required": true,
   "package": "net.phoenix_archives.phoenix_archive.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "plugin": "net.phoenix_archives.phoenix_archive.mixin.ArchiveMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
   "priority": 2000,
   "minVersion": "0.8",
   "mixins": [
-    "MultiblockFormedMixin",
-    "DummyMixin"
-  ],
-  "client": [
+    "MultiblockFormedMixin"
   ],
   "injectors": {
     "defaultRequire": 1

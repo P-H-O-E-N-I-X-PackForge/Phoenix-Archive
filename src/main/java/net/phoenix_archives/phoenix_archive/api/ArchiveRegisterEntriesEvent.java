@@ -1,7 +1,7 @@
 package net.phoenix_archives.phoenix_archive.api;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

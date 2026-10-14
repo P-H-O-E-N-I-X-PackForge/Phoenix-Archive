@@ -1,6 +1,5 @@
 package net.phoenix_archives.phoenix_archive.client;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -183,7 +182,7 @@ public class TerminalInputScreen extends Screen {
                                         "won't render as clickable")))
                         .build());
 
-        if (net.minecraftforge.fml.ModList.get().isLoaded("phoenix_chromatic_codes")) {
+        if (net.neoforged.fml.ModList.get().isLoaded("phoenix_chromatic_codes")) {
             this.addRenderableWidget(Button.builder(Component.literal("§z[ CHROMATIC_OS ]"), b -> {
                 if (this.minecraft != null) {
                     liveValue = this.textArea.getValue();
@@ -264,7 +263,7 @@ public class TerminalInputScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
         graphics.fill(10, 10, this.width - 10, this.height - 10, ArchivePalette.BG_SCRIM);
         graphics.renderOutline(10, 10, this.width - 20, this.height - 20, ArchivePalette.TERM_BRIGHT);
         graphics.drawString(this.font, titleLabel + " // ADDR: 0x7FFA", 20, 46, ArchivePalette.TERM);
@@ -612,7 +611,7 @@ public class TerminalInputScreen extends Screen {
         }
 
         @Override
-        public boolean mouseScrolled(double mx, double my, double delta) {
+        public boolean mouseScrolled(double mx, double my, double scrollX, double delta) {
             if (mx >= getX() && mx < getX() + width && my >= getY() && my < getY() + height) {
                 int maxScroll = Math.max(0, linesCache.size() - visibleLines());
                 scrollLine = Math.max(0, Math.min(maxScroll, scrollLine - (int) Math.signum(delta) * 3));
@@ -668,7 +667,7 @@ public class TerminalInputScreen extends Screen {
 
         @Override
         public boolean charTyped(char codePoint, int modifiers) {
-            if (this.isFocused() && SharedConstants.isAllowedChatCharacter(codePoint)) {
+            if (this.isFocused() && net.minecraft.util.StringUtil.isAllowedChatCharacter(codePoint)) {
                 this.textField.insertText(Character.toString(codePoint));
                 return true;
             }

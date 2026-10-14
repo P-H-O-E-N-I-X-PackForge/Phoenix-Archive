@@ -2,17 +2,17 @@ package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.phoenix_archives.phoenix_archive.PhoenixArchive;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(modid = PhoenixArchive.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = PhoenixArchive.MOD_ID, value = Dist.CLIENT)
 public class ClientEvents {
 
     public static final KeyMapping OPEN_ARCHIVE = new KeyMapping(
@@ -27,8 +27,8 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
+    public static void onClientTick(ClientTickEvent.Post event) {
+        {
             while (OPEN_ARCHIVE.consumeClick()) {
                 Minecraft.getInstance().setScreen(new ArchiveScreen());
             }

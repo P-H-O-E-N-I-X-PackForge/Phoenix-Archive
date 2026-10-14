@@ -142,7 +142,7 @@ public class ArchiveEntryPickerScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double scrollX, double delta) {
         scrollY = (int) (scrollY - delta * 20);
         clampScroll();
         return true;

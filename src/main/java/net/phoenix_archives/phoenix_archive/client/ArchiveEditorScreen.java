@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 import net.phoenix_archives.phoenix_archive.api.CategoryDefinition;
 import net.phoenix_archives.phoenix_archive.api.CategoryRegistry;
 import net.phoenix_archives.phoenix_archive.api.ChroniclesQuestBridge;
@@ -585,7 +585,7 @@ public class ArchiveEditorScreen extends Screen {
                 GSON.toJson(entry, writer);
             }
 
-            ResourceLocation resId = new ResourceLocation("phoenix_archive", fileName);
+            ResourceLocation resId = ResourceLocation.fromNamespaceAndPath("phoenix_archive", fileName);
             LoreDataLoader.LORE_ENTRIES.put(resId, entry);
 
             boolean hasConditions = !entry.conditionTree().isEmpty();
@@ -606,7 +606,7 @@ public class ArchiveEditorScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
         super.render(graphics, mouseX, mouseY, partialTicks);
 
         graphics.drawString(this.font, "§6TRIGGER_LOGIC:", rightX, triggerY, ArchivePalette.TERM_BRIGHT);

@@ -1,10 +1,9 @@
 package net.phoenix_archives.phoenix_archive;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.phoenix_archives.phoenix_archive.api.TriggerRegistry;
 import net.phoenix_archives.phoenix_archive.common.LoreSavedData;
-import net.phoenix_archives.phoenix_archive.network.PhoenixNetwork;
 import net.phoenix_archives.phoenix_archive.network.SyncLorePacket;
 
 public class ArchiveAPI {
@@ -15,7 +14,7 @@ public class ArchiveAPI {
 
         String hardwareKey = entryId.startsWith("unlocked_") ? entryId : "unlocked_" + entryId;
 
-        PhoenixNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                 new SyncLorePacket(hardwareKey, true, true));
 
         player.getPersistentData().put("PhoenixArchive", data.getRawDataForPlayer(player.getUUID()));

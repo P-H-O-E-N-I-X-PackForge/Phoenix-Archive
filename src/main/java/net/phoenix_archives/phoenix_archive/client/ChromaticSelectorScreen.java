@@ -4,7 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 import net.phoenix.chromatic_codes.config.ModConfig;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
@@ -76,7 +76,7 @@ public class ChromaticSelectorScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
 
         graphics.fill(this.width / 2 - 110, 20, this.width / 2 + 110, this.height - 10, ArchivePalette.BG_SCRIM);
         graphics.renderOutline(this.width / 2 - 110, 20, 220, this.height - 30, ArchivePalette.TERM_BRIGHT);

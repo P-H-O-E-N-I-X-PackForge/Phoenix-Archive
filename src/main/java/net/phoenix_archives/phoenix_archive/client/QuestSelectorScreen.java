@@ -46,8 +46,8 @@ public class QuestSelectorScreen extends Screen {
         this.searchBox.setTextColor(ArchivePalette.TERM);
         this.addRenderableWidget(searchBox);
 
-        this.list = new QuestList(this.minecraft, guiWidth - 10, guiHeight - 70, top + 40, top + guiHeight - 30);
-        this.list.setLeftPos(left + 5);
+        this.list = new QuestList(this.minecraft, guiWidth - 10, guiHeight - 70, top + 40);
+        this.list.setX(left + 5);
         this.addRenderableWidget(list);
 
         this.addRenderableWidget(Button.builder(Component.literal("CANCEL"), b -> this.minecraft.setScreen(parent))
@@ -73,7 +73,7 @@ public class QuestSelectorScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
 
         graphics.fill(left, top, left + guiWidth, top + guiHeight, ArchivePalette.BG_SCRIM);
         graphics.renderOutline(left, top, guiWidth, guiHeight, ArchivePalette.TERM_BRIGHT);
@@ -86,11 +86,15 @@ public class QuestSelectorScreen extends Screen {
 
     class QuestList extends ObjectSelectionList<QuestEntry> {
 
-        public QuestList(Minecraft mc, int width, int height, int top, int bottom) {
-            super(mc, width, height, top, bottom, 14);
-            this.setRenderBackground(false);
-            this.setRenderTopAndBottom(false);
+        public QuestList(Minecraft mc, int width, int height, int top) {
+            super(mc, width, height, top, 14);
         }
+
+        @Override
+        protected void renderListBackground(GuiGraphics graphics) {}
+
+        @Override
+        protected void renderListSeparators(GuiGraphics graphics) {}
 
         public void replaceEntries(List<QuestEntry> entries) {
             this.clearEntries();

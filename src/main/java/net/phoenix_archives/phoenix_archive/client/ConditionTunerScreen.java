@@ -62,7 +62,7 @@ public class ConditionTunerScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
 
         graphics.fill(this.width / 2 - 170, 10, this.width / 2 + 170, this.height - 10, ArchivePalette.BG_SCRIM);
         graphics.renderOutline(this.width / 2 - 170, 10, 340, this.height - 20, ArchivePalette.TERM);

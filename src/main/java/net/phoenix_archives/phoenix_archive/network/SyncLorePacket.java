@@ -3,12 +3,23 @@ package net.phoenix_archives.phoenix_archive.network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.phoenix_archives.phoenix_archive.client.ArchiveScreen;
 
-import java.util.function.Supplier;
+public class SyncLorePacket implements CustomPacketPayload {
 
-public class SyncLorePacket {
+    public static final Type<SyncLorePacket> TYPE = new Type<>(
+            ResourceLocation.fromNamespaceAndPath("phoenix_archive", "sync_lore"));
+    public static final StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, SyncLorePacket> STREAM_CODEC = StreamCodec
+            .of((buf, msg) -> encode(msg, buf), buf -> decode(buf));
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 
     private final String hardwareId;
     private final boolean state;
@@ -30,8 +41,8 @@ public class SyncLorePacket {
         return new SyncLorePacket(buffer.readUtf(), buffer.readBoolean(), buffer.readBoolean());
     }
 
-    public static void handle(SyncLorePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static void handle(SyncLorePacket msg, IPayloadContext context) {
+        context.enqueueWork(() -> {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player != null) {
 
@@ -49,6 +60,5 @@ public class SyncLorePacket {
                 }
             }
         });
-        ctx.get().setPacketHandled(true);
     }
 }

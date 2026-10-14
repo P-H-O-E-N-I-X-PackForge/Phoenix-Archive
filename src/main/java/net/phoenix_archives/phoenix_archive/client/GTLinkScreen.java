@@ -4,9 +4,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +38,7 @@ public class GTLinkScreen extends Screen {
 
         this.addRenderableWidget(Button.builder(Component.literal("VERIFY_ID"), b -> {
             ResourceLocation loc = ResourceLocation.tryParse(machineInput.getValue());
-            if (loc != null && ForgeRegistries.BLOCKS.containsKey(loc)) {
+            if (loc != null && BuiltInRegistries.BLOCK.containsKey(loc)) {
                 status = "§2ID_VALID: §f" + loc.getPath();
             } else {
                 status = "§4ID_NOT_FOUND_IN_REGISTRY";
@@ -63,7 +63,7 @@ public class GTLinkScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
         graphics.fill(this.width / 2 - 120, this.height / 2 - 60, this.width / 2 + 120, this.height / 2 + 50,
                 ArchivePalette.BG_SCRIM);
         graphics.renderOutline(this.width / 2 - 120, this.height / 2 - 60, 240, 110, ArchivePalette.TERM_BRIGHT);

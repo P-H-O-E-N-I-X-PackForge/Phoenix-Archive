@@ -2,15 +2,15 @@ package net.phoenix_archives.phoenix_archive;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.phoenix_archives.phoenix_archive.api.CategoryRegistry;
 import net.phoenix_archives.phoenix_archive.api.LoreDataLoader;
 import net.phoenix_archives.phoenix_archive.client.ArchiveClient;
@@ -31,9 +31,8 @@ public class PhoenixArchive {
     public static final Logger LOGGER = LogManager.getLogger();
     public static IProxy PROXY;
 
-    public PhoenixArchive(FMLJavaModLoadingContext context) {
+    public PhoenixArchive(IEventBus modEventBus, ModContainer container) {
         ArchiveConfigs.init();
-        IEventBus modEventBus = context.getModEventBus();
 
         ArchiveItems.ITEMS.register(modEventBus);
 
@@ -47,9 +46,9 @@ public class PhoenixArchive {
             PROXY = new ServerProxy();
         }
 
-        PhoenixNetwork.init();
+        modEventBus.addListener(PhoenixNetwork::register);
 
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -69,7 +68,7 @@ public class PhoenixArchive {
      */
     private void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            event.accept(ArchiveItems.LORE_TABLET);
+            event.accept(ArchiveItems.LORE_TABLET.get());
         }
     }
 
@@ -80,6 +79,6 @@ public class PhoenixArchive {
     }
 
     public static ResourceLocation id(String path) {
-        return new ResourceLocation(MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 }

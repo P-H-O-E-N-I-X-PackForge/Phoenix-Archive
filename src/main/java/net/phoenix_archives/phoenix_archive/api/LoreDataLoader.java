@@ -4,8 +4,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.common.NeoForge;
 import net.phoenix_archives.phoenix_archive.PhoenixArchive;
 
 import com.google.gson.Gson;
@@ -54,7 +54,7 @@ public class LoreDataLoader extends SimpleJsonResourceReloadListener {
         loadExternalLore(newEntries);
 
         ArchiveRegisterEntriesEvent registerEvent = new ArchiveRegisterEntriesEvent();
-        MinecraftForge.EVENT_BUS.post(registerEvent);
+        NeoForge.EVENT_BUS.post(registerEvent);
         registerEvent.getRegisteredEntries().forEach((id, entry) -> {
             if (isValid(entry)) {
                 entry = ensureInternalId(entry, id.getPath());
@@ -90,7 +90,7 @@ public class LoreDataLoader extends SimpleJsonResourceReloadListener {
                     LoreEntry entry = GSON.fromJson(reader, LoreEntry.class);
                     if (isValid(entry)) {
                         String nameId = file.getName().toLowerCase().replace(".json", "");
-                        ResourceLocation resId = new ResourceLocation("phoenix_archive", nameId);
+                        ResourceLocation resId = ResourceLocation.fromNamespaceAndPath("phoenix_archive", nameId);
 
                         entry = ensureInternalId(entry, nameId);
 

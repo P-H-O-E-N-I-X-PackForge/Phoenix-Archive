@@ -1,20 +1,21 @@
 package net.phoenix_archives.phoenix_archive.api;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
-@Mod.EventBusSubscriber(modid = "phoenix_archive")
+@EventBusSubscriber(modid = "phoenix_archive")
 public class CommonTriggers {
 
     @SubscribeEvent
-    public static void onItemPickup(PlayerEvent.ItemPickupEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            TriggerRegistry.fireItem(player, event.getStack());
+    public static void onItemPickup(ItemEntityPickupEvent.Post event) {
+        if (event.getPlayer() instanceof ServerPlayer player) {
+            TriggerRegistry.fireItem(player, event.getOriginalStack());
         }
     }
 
@@ -29,7 +30,7 @@ public class CommonTriggers {
     public static void onMobKill(LivingDeathEvent event) {
         if (event.getSource().getEntity() instanceof ServerPlayer player) {
 
-            ResourceLocation mobKey = ForgeRegistries.ENTITY_TYPES.getKey(event.getEntity().getType());
+            ResourceLocation mobKey = BuiltInRegistries.ENTITY_TYPE.getKey(event.getEntity().getType());
             if (mobKey != null) {
                 TriggerRegistry.fire(player, "kill", mobKey);
             }

@@ -35,14 +35,13 @@ public final class ArchiveShaderRenderUtil {
 
         PoseStack.Pose pose = g.pose().last();
         Tesselator tess = Tesselator.getInstance();
-        BufferBuilder buf = tess.getBuilder();
-        buf.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buf.vertex(pose.pose(), x, y + h, 0).uv(0, 1).endVertex();
-        buf.vertex(pose.pose(), x + w, y + h, 0).uv(1, 1).endVertex();
-        buf.vertex(pose.pose(), x + w, y, 0).uv(1, 0).endVertex();
-        buf.vertex(pose.pose(), x, y, 0).uv(0, 0).endVertex();
+        BufferBuilder buf = tess.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buf.addVertex(pose.pose(), x, y + h, 0).setUv(0, 1);
+        buf.addVertex(pose.pose(), x + w, y + h, 0).setUv(1, 1);
+        buf.addVertex(pose.pose(), x + w, y, 0).setUv(1, 0);
+        buf.addVertex(pose.pose(), x, y, 0).setUv(0, 0);
 
-        BufferUploader.drawWithShader(buf.end());
+        BufferUploader.drawWithShader(buf.buildOrThrow());
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.disableBlend();

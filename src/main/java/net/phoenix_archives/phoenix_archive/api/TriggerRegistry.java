@@ -30,7 +30,7 @@ public class TriggerRegistry {
 
     public static void fireItem(ServerPlayer player, ItemStack stack) {
         if (stack.isEmpty()) return;
-        ResourceLocation itemKey = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+        ResourceLocation itemKey = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (itemKey != null) {
             fire(player, "item", itemKey);
         }
@@ -38,7 +38,7 @@ public class TriggerRegistry {
 
     public static void fireWearing(ServerPlayer player, ItemStack stack) {
         if (stack.isEmpty()) return;
-        ResourceLocation itemKey = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+        ResourceLocation itemKey = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (itemKey != null) {
             fire(player, "wearing", itemKey);
         }

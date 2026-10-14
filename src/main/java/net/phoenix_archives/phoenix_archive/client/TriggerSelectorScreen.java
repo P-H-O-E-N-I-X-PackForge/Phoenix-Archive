@@ -43,7 +43,7 @@ public class TriggerSelectorScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partial);
         graphics.drawCenteredString(this.font, "§2SELECT_TRIGGER_TYPE", this.width / 2, this.height / 2 - 60,
                 ArchivePalette.TERM_BRIGHT);
         super.render(graphics, mouseX, mouseY, partial);

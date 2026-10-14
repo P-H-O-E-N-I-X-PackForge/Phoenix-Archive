@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -16,8 +17,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
 import net.phoenix_archives.phoenix_archive.PhoenixArchive;
 import net.phoenix_archives.phoenix_archive.api.CategoryDefinition;
 import net.phoenix_archives.phoenix_archive.api.CategoryRegistry;
@@ -35,7 +35,6 @@ import net.phoenix_archives.phoenix_archive.client.rich.ArchiveMarkdown;
 import net.phoenix_archives.phoenix_archive.common.LoreSavedData;
 import net.phoenix_archives.phoenix_archive.config.ArchiveConfigs;
 import net.phoenix_archives.phoenix_archive.network.BookmarkPacket;
-import net.phoenix_archives.phoenix_archive.network.PhoenixNetwork;
 import net.phoenixvine.wiki.client.rich.RichBlock;
 import net.phoenixvine.wiki.client.rich.RichSpan;
 import net.phoenixvine.wiki.client.rich.WikiRichTextRenderer;
@@ -561,7 +560,7 @@ public class ArchiveScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
 
         int contentX = guiX + sidebarWidth + 12;
         int contentWidth = contentWidth();
@@ -719,7 +718,7 @@ public class ArchiveScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double delta) {
         if (mouseX < guiX + sidebarWidth) {
             int max = Math.max(0, sidebarRows.size() - sidebarVisibleRows());
             scrollOffset = (int) Math.max(0, Math.min(scrollOffset - (int) delta, max));
@@ -1010,7 +1009,7 @@ public class ArchiveScreen extends Screen {
         if (iconItemStr != null && !iconItemStr.isEmpty()) {
             try {
                 ResourceLocation iconRes = ResourceLocation.parse(iconItemStr);
-                var item = ForgeRegistries.ITEMS.getValue(iconRes);
+                var item = BuiltInRegistries.ITEM.get(iconRes);
                 if (item != null && item != Items.AIR) {
                     graphics.renderFakeItem(new ItemStack(item), x, guiY + 28);
                 } else {
@@ -1264,7 +1263,7 @@ public class ArchiveScreen extends Screen {
         ResourceLocation res = soundLocation.contains(":") ? ResourceLocation.parse(soundLocation) :
                 ResourceLocation.fromNamespaceAndPath("phoenix_archive", soundLocation);
 
-        SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(res);
+        SoundEvent event = BuiltInRegistries.SOUND_EVENT.get(res);
         if (event == null) {
             PhoenixArchive.LOGGER.error("SOUND_NOT_FOUND: {}", res);
             return;
@@ -1334,7 +1333,7 @@ public class ArchiveScreen extends Screen {
             }
         } else {
 
-            PhoenixNetwork.CHANNEL.sendToServer(new BookmarkPacket(entry.id(), next));
+            net.neoforged.neoforge.network.PacketDistributor.sendToServer(new BookmarkPacket(entry.id(), next));
         }
 
         this.init(this.minecraft, this.width, this.height);

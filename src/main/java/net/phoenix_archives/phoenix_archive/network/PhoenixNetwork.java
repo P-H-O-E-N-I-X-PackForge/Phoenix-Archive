@@ -1,26 +1,17 @@
 package net.phoenix_archives.phoenix_archive.network;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class PhoenixNetwork {
 
     private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation("phoenix_archive", "main"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals);
 
-    public static void init() {
-        CHANNEL.registerMessage(0, SyncLorePacket.class, SyncLorePacket::encode, SyncLorePacket::decode,
-                SyncLorePacket::handle);
-
-        CHANNEL.registerMessage(1, BulkSyncLorePacket.class, BulkSyncLorePacket::encode, BulkSyncLorePacket::decode,
-                BulkSyncLorePacket::handle);
-
-        CHANNEL.registerMessage(2, BookmarkPacket.class, BookmarkPacket::encode, BookmarkPacket::decode,
-                BookmarkPacket::handle);
+    /** Registers every packet; hooked to the mod bus from {@code PhoenixArchive}. */
+    public static void register(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
+        registrar.playToClient(SyncLorePacket.TYPE, SyncLorePacket.STREAM_CODEC, SyncLorePacket::handle);
+        registrar.playToClient(BulkSyncLorePacket.TYPE, BulkSyncLorePacket.STREAM_CODEC, BulkSyncLorePacket::handle);
+        registrar.playToServer(BookmarkPacket.TYPE, BookmarkPacket.STREAM_CODEC, BookmarkPacket::handle);
     }
 }

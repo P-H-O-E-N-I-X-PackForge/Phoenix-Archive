@@ -138,7 +138,7 @@ public class CategoryManagementScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partial);
 
         String title = (editingId != null) ? "§6EDIT_CATEGORY: " + editingId : "§6NEW_CATEGORY_PROTOCOL";
 

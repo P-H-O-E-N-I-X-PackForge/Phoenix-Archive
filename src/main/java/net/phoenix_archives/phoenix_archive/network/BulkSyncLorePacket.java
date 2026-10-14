@@ -3,13 +3,25 @@ package net.phoenix_archives.phoenix_archive.network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.phoenix_archives.phoenix_archive.client.ArchiveScreen;
 
 import java.util.Arrays;
-import java.util.function.Supplier;
 
-public record BulkSyncLorePacket(CompoundTag allData) {
+public record BulkSyncLorePacket(CompoundTag allData) implements CustomPacketPayload {
+
+    public static final Type<BulkSyncLorePacket> TYPE = new Type<>(
+            ResourceLocation.fromNamespaceAndPath("phoenix_archive", "bulk_sync_lore"));
+    public static final StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, BulkSyncLorePacket> STREAM_CODEC = StreamCodec
+            .of((buf, msg) -> encode(msg, buf), buf -> decode(buf));
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 
     public static void encode(BulkSyncLorePacket msg, FriendlyByteBuf buffer) {
         buffer.writeNbt(msg.allData);
@@ -19,8 +31,8 @@ public record BulkSyncLorePacket(CompoundTag allData) {
         return new BulkSyncLorePacket(buffer.readNbt());
     }
 
-    public static void handle(BulkSyncLorePacket packet, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static void handle(BulkSyncLorePacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> {
             var mc = Minecraft.getInstance();
             if (mc.player == null) return;
 
@@ -32,7 +44,6 @@ public record BulkSyncLorePacket(CompoundTag allData) {
                 archive.init(mc, archive.width, archive.height);
             }
         });
-        ctx.get().setPacketHandled(true);
     }
 
     private static String prettifyKey(String key) {

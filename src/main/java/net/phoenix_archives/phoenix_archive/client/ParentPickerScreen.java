@@ -91,7 +91,7 @@ public class ParentPickerScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partial) {
         ArchivePalette.refresh(PhoenixTheme.current());
-        this.renderBackground(g);
+        this.renderBackground(g, mouseX, mouseY, partial);
 
         g.drawCenteredString(this.font, "§6SELECT_PARENT_CATEGORY",
                 this.width / 2, listY - 18, ArchivePalette.TERM_BRIGHT);
@@ -159,7 +159,7 @@ public class ParentPickerScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double delta) {
         int maxScroll = Math.max(0, options.size() - visibleRows);
         scrollOffset = (int) Math.max(0, Math.min(scrollOffset - (int) delta, maxScroll));
         return true;
