@@ -15,11 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * Lists existing lore entries by title/id for picking an "unlock check" target, mirroring
- * ArchiveShaderPickerScreen's browse-then-select pattern for the background-shader field.
- */
 public class ArchiveEntryPickerScreen extends Screen {
+
+
 
     private static final int HEADER_H = 42;
     private static final int FOOTER_H = 20;
@@ -38,7 +36,6 @@ public class ArchiveEntryPickerScreen extends Screen {
     private int scrollY = 0;
     private int hoveredIdx = -1;
 
-    // Responsive search bar (recomputed in init)
     private int searchX, searchW;
 
     public ArchiveEntryPickerScreen(Screen parent, String excludeId, Consumer<String> onSelect) {
@@ -60,7 +57,6 @@ public class ArchiveEntryPickerScreen extends Screen {
         applyFilter();
         clampScroll();
 
-        // Leave room on the left for the "Search:" label
         int labelW = font.width("Search: ");
         searchW = Math.max(100, Math.min(200, width - 2 * (labelW + 16)));
         searchX = (width - searchW) / 2;
@@ -113,7 +109,7 @@ public class ArchiveEntryPickerScreen extends Screen {
             }
 
             LoreEntry entry = filtered.get(i);
-            // Trim long "title (id)" rows so they never run off the right edge
+            
             FormattedText row = font.substrByWidth(
                     Component.literal("§f" + entry.title() + " §8(" + entry.id() + ")"), width - 28);
             g.drawString(font, Language.getInstance().getVisualOrder(row), 12, ty + 4,

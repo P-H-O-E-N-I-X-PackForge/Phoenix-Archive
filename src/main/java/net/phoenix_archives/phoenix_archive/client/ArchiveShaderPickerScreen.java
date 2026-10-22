@@ -16,6 +16,8 @@ import java.util.function.Consumer;
 
 public class ArchiveShaderPickerScreen extends Screen {
 
+
+
     private static final int THUMB = 56;
     private static final int THUMB_PAD = 8;
     private static final int HEADER_H = 42;

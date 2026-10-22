@@ -32,6 +32,7 @@ import java.util.*;
 
 public class ArchiveEditorScreen extends Screen {
 
+
     private final LoreEntry editingEntry;
     private final String initialCategory;
 
@@ -65,7 +66,6 @@ public class ArchiveEditorScreen extends Screen {
 
     private boolean suppressDirtyGuard = false;
 
-    // ---- Responsive layout (recomputed on every init / window resize) ----
     private static final int MARGIN = 6;
     private static final int STATUS_MAX_LINES_PER_ENTRY = 2;
 
@@ -143,14 +143,9 @@ public class ArchiveEditorScreen extends Screen {
         this.isDirty = true;
     }
 
-    /**
-     * Works out every position from the current window size. Horizontal: terminal buttons | fields |
-     * trigger-logic column, shrinking proportionally when the window is narrow. Vertical: rows compress
-     * (20px/5px gaps -> 16px/3px gaps) when short, and the two text boxes absorb whatever height is left.
-     */
     private void computeLayout() {
-        // ---- horizontal ----
-        int remaining = Math.max(200, (this.width - 16) - 10); // 16 = side margins, 10 = two 5px gaps
+        
+        int remaining = Math.max(200, (this.width - 16) - 10); 
         if (remaining >= 375) {
             termW = 80;
             fieldW = 200;
@@ -165,9 +160,8 @@ public class ArchiveEditorScreen extends Screen {
         fieldX = termX + termW + 5;
         rightX = fieldX + fieldW + 5;
 
-        // ---- vertical ----
         int avail = this.height - 2 * MARGIN;
-        // 6 full-height rows (id, title, category, icon, voice, save) + 2 small rows (hidden, unlock) + 9 gaps
+        
         boolean roomy = avail - (6 * 20 + 2 * 16 + 9 * 5) >= 70;
         rowH = roomy ? 20 : 16;
         int gap = roomy ? 5 : 3;
@@ -199,7 +193,6 @@ public class ArchiveEditorScreen extends Screen {
         y += 16 + gap;
         saveY = y;
 
-        // ---- trigger-logic column: status lines wrap, and the shader row sits below them ----
         triggerY = iconY;
         statusStartY = triggerY + 15;
         statusEntries = buildStatusEntries();
@@ -624,7 +617,6 @@ public class ArchiveEditorScreen extends Screen {
 
         graphics.drawString(this.font, "§6BG_SHADER:", rightX, shaderLabelY, ArchivePalette.TERM_BRIGHT);
 
-        // Header tag: only drawn when it fits to the left of the ID box
         String tag = "> " + ArchiveConfigs.INSTANCE.general.mainMenuName + "Lore_Dev";
         if (10 + this.font.width(tag) < fieldX - 4) {
             graphics.drawString(this.font, tag, 10, idY + (rowH - 8) / 2, ArchivePalette.TERM);

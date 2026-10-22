@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 
 public class QuestSelectorScreen extends Screen {
 
+
+
     public record PickableQuest(boolean chronicles, String rawId, String title, boolean locked) {}
 
     private final ArchiveEditorScreen parent;

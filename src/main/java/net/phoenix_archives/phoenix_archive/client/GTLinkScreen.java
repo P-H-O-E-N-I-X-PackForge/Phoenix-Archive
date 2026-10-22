@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class GTLinkScreen extends Screen {
 
+
+
     private final ArchiveEditorScreen parent;
     private EditBox machineInput;
     private String status = "§8AWAITING_GT_ID...";

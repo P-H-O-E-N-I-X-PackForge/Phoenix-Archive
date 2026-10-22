@@ -62,11 +62,6 @@ public class PhoenixArchive {
         });
     }
 
-    /**
-     * The Lore Tablet was never added to any creative tab -- JEI (and the creative inventory itself)
-     * builds its ingredient list from tab contents, not the raw item registry, so it was silently
-     * invisible in both despite being fully registered and obtainable via /give.
-     */
     private void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ArchiveItems.LORE_TABLET);

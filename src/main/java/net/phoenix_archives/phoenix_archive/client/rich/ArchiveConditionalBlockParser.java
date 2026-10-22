@@ -15,12 +15,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Recognizes {@code :::if condition} ... {@code :::else} ... {@code :::} -- registered via
- * {@link net.phoenixvine.wiki.client.rich.markdown.BlockParserRegistry#registerFirst}, ahead of
- * the generic container parser, so {@code :::if} isn't swallowed as a plain callout of type "if".
- * Any other {@code :::type} is declined (returns -1) and falls through to the generic parser.
- */
 public final class ArchiveConditionalBlockParser implements BlockParser {
 
     private static final Pattern CONTAINER_ELSE = Pattern.compile("^:::else\\s*$");
