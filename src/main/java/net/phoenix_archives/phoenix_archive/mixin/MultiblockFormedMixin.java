@@ -39,7 +39,7 @@ public abstract class MultiblockFormedMixin {
         phoenixArchive$wasFormed = isFormed;
     }
 
-    @Inject(method = "formStructure(Ljava/lang/String;)V", at = @At("TAIL"), remap = false)
+    @Inject(method = "formStructure(Ljava/lang/String;)V", at = @At("RETURN"), remap = false)
     private void phoenixArchive$afterForm(String name, CallbackInfo ci) {
         if (phoenixArchive$wasFormed || !isFormed) return;
         MultiblockControllerMachine self = (MultiblockControllerMachine) (Object) this;
@@ -49,6 +49,8 @@ public abstract class MultiblockFormedMixin {
         ResourceLocation machineId = BuiltInRegistries.BLOCK
                 .getKey(serverLevel.getBlockState(controllerPos).getBlock());
         if (machineId == null) return;
+        net.phoenix_archives.phoenix_archive.PhoenixArchive.LOGGER.info("[multiblock] {} formed at {}", machineId,
+                controllerPos);
 
         var positions = new ArrayList<BlockPos>();
         PatternState state = getPatternState(name);
