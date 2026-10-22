@@ -12,6 +12,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class ChromaticSelectorScreen extends Screen {
 
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
+
     private final TerminalInputScreen parent;
 
     public ChromaticSelectorScreen(TerminalInputScreen parent) {

@@ -8,6 +8,9 @@ import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 public class TriggerSelectorScreen extends Screen {
 
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
+
     private final ArchiveEditorScreen parent;
 
     public TriggerSelectorScreen(ArchiveEditorScreen parent) {

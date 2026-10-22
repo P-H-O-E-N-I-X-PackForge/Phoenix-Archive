@@ -7,7 +7,6 @@ public class PhoenixNetwork {
 
     private static final String PROTOCOL_VERSION = "1";
 
-    /** Registers every packet; hooked to the mod bus from {@code PhoenixArchive}. */
     public static void register(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
         registrar.playToClient(SyncLorePacket.TYPE, SyncLorePacket.STREAM_CODEC, SyncLorePacket::handle);

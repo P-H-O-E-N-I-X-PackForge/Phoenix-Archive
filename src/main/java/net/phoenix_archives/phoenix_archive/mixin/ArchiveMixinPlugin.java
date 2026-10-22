@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import java.util.List;
 import java.util.Set;
 
-/** The GregTech mixin only applies when GregTech is installed. */
 public class ArchiveMixinPlugin implements IMixinConfigPlugin {
 
     @Override

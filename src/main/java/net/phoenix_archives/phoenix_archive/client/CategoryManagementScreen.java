@@ -17,6 +17,9 @@ import java.io.FileWriter;
 
 public class CategoryManagementScreen extends Screen {
 
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
+
     private final Screen lastScreen;
 
     private final String editingId;

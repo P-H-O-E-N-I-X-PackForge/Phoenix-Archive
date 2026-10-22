@@ -7,13 +7,6 @@ import net.phoenixvine.wiki.client.rich.markdown.HeadingSectionGrouper;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Archive's entry point for parsing lore entry markdown -- thin wrapper around the shared
- * {@link WikiMarkdownParser}: turns on soft-wrapped list continuation (Archive's one opt-in
- * deviation from the shared default) and fixes up heading-collapsing inside
- * {@link ArchiveConditionalSection} branches, which {@link HeadingSectionGrouper} can't see into
- * since that block type is local to Archive, not known to the shared engine.
- */
 public final class ArchiveMarkdown {
 
     private ArchiveMarkdown() {}

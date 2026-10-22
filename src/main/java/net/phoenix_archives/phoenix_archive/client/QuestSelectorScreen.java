@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 
 public class QuestSelectorScreen extends Screen {
 
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
+
     public record PickableQuest(boolean chronicles, String rawId, String title, boolean locked) {}
 
     private final ArchiveEditorScreen parent;

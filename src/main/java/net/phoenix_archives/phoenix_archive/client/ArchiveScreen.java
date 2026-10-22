@@ -54,6 +54,9 @@ import java.util.*;
 
 public class ArchiveScreen extends Screen {
 
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
+
     private LoreEntry selectedEntry = null;
     private boolean isEditMode = false;
     private int contentScrollOffset = 0;
@@ -102,7 +105,6 @@ public class ArchiveScreen extends Screen {
     private SoundInstance currentVoice = null;
     private static final Gson GSON = ConditionNodeAdapter.register(new GsonBuilder().setPrettyPrinting()).create();
 
-    // ---- Responsive layout ----
     private static final int MAX_GUI_W = 420;
     private static final int MAX_GUI_H = 240;
     private static final int GUI_MARGIN = 6;
@@ -112,11 +114,10 @@ public class ArchiveScreen extends Screen {
     private int guiHeight = MAX_GUI_H;
     private int sidebarWidth = 140;
 
-    /** Recomputes panel size/position from the current window. Called at the top of {@link #init()}. */
     private void computeLayout() {
         guiWidth = Math.max(160, Math.min(MAX_GUI_W, this.width - GUI_MARGIN * 2));
         guiHeight = Math.max(120, Math.min(MAX_GUI_H, this.height - GUI_MARGIN * 2));
-        sidebarWidth = Math.max(90, Math.min(140, guiWidth / 3)); // 140 at full size
+        sidebarWidth = Math.max(90, Math.min(140, guiWidth / 3));
         guiX = (this.width - guiWidth) / 2;
         guiY = (this.height - guiHeight) / 2;
     }
@@ -227,7 +228,6 @@ public class ArchiveScreen extends Screen {
         boolean isOp = this.minecraft != null && this.minecraft.player != null &&
                 this.minecraft.player.hasPermissions(2);
 
-        // Bottom button row: voice + quest buttons share whatever space is left of the star/copy buttons
         int bottomAvail = guiWidth - contentXOffset - 48;
         int btnW = Math.max(44, Math.min(100, (bottomAvail - 4) / 2));
         boolean shortLabels = btnW < 84;
@@ -286,7 +286,7 @@ public class ArchiveScreen extends Screen {
                 .build());
 
         if (isOp) {
-            // Header buttons laid out from the right edge; compact labels when the title would be crowded
+
             int titleW = this.font.width("> " + ArchiveConfigs.INSTANCE.general.mainMenuName) + 14;
             boolean compact = guiWidth < titleW + 70 + 64 + 72 + 12;
 
@@ -1023,7 +1023,6 @@ public class ArchiveScreen extends Screen {
             } catch (Exception ignored) {}
         }
 
-        // Trim title/breadcrumb so they never run under the THEME button or past the panel edge
         int titleMaxW = (guiX + guiWidth - 80) - titleX;
         String shownTitle = unlocked ?
                 "§6" + this.font.plainSubstrByWidth(selectedEntry.title().toUpperCase(), titleMaxW) : "§4[ENCRYPTED]";
@@ -1218,7 +1217,6 @@ public class ArchiveScreen extends Screen {
         return CLIENT_LORE_CACHE.getBoolean(key);
     }
 
-    /** Looks an entry up by id and checks it the same way {@link #isLoreUnlockedClient} does. */
     private boolean isEntryUnlockedById(String id) {
         if (id == null || id.isEmpty()) return false;
         return LoreDataLoader.LORE_ENTRIES.values().stream()
@@ -1228,12 +1226,6 @@ public class ArchiveScreen extends Screen {
                 .orElse(false);
     }
 
-    /**
-     * Whether a {@code hidden} entry should currently appear in the sidebar at all -- see
-     * {@link LoreEntry#isVisibleInList}. Entries that aren't marked hidden are always visible (the
-     * pre-existing "show locked, greyed out" behavior); OPs in edit mode always see everything, so
-     * hidden/chained entries can still be found and managed.
-     */
     private boolean isRowVisible(LoreEntry entry) {
         return isEditMode || entry.isVisibleInList(this::isEntryUnlockedById);
     }

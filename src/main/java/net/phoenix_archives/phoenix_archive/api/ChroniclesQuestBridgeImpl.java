@@ -14,10 +14,6 @@ import net.phoenixvine.chronicles.common.registry.QuestTreeRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Only ever called from {@link ChroniclesQuestBridge} behind an {@code isLoaded()} check --
- * package-private so nothing outside the bridge can reach a Chronicles type directly.
- */
 final class ChroniclesQuestBridgeImpl {
 
     private ChroniclesQuestBridgeImpl() {}

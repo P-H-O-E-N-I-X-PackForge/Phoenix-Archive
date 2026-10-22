@@ -63,9 +63,6 @@ public class ArchiveClient {
         Minecraft mc = Minecraft.getInstance();
         PhoenixArchive.LOGGER.info("PHOENIX_OS // Client setup, registering HUD bar entry...");
 
-        // Lets the suite's shared/per-mod theme toggle (see PhoenixTheme#setSharedMode) tell this
-        // mod's own code apart from every other Phoenix mod's when they call the no-arg theme
-        // accessors -- see PhoenixTheme#resolveCallerModId.
         PhoenixTheme.registerMod("net.phoenix_archives.phoenix_archive", MOD_ID);
 
         ArchivePalette.refresh(PhoenixTheme.current());
@@ -73,8 +70,6 @@ public class ArchiveClient {
 
         ArchiveShaderManager.ensureDefault(TORN_PAGE_SHADER_ID, TORN_PAGE_SHADER_SOURCE);
 
-        // Archive's own :::if/:::else conditional-content block, and the quest: link scheme for
-        // deep-linking into Chronicles -- see ArchiveConditionalBlockParser and openLink() below.
         BlockParserRegistry.DEFAULT.registerFirst(new ArchiveConditionalBlockParser());
         LinkTargetHandler.registerScheme("quest:");
 
@@ -120,11 +115,6 @@ public class ArchiveClient {
     }
 
     private static void registerHudBar(Minecraft mc) {
-        // A plain static 16x16 crop of lore_terminal.png's first frame -- the HUD bar blits this
-        // raw texture directly (not through the item/block atlas), and the source item texture's
-        // animation .mcmeta made that raw blit sample garbage in a packaged environment (the atlas
-        // handles animated item textures fine for real item rendering, but a manual UV-sliced blit
-        // of a multi-frame strip isn't guaranteed a clean single frame outside dev).
         ResourceLocation iconPath = ResourceLocation.fromNamespaceAndPath(
                 MOD_ID,
                 "textures/gui/lore_terminal_icon.png");

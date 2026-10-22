@@ -21,7 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.ArrayList;
 import java.util.Optional;
 
-/** Fires the {@code machine} trigger when a multiblock actually forms, not when its controller is placed. */
 @Mixin(value = MultiblockControllerMachine.class, remap = false)
 public abstract class MultiblockFormedMixin {
 

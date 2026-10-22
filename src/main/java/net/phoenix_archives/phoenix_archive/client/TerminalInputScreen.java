@@ -29,6 +29,9 @@ import java.util.function.Consumer;
 
 public class TerminalInputScreen extends Screen {
 
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
+
     private final Screen parent;
     private final String titleLabel;
     private final String initialValue;
@@ -37,10 +40,6 @@ public class TerminalInputScreen extends Screen {
     private CustomTextArea textArea;
     private String liveValue;
 
-    /**
-     * Live markdown preview shown alongside the editor -- re-parsed only when the text actually
-     * changes (checked once per render), not every frame, since parsing runs on the render thread.
-     */
     private List<RichBlock> previewBlocks = List.of();
     private String previewSourceText = null;
     private int previewX, previewY, previewW, previewH;
@@ -61,9 +60,6 @@ public class TerminalInputScreen extends Screen {
         ArchivePalette.refresh(PhoenixTheme.current());
         String startingValue = (liveValue != null) ? liveValue : initialValue;
 
-        // Split the body left/right: editable text area on the left, a live-rendered markdown
-        // preview of the same text on the right, so formatting is visible while still typing
-        // instead of only after committing and reopening the entry.
         int bodyY = 59, bodyH = this.height - 104;
         int totalBodyW = this.width - 40;
         int editorW = totalBodyW / 2 - 4;
@@ -290,10 +286,6 @@ public class TerminalInputScreen extends Screen {
         g.disableScissor();
     }
 
-    /**
-     * Mirrors ArchiveScreen#handleContentClick/openLink so the preview panel's links, code-copy
-     * buttons, and collapsible/checklist toggles behave the same as the real entry viewer.
-     */
     private boolean handlePreviewClick(double mouseX, double mouseY) {
         for (RichSpan.Region region : previewRegions) {
             if (!region.contains(mouseX, mouseY)) continue;
