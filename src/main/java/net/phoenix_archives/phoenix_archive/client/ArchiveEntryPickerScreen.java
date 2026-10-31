@@ -17,8 +17,6 @@ import java.util.function.Consumer;
 
 public class ArchiveEntryPickerScreen extends Screen {
 
-
-
     private static final int HEADER_H = 42;
     private static final int FOOTER_H = 20;
     private static final int ROW_H = 16;
@@ -109,7 +107,7 @@ public class ArchiveEntryPickerScreen extends Screen {
             }
 
             LoreEntry entry = filtered.get(i);
-            
+
             FormattedText row = font.substrByWidth(
                     Component.literal("§f" + entry.title() + " §8(" + entry.id() + ")"), width - 28);
             g.drawString(font, Language.getInstance().getVisualOrder(row), 12, ty + 4,

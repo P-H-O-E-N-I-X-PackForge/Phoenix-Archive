@@ -115,7 +115,6 @@ public class ArchiveClient {
     }
 
     private static void registerHudBar(Minecraft mc) {
-
         ResourceLocation iconPath = ResourceLocation.fromNamespaceAndPath(
                 MOD_ID,
                 "textures/gui/lore_terminal_icon.png");

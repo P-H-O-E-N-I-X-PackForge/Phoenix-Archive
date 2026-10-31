@@ -30,8 +30,6 @@ import java.util.function.Consumer;
 
 public class TerminalInputScreen extends Screen {
 
-
-
     private final Screen parent;
     private final String titleLabel;
     private final String initialValue;

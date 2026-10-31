@@ -12,8 +12,6 @@ import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 public class ConditionTunerScreen extends Screen {
 
-
-
     private final ArchiveEditorScreen parent;
     private final ConditionNode initial;
 

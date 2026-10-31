@@ -17,8 +17,6 @@ import java.io.FileWriter;
 
 public class CategoryManagementScreen extends Screen {
 
-
-
     private final Screen lastScreen;
 
     private final String editingId;

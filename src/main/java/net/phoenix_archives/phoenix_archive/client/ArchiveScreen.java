@@ -55,7 +55,6 @@ import java.util.*;
 
 public class ArchiveScreen extends Screen {
 
-
     private LoreEntry selectedEntry = null;
     private boolean isEditMode = false;
     private int contentScrollOffset = 0;
@@ -116,7 +115,7 @@ public class ArchiveScreen extends Screen {
     private void computeLayout() {
         guiWidth = Math.max(160, Math.min(MAX_GUI_W, this.width - GUI_MARGIN * 2));
         guiHeight = Math.max(120, Math.min(MAX_GUI_H, this.height - GUI_MARGIN * 2));
-        sidebarWidth = Math.max(90, Math.min(140, guiWidth / 3)); 
+        sidebarWidth = Math.max(90, Math.min(140, guiWidth / 3));
         guiX = (this.width - guiWidth) / 2;
         guiY = (this.height - guiHeight) / 2;
     }
@@ -285,7 +284,7 @@ public class ArchiveScreen extends Screen {
                 .build());
 
         if (isOp) {
-            
+
             int titleW = this.font.width("> " + ArchiveConfigs.INSTANCE.general.mainMenuName) + 14;
             boolean compact = guiWidth < titleW + 70 + 64 + 72 + 12;
 

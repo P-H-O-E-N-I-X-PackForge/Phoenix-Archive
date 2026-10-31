@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class ChromaticSelectorScreen extends Screen {
 
-
     private final TerminalInputScreen parent;
 
     public ChromaticSelectorScreen(TerminalInputScreen parent) {

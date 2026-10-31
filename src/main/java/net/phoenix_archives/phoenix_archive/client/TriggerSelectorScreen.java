@@ -8,8 +8,6 @@ import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 public class TriggerSelectorScreen extends Screen {
 
-
-
     private final ArchiveEditorScreen parent;
 
     public TriggerSelectorScreen(ArchiveEditorScreen parent) {

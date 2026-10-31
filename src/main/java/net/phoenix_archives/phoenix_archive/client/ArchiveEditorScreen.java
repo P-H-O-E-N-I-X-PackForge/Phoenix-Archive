@@ -32,7 +32,6 @@ import java.util.*;
 
 public class ArchiveEditorScreen extends Screen {
 
-
     private final LoreEntry editingEntry;
     private final String initialCategory;
 
@@ -144,8 +143,7 @@ public class ArchiveEditorScreen extends Screen {
     }
 
     private void computeLayout() {
-        
-        int remaining = Math.max(200, (this.width - 16) - 10); 
+        int remaining = Math.max(200, (this.width - 16) - 10);
         if (remaining >= 375) {
             termW = 80;
             fieldW = 200;
@@ -161,7 +159,7 @@ public class ArchiveEditorScreen extends Screen {
         rightX = fieldX + fieldW + 5;
 
         int avail = this.height - 2 * MARGIN;
-        
+
         boolean roomy = avail - (6 * 20 + 2 * 16 + 9 * 5) >= 70;
         rowH = roomy ? 20 : 16;
         int gap = roomy ? 5 : 3;
