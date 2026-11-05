@@ -236,7 +236,7 @@ public class ArchiveScreen extends Screen {
                 !selectedEntry.voiceLine().isEmpty()) {
             final LoreEntry voiceTarget = selectedEntry;
             this.addRenderableWidget(
-                    Button.builder(Component.literal(shortLabels ? "▶ VOICE" : "▶ PLAY VOICE"),
+                    ArchiveButton.create(Component.literal(shortLabels ? "▶ VOICE" : "▶ PLAY VOICE"),
                             b -> playLoreVoice(voiceTarget.voiceLine()))
                             .bounds(guiX + contentXOffset, guiY + guiHeight - 25, btnW, 16)
                             .tooltip(Tooltip.create(Component.literal("Play Voice Entry")))
@@ -247,7 +247,7 @@ public class ArchiveScreen extends Screen {
                 ModList.get().isLoaded("phoenix_chronicles")) {
             String chroniclesQuestId = selectedEntry.conditionTree().findLeafValue("chronicles_quest").orElse(null);
             if (chroniclesQuestId != null && !chroniclesQuestId.isEmpty()) {
-                this.addRenderableWidget(Button.builder(Component.literal(shortLabels ? "§b→ QUEST" : "§b→ QUEST TREE"),
+                this.addRenderableWidget(ArchiveButton.create(Component.literal(shortLabels ? "§b→ QUEST" : "§b→ QUEST TREE"),
                         b -> ArchiveClient.openChroniclesQuest(this, chroniclesQuestId))
                         .bounds(guiX + contentXOffset + btnW + 4, guiY + guiHeight - 25, btnW, 16)
                         .tooltip(Tooltip.create(Component.literal("Jump to this quest in Chronicles")))
@@ -258,7 +258,7 @@ public class ArchiveScreen extends Screen {
         if (selectedEntry != null) {
             final LoreEntry pinnedEntry = selectedEntry;
             boolean bookmarked = isBookmarked(pinnedEntry);
-            this.addRenderableWidget(Button.builder(
+            this.addRenderableWidget(ArchiveButton.create(
                     Component.literal(bookmarked ? "§6★" : "§8☆"),
                     b -> toggleBookmark(pinnedEntry))
                     .bounds(guiX + guiWidth - 24, guiY + guiHeight - 25, 14, 14)
@@ -266,7 +266,7 @@ public class ArchiveScreen extends Screen {
                     .build());
 
             if (isLoreUnlockedClient(pinnedEntry)) {
-                this.addRenderableWidget(Button.builder(
+                this.addRenderableWidget(ArchiveButton.create(
                         Component.literal("§7[copy]"),
                         b -> {
                             final String text = pinnedEntry.content();
@@ -279,7 +279,7 @@ public class ArchiveScreen extends Screen {
             }
         }
 
-        this.addRenderableWidget(Button.builder(Component.literal("§6[ THEME ]"),
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("§6[ THEME ]"),
                 b -> this.minecraft.setScreen(new PhoenixThemeEditorScreen(this, "Phoenix Archive")))
                 .bounds(guiX + guiWidth - 75, guiY + 22, 70, 14)
                 .tooltip(Tooltip.create(Component.literal("Open the Suite Theme Editor")))
@@ -297,7 +297,7 @@ public class ArchiveScreen extends Screen {
             int catW = compact ? 36 : 72;
             int catX = entryX - 4 - catW;
 
-            this.addRenderableWidget(Button.builder(
+            this.addRenderableWidget(ArchiveButton.create(
                     Component.literal(isEditMode ? "§c[EDIT: ON]" : "§7[EDIT: OFF]"),
                     b -> {
                         this.isEditMode = !this.isEditMode;
@@ -307,7 +307,7 @@ public class ArchiveScreen extends Screen {
                     .build());
 
             if (isEditMode) {
-                this.addRenderableWidget(Button.builder(Component.literal(compact ? "+Cat" : "New Category"),
+                this.addRenderableWidget(ArchiveButton.create(Component.literal(compact ? "+Cat" : "New Category"),
                         b -> this.minecraft.setScreen(new CategoryManagementScreen(this)))
                         .bounds(catX, guiY + 6, catW, 14)
                         .tooltip(Tooltip.create(Component.literal("Open New Category Screen")))
@@ -316,7 +316,7 @@ public class ArchiveScreen extends Screen {
                 int ctrlX = guiX + guiWidth - 22;
                 final String pinnedCat = selectedCategory;
 
-                this.addRenderableWidget(Button.builder(Component.literal(compact ? "+Entry" : "New Entry"),
+                this.addRenderableWidget(ArchiveButton.create(Component.literal(compact ? "+Entry" : "New Entry"),
                         b -> this.minecraft.setScreen(new ArchiveEditorScreen(this, null, pinnedCat)))
                         .bounds(entryX, guiY + 6, entryW, 14)
                         .tooltip(Tooltip.create(Component.literal("Open New Entry Screen")))
@@ -327,11 +327,11 @@ public class ArchiveScreen extends Screen {
 
                     boolean viewingViaBookmark = BOOKMARK_CAT_ID.equals(selectedCategory);
                     if (!viewingViaBookmark) {
-                        this.addRenderableWidget(Button.builder(Component.literal("§4X"), b -> openDeletePrompt())
+                        this.addRenderableWidget(ArchiveButton.create(Component.literal("§4X"), b -> openDeletePrompt())
                                 .bounds(ctrlX, guiY + 30, 18, 18)
                                 .tooltip(Tooltip.create(Component.literal("Delete Entry? Cannot be undone.")))
                                 .build());
-                        this.addRenderableWidget(Button.builder(Component.literal("§aDupe"),
+                        this.addRenderableWidget(ArchiveButton.create(Component.literal("§aDupe"),
                                 b -> duplicateEntry(pinnedEdit))
                                 .bounds(ctrlX - 36, guiY + 52, 55, 14)
                                 .tooltip(Tooltip.create(Component.literal("Duplicate this entry as a new draft")))
@@ -339,21 +339,21 @@ public class ArchiveScreen extends Screen {
                     }
 
                 } else if (selectedCategory != null && !BOOKMARK_CAT_ID.equals(selectedCategory)) {
-                    this.addRenderableWidget(Button.builder(Component.literal("↑"), b -> shiftCategory(-1))
+                    this.addRenderableWidget(ArchiveButton.create(Component.literal("↑"), b -> shiftCategory(-1))
                             .tooltip(Tooltip.create(Component.literal("Move Category Up (among siblings)")))
                             .bounds(ctrlX, guiY + 30, 18, 18).build());
 
-                    this.addRenderableWidget(Button.builder(Component.literal("↓"), b -> shiftCategory(1))
+                    this.addRenderableWidget(ArchiveButton.create(Component.literal("↓"), b -> shiftCategory(1))
                             .tooltip(Tooltip.create(Component.literal("Move Category Down (among siblings)")))
                             .bounds(ctrlX, guiY + 50, 18, 18).build());
 
                     this.addRenderableWidget(
-                            Button.builder(Component.literal("§4Delete"), b -> openDeleteCategoryPrompt())
+                            ArchiveButton.create(Component.literal("§4Delete"), b -> openDeleteCategoryPrompt())
                                     .tooltip(Tooltip.create(Component.literal("Delete this category (entries remain)")))
                                     .bounds(ctrlX - 36, guiY + 70, 55, 14).build());
 
-                    this.addRenderableWidget(Button
-                            .builder(Component.literal("§eEdit"),
+                    this.addRenderableWidget(ArchiveButton
+                            .create(Component.literal("§eEdit"),
                                     b -> this.minecraft.setScreen(new CategoryManagementScreen(this, pinnedCat)))
                             .tooltip(Tooltip.create(Component.literal("Edit this category's description and weight")))
                             .bounds(ctrlX - 36, guiY + 87, 55, 14).build());
@@ -361,7 +361,7 @@ public class ArchiveScreen extends Screen {
 
                 int bulkToggleX = ctrlX - 55;
                 String bulkLabel = bulkMode ? "§e[BULK: ON]" : "§8[BULK: OFF]";
-                this.addRenderableWidget(Button.builder(Component.literal(bulkLabel), b -> {
+                this.addRenderableWidget(ArchiveButton.create(Component.literal(bulkLabel), b -> {
                     bulkMode = !bulkMode;
                     if (!bulkMode) bulkSelected.clear();
                     this.init(this.minecraft, this.width, this.height);
@@ -376,7 +376,7 @@ public class ArchiveScreen extends Screen {
                     final String bulkTarget = selectedCategory;
                     int assignX = guiX + sidebarWidth + 4;
                     int assignW = Math.max(40, bulkToggleX - assignX - 4);
-                    this.addRenderableWidget(Button.builder(
+                    this.addRenderableWidget(ArchiveButton.create(
                             Component.literal("§6► Move " + bulkSelected.size() + " entr" +
                                     (bulkSelected.size() == 1 ? "y" : "ies") +
                                     " → §e" + bulkTarget),

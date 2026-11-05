@@ -80,7 +80,7 @@ public class ParentPickerScreen extends Screen {
         listY = (this.height - listH) / 2 - 10;
 
         this.addRenderableWidget(
-                Button.builder(Component.literal("CANCEL"),
+                ArchiveButton.create(Component.literal("CANCEL"),
                         b -> this.minecraft.setScreen(returnTo))
                         .bounds(this.width / 2 - 60, listY + listH + 8, 120, 16)
                         .build());

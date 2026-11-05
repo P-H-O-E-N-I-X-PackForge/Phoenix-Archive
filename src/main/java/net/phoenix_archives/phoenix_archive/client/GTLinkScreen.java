@@ -39,7 +39,7 @@ public class GTLinkScreen extends Screen {
 
         this.addRenderableWidget(machineInput);
 
-        this.addRenderableWidget(Button.builder(Component.literal("VERIFY_ID"), b -> {
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("VERIFY_ID"), b -> {
             ResourceLocation loc = ResourceLocation.tryParse(machineInput.getValue());
             if (loc != null && BuiltInRegistries.BLOCK.containsKey(loc)) {
                 status = "§2ID_VALID: §f" + loc.getPath();
@@ -48,7 +48,7 @@ public class GTLinkScreen extends Screen {
             }
         }).bounds(x, this.height / 2 + 15, 95, 20).build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("§2[ LINK ]"), b -> {
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("§2[ LINK ]"), b -> {
             String id = machineInput.getValue().trim();
             if (!id.isEmpty()) {
 

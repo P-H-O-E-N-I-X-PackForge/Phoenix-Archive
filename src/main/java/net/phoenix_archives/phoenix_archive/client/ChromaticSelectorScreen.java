@@ -31,7 +31,7 @@ public class ChromaticSelectorScreen extends Screen {
 
         if (ModList.get().isLoaded("phoenix_chromatic_codes")) {
 
-            this.addRenderableWidget(Button.builder(Component.literal("§b>_ STATIC_SIGNATURE_ARRAY"), b -> {})
+            this.addRenderableWidget(ArchiveButton.create(Component.literal("§b>_ STATIC_SIGNATURE_ARRAY"), b -> {})
                     .bounds(centerX - 100, startY, 200, 14).build()).active = false;
 
             startY += 20;
@@ -42,7 +42,7 @@ public class ChromaticSelectorScreen extends Screen {
 
             for (String entry : ModConfig.INSTANCE.colors.customColors) {
                 String code = entry.split(":")[0];
-                this.addRenderableWidget(Button.builder(Component.literal("§" + code + "Color &" + code), b -> {
+                this.addRenderableWidget(ArchiveButton.create(Component.literal("§" + code + "Color &" + code), b -> {
                     insertAndClose("&" + code);
                 }).bounds(currentX + (rowCount % 3 * (colWidth + 2)), startY, colWidth, 18).build());
 
@@ -52,7 +52,7 @@ public class ChromaticSelectorScreen extends Screen {
             if (rowCount % 3 != 0) startY += 25;
             else startY += 5;
 
-            this.addRenderableWidget(Button.builder(Component.literal("§d>_ ACTIVE_CHROMATIC_FLUX"), b -> {})
+            this.addRenderableWidget(ArchiveButton.create(Component.literal("§d>_ ACTIVE_CHROMATIC_FLUX"), b -> {})
                     .bounds(centerX - 100, startY, 200, 14).build()).active = false;
 
             startY += 20;
@@ -60,14 +60,14 @@ public class ChromaticSelectorScreen extends Screen {
             for (String entry : ModConfig.INSTANCE.colors.customGradients) {
                 String code = entry.split(":")[0];
                 this.addRenderableWidget(
-                        Button.builder(Component.literal("§" + code + "EXECUTABLE_EFFECT: &" + code), b -> {
+                        ArchiveButton.create(Component.literal("§" + code + "EXECUTABLE_EFFECT: &" + code), b -> {
                             insertAndClose("&" + code);
                         }).bounds(centerX - 100, startY, 200, 18).build());
                 startY += 20;
             }
         }
 
-        this.addRenderableWidget(Button.builder(Component.literal("§7[ ABORT_AND_RETURN ]"), b -> this.onClose())
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("§7[ ABORT_AND_RETURN ]"), b -> this.onClose())
                 .bounds(centerX - 60, this.height - 35, 120, 20).build());
     }
 

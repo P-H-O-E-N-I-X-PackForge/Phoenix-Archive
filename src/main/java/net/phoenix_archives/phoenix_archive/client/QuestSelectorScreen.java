@@ -53,7 +53,7 @@ public class QuestSelectorScreen extends Screen {
         this.list.setX(left + 5);
         this.addRenderableWidget(list);
 
-        this.addRenderableWidget(Button.builder(Component.literal("CANCEL"), b -> this.minecraft.setScreen(parent))
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("CANCEL"), b -> this.minecraft.setScreen(parent))
                 .bounds(left + 10, top + guiHeight - 22, guiWidth - 20, 16).build());
 
         this.setInitialFocus(this.searchBox);

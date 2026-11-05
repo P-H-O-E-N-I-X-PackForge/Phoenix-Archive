@@ -25,15 +25,15 @@ public class TriggerSelectorScreen extends Screen {
         int x = this.width / 2 - 80;
         int y = this.height / 2 - 40;
 
-        this.addRenderableWidget(Button.builder(Component.literal("GT: MULTIBLOCK"), b -> {
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("GT: MULTIBLOCK"), b -> {
             this.minecraft.setScreen(new GTLinkScreen(parent));
         }).bounds(x, y, 160, 20).build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("WORLD: BIOME"), b -> {
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("WORLD: BIOME"), b -> {
 
         }).bounds(x, y + 25, 160, 20).build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("CANCEL"), b -> {
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("CANCEL"), b -> {
             this.minecraft.setScreen(parent);
         }).bounds(x, y + 60, 160, 20).build());
     }

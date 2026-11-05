@@ -82,7 +82,7 @@ public class TerminalInputScreen extends Screen {
                 "Gold", "Gray", "Dark Gray", "Blue", "Green", "Aqua", "Red", "Light Purple", "Yellow", "White" };
         for (int idx = 0; idx < colorCodes.length(); idx++) {
             char c = colorCodes.charAt(idx);
-            this.addRenderableWidget(Button.builder(Component.literal("§" + c + "█"), b -> insertCode("&" + c))
+            this.addRenderableWidget(ArchiveButton.create(Component.literal("§" + c + "█"), b -> insertCode("&" + c))
                     .bounds(startX, startY, btnW, 14)
                     .tooltip(Tooltip.create(Component.literal(colorNames[idx])))
                     .build());
@@ -91,7 +91,7 @@ public class TerminalInputScreen extends Screen {
 
         startX += 4;
 
-        this.addRenderableWidget(Button.builder(
+        this.addRenderableWidget(ArchiveButton.create(
                 Component.literal("T").withStyle(Style.EMPTY.withColor(
                         TextColor.fromRgb(ArchivePalette.TERM & 0xFFFFFF))),
                 b -> insertCode("&t"))
@@ -108,7 +108,7 @@ public class TerminalInputScreen extends Screen {
         for (int idx = 0; idx < formatCodes.length(); idx++) {
             char c = formatCodes.charAt(idx);
             String label = (c == 'r') ? "X" : (c == 'k') ? "?" : "§" + c + "█";
-            this.addRenderableWidget(Button.builder(Component.literal(label), b -> insertCode("&" + c))
+            this.addRenderableWidget(ArchiveButton.create(Component.literal(label), b -> insertCode("&" + c))
                     .bounds(startX, startY, btnW, 14)
                     .tooltip(Tooltip.create(Component.literal(formatNames[idx])))
                     .build());
@@ -116,7 +116,7 @@ public class TerminalInputScreen extends Screen {
         }
 
         startX += 4;
-        this.addRenderableWidget(Button.builder(Component.literal("§b[THEME]"), b -> applyThemeToColors())
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("§b[THEME]"), b -> applyThemeToColors())
                 .bounds(startX, startY, 46, 14)
                 .tooltip(Tooltip.create(Component.literal(
                         "Recolor every &0-&f code above to the suite's current theme (dark codes -> theme " +
@@ -140,7 +140,7 @@ public class TerminalInputScreen extends Screen {
             String snippet = entry[1];
             String tooltip = entry[2];
             int w = this.font.width(label) + 8;
-            this.addRenderableWidget(Button.builder(Component.literal(label), b -> insertCode(snippet))
+            this.addRenderableWidget(ArchiveButton.create(Component.literal(label), b -> insertCode(snippet))
                     .bounds(mdX, mdY, w, 14)
                     .tooltip(Tooltip.create(Component.literal(tooltip)))
                     .build());
@@ -148,30 +148,30 @@ public class TerminalInputScreen extends Screen {
         }
 
         mdX += 4;
-        this.addRenderableWidget(Button.builder(Component.literal("`c`"), b -> insertMarkdownWrap("`", "`"))
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("`c`"), b -> insertMarkdownWrap("`", "`"))
                 .bounds(mdX, mdY, 26, 14)
                 .tooltip(Tooltip.create(Component.literal("Inline code")))
                 .build());
         mdX += 28;
-        this.addRenderableWidget(Button.builder(Component.literal("```"), b -> insertMarkdownWrap("\n```\n", "\n```\n"))
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("```"), b -> insertMarkdownWrap("\n```\n", "\n```\n"))
                 .bounds(mdX, mdY, 26, 14)
                 .tooltip(Tooltip.create(Component.literal("Code block")))
                 .build());
         mdX += 28;
-        this.addRenderableWidget(Button
-                .builder(Component.literal(":::"), b -> insertMarkdownWrap(":::spoiler Title\n", "\n:::\n"))
+        this.addRenderableWidget(ArchiveButton
+                .create(Component.literal(":::"), b -> insertMarkdownWrap(":::spoiler Title\n", "\n:::\n"))
                 .bounds(mdX, mdY, 26, 14)
                 .tooltip(Tooltip.create(Component.literal("Spoiler / details block")))
                 .build());
         mdX += 28;
         this.addRenderableWidget(
-                Button.builder(Component.literal("!"), b -> insertMarkdownWrap(":::warning\n", "\n:::\n"))
+                ArchiveButton.create(Component.literal("!"), b -> insertMarkdownWrap(":::warning\n", "\n:::\n"))
                         .bounds(mdX, mdY, 18, 14)
                         .tooltip(Tooltip.create(Component.literal("Warning callout")))
                         .build());
         mdX += 20;
         this.addRenderableWidget(
-                Button.builder(Component.literal("[url]"), b -> insertMarkdownWrap("[", "](https://)"))
+                ArchiveButton.create(Component.literal("[url]"), b -> insertMarkdownWrap("[", "](https://)"))
                         .bounds(mdX, mdY, 34, 14)
                         .tooltip(Tooltip.create(Component.literal(
                                 "Link -- the target must start with http://, https://, wiki:, or quest: or it " +
@@ -179,7 +179,7 @@ public class TerminalInputScreen extends Screen {
                         .build());
 
         if (net.neoforged.fml.ModList.get().isLoaded("phoenix_chromatic_codes")) {
-            this.addRenderableWidget(Button.builder(Component.literal("§z[ CHROMATIC_OS ]"), b -> {
+            this.addRenderableWidget(ArchiveButton.create(Component.literal("§z[ CHROMATIC_OS ]"), b -> {
                 if (this.minecraft != null) {
                     liveValue = this.textArea.getValue();
                     this.minecraft.setScreen(new ChromaticSelectorScreen(this));
@@ -187,7 +187,7 @@ public class TerminalInputScreen extends Screen {
             }).bounds(this.width - 110, 12, 100, 14).build());
         }
 
-        this.addRenderableWidget(Button.builder(Component.literal("§2[ COMMIT_CHANGES ]"), b -> {
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("§2[ COMMIT_CHANGES ]"), b -> {
             this.onCommit.accept(this.textArea.getValue());
             if (this.minecraft != null) {
                 this.minecraft.setScreen(parent);
