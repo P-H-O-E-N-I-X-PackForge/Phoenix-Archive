@@ -9,11 +9,13 @@ import net.minecraft.network.chat.Component;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 /**
- * The Phoenix Suite button: a flat themed plate with a thin border, corner ticks and an accent bar that lights up
- * under the cursor, in place of the stone-grey Minecraft button. It takes its colours from the suite theme, so the
+ * The Phoenix Suite button: a slim flat plate with a thin border that lights up under the cursor, in place of the stone-grey Minecraft button. It takes its colours from the suite theme, so the
  * theme editor restyles it with everything else.
  */
 public class ArchiveButton extends Button {
+
+    /** Buttons never get taller than this, so a screen asking for a chunky one still gets a slim plate. */
+    private static final int MAX_HEIGHT = 14;
 
     protected ArchiveButton(int x, int y, int w, int h, Component message, OnPress onPress) {
         super(x, y, w, h, message, onPress, DEFAULT_NARRATION);
@@ -30,31 +32,17 @@ public class ArchiveButton extends Button {
         int x0 = getX(), y0 = getY(), x1 = x0 + width, y1 = y0 + height;
 
         int accent = ArchivePalette.BORDER_LIT;
-        int fill = active ? (hot ? ArchivePalette.withAlpha(accent, 0x4A) : ArchivePalette.withAlpha(accent, 0x1C)) :
-                0x33000000;
-        int border = !active ? ArchivePalette.withAlpha(ArchivePalette.BORDER, 0x66) :
-                hot ? ArchivePalette.TERM_BRIGHT : ArchivePalette.BORDER;
+        int fill = !active ? 0x22000000 : hot ? ArchivePalette.withAlpha(accent, 0x38) :
+                ArchivePalette.withAlpha(accent, 0x12);
+        int border = !active ? ArchivePalette.withAlpha(ArchivePalette.BORDER, 0x44) :
+                hot ? ArchivePalette.TERM_BRIGHT : ArchivePalette.withAlpha(ArchivePalette.BORDER, 0x99);
 
-        g.fill(x0, y0, x1, y1, ArchivePalette.PANEL);
         g.fill(x0, y0, x1, y1, fill);
-        g.fill(x0, y0, x1, y0 + 1, border);
-        g.fill(x0, y1 - 1, x1, y1, border);
-        g.fill(x0, y0, x0 + 1, y1, border);
-        g.fill(x1 - 1, y0, x1, y1, border);
-
-        if (active) {
-            int tick = hot ? ArchivePalette.TERM_HILITE : accent;
-            int len = Math.min(3, Math.max(1, height / 4));
-            g.fill(x0, y0, x0 + len + 1, y0 + 1, tick);
-            g.fill(x0, y0, x0 + 1, y0 + len + 1, tick);
-            g.fill(x1 - len - 1, y1 - 1, x1, y1, tick);
-            g.fill(x1 - 1, y1 - len - 1, x1, y1, tick);
-            if (hot) g.fill(x0 + 1, y0 + 1, x0 + 3, y1 - 1, accent);
-        }
+        g.renderOutline(x0, y0, width, height, border);
 
         Font font = Minecraft.getInstance().font;
         int textColor = !active ? ArchivePalette.TEXT_FAINT : hot ? ArchivePalette.TERM_BRIGHT : ArchivePalette.TEXT;
-        int pad = hot ? 5 : 3;
+        int pad = 3;
         int maxW = width - pad * 2;
         Component label = getMessage();
         int labelW = font.width(label);
@@ -109,7 +97,8 @@ public class ArchiveButton extends Button {
         }
 
         public ArchiveButton build() {
-            ArchiveButton button = new ArchiveButton(x, y, width, height, message, onPress);
+            int h = Math.min(height, MAX_HEIGHT);
+            ArchiveButton button = new ArchiveButton(x, y + (height - h) / 2, width, h, message, onPress);
             button.setTooltip(tooltip);
             return button;
         }
