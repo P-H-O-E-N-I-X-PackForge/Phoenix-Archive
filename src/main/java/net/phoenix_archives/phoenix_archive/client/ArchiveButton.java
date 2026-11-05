@@ -9,7 +9,8 @@ import net.minecraft.network.chat.Component;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 /**
- * The Phoenix Suite button: a slim flat plate with a thin border that lights up under the cursor, in place of the stone-grey Minecraft button. It takes its colours from the suite theme, so the
+ * The Phoenix Suite button: a slim flat plate with a thin border that lights up under the cursor, in place of the
+ * stone-grey Minecraft button. It takes its colours from the suite theme, so the
  * theme editor restyles it with everything else.
  */
 public class ArchiveButton extends Button {
