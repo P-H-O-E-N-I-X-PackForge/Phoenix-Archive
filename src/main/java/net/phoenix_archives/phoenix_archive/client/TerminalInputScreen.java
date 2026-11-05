@@ -4,7 +4,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultilineTextField;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -151,10 +150,11 @@ public class TerminalInputScreen extends Screen {
                 .tooltip(Tooltip.create(Component.literal("Inline code")))
                 .build());
         mdX += 28;
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("```"), b -> insertMarkdownWrap("\n```\n", "\n```\n"))
-                .bounds(mdX, mdY, 26, 14)
-                .tooltip(Tooltip.create(Component.literal("Code block")))
-                .build());
+        this.addRenderableWidget(
+                ArchiveButton.create(Component.literal("```"), b -> insertMarkdownWrap("\n```\n", "\n```\n"))
+                        .bounds(mdX, mdY, 26, 14)
+                        .tooltip(Tooltip.create(Component.literal("Code block")))
+                        .build());
         mdX += 28;
         this.addRenderableWidget(ArchiveButton
                 .create(Component.literal(":::"), b -> insertMarkdownWrap(":::spoiler Title\n", "\n:::\n"))

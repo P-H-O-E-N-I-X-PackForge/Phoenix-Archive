@@ -2,7 +2,6 @@ package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -245,8 +244,9 @@ public class ArchiveScreen extends Screen {
                 ModList.get().isLoaded("phoenix_chronicles")) {
             String chroniclesQuestId = selectedEntry.conditionTree().findLeafValue("chronicles_quest").orElse(null);
             if (chroniclesQuestId != null && !chroniclesQuestId.isEmpty()) {
-                this.addRenderableWidget(ArchiveButton.create(Component.literal(shortLabels ? "§b→ QUEST" : "§b→ QUEST TREE"),
-                        b -> ArchiveClient.openChroniclesQuest(this, chroniclesQuestId))
+                this.addRenderableWidget(ArchiveButton
+                        .create(Component.literal(shortLabels ? "§b→ QUEST" : "§b→ QUEST TREE"),
+                                b -> ArchiveClient.openChroniclesQuest(this, chroniclesQuestId))
                         .bounds(guiX + contentXOffset + btnW + 4, guiY + guiHeight - 25, btnW, 16)
                         .tooltip(Tooltip.create(Component.literal("Jump to this quest in Chronicles")))
                         .build());
@@ -290,9 +290,9 @@ public class ArchiveScreen extends Screen {
 
             int right = guiX + guiWidth - 5;
             int editX = right - 70;
-            int entryW = compact ? 44 : 64;
+            int entryW = compact ? 34 : 46;
             int entryX = editX - 4 - entryW;
-            int catW = compact ? 36 : 72;
+            int catW = compact ? 30 : 62;
             int catX = entryX - 4 - catW;
 
             this.addRenderableWidget(ArchiveButton.create(
@@ -305,7 +305,7 @@ public class ArchiveScreen extends Screen {
                     .build());
 
             if (isEditMode) {
-                this.addRenderableWidget(ArchiveButton.create(Component.literal(compact ? "+Cat" : "New Category"),
+                this.addRenderableWidget(ArchiveButton.create(Component.literal(compact ? "+ Cat" : "+ Category"),
                         b -> this.minecraft.setScreen(new CategoryManagementScreen(this)))
                         .bounds(catX, guiY + 6, catW, 14)
                         .tooltip(Tooltip.create(Component.literal("Open New Category Screen")))
@@ -314,7 +314,7 @@ public class ArchiveScreen extends Screen {
                 int ctrlX = guiX + guiWidth - 22;
                 final String pinnedCat = selectedCategory;
 
-                this.addRenderableWidget(ArchiveButton.create(Component.literal(compact ? "+Entry" : "New Entry"),
+                this.addRenderableWidget(ArchiveButton.create(Component.literal(compact ? "+ Ent" : "+ Entry"),
                         b -> this.minecraft.setScreen(new ArchiveEditorScreen(this, null, pinnedCat)))
                         .bounds(entryX, guiY + 6, entryW, 14)
                         .tooltip(Tooltip.create(Component.literal("Open New Entry Screen")))
@@ -326,12 +326,12 @@ public class ArchiveScreen extends Screen {
                     boolean viewingViaBookmark = BOOKMARK_CAT_ID.equals(selectedCategory);
                     if (!viewingViaBookmark) {
                         this.addRenderableWidget(ArchiveButton.create(Component.literal("§4X"), b -> openDeletePrompt())
-                                .bounds(ctrlX, guiY + 30, 18, 18)
+                                .bounds(ctrlX, guiY + 42, 18, 14)
                                 .tooltip(Tooltip.create(Component.literal("Delete Entry? Cannot be undone.")))
                                 .build());
                         this.addRenderableWidget(ArchiveButton.create(Component.literal("§aDupe"),
                                 b -> duplicateEntry(pinnedEdit))
-                                .bounds(ctrlX - 36, guiY + 52, 55, 14)
+                                .bounds(ctrlX - 36, guiY + 59, 55, 14)
                                 .tooltip(Tooltip.create(Component.literal("Duplicate this entry as a new draft")))
                                 .build());
                     }
@@ -339,22 +339,22 @@ public class ArchiveScreen extends Screen {
                 } else if (selectedCategory != null && !BOOKMARK_CAT_ID.equals(selectedCategory)) {
                     this.addRenderableWidget(ArchiveButton.create(Component.literal("↑"), b -> shiftCategory(-1))
                             .tooltip(Tooltip.create(Component.literal("Move Category Up (among siblings)")))
-                            .bounds(ctrlX, guiY + 30, 18, 18).build());
+                            .bounds(ctrlX, guiY + 42, 18, 14).build());
 
                     this.addRenderableWidget(ArchiveButton.create(Component.literal("↓"), b -> shiftCategory(1))
                             .tooltip(Tooltip.create(Component.literal("Move Category Down (among siblings)")))
-                            .bounds(ctrlX, guiY + 50, 18, 18).build());
+                            .bounds(ctrlX, guiY + 59, 18, 14).build());
 
                     this.addRenderableWidget(
                             ArchiveButton.create(Component.literal("§4Delete"), b -> openDeleteCategoryPrompt())
                                     .tooltip(Tooltip.create(Component.literal("Delete this category (entries remain)")))
-                                    .bounds(ctrlX - 36, guiY + 70, 55, 14).build());
+                                    .bounds(ctrlX - 36, guiY + 76, 55, 14).build());
 
                     this.addRenderableWidget(ArchiveButton
                             .create(Component.literal("§eEdit"),
                                     b -> this.minecraft.setScreen(new CategoryManagementScreen(this, pinnedCat)))
                             .tooltip(Tooltip.create(Component.literal("Edit this category's description and weight")))
-                            .bounds(ctrlX - 36, guiY + 87, 55, 14).build());
+                            .bounds(ctrlX - 36, guiY + 93, 55, 14).build());
                 }
 
                 int bulkToggleX = ctrlX - 55;

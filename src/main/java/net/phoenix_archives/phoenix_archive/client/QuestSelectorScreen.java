@@ -2,7 +2,6 @@ package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -50,8 +49,9 @@ public class QuestSelectorScreen extends Screen {
         this.list.setLeftPos(left + 5);
         this.addRenderableWidget(list);
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("CANCEL"), b -> this.minecraft.setScreen(parent))
-                .bounds(left + 10, top + guiHeight - 22, guiWidth - 20, 16).build());
+        this.addRenderableWidget(
+                ArchiveButton.create(Component.literal("CANCEL"), b -> this.minecraft.setScreen(parent))
+                        .bounds(left + 10, top + guiHeight - 22, guiWidth - 20, 16).build());
 
         this.setInitialFocus(this.searchBox);
         refreshList("");
