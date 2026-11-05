@@ -39,7 +39,7 @@ public class ConditionTunerScreen extends Screen {
         exprBox.setValue(ConditionExprParser.render(initial));
         this.addRenderableWidget(exprBox);
 
-        this.addRenderableWidget(Button.builder(Component.literal("§2[ APPLY_CHANGES ]"), b -> tryApply())
+        this.addRenderableWidget(ArchiveButton.create(Component.literal("§2[ APPLY_CHANGES ]"), b -> tryApply())
                 .bounds(this.width / 2 - 100, this.height - 30, 200, 20)
                 .build());
     }

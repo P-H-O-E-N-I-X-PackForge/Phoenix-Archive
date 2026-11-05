@@ -86,7 +86,7 @@ public class CategoryManagementScreen extends Screen {
 
         String parentLabel = (selectedParentId == null) ? "(none — root)" : selectedParentId;
 
-        this.addRenderableWidget(Button.builder(
+        this.addRenderableWidget(ArchiveButton.create(
                 Component.literal("§8Parent: §7" + parentLabel + " §8[change]"),
                 b -> openParentPicker())
                 .bounds(x + 45, y + 50, 155, 20)
@@ -98,12 +98,12 @@ public class CategoryManagementScreen extends Screen {
         Tooltip saveTooltip = (editingId != null) ? Tooltip.create(Component.literal("Update Selected Category")) :
                 Tooltip.create(Component.literal("Save New Category"));
 
-        this.addRenderableWidget(Button.builder(Component.literal(saveLabel), b -> saveCategory())
+        this.addRenderableWidget(ArchiveButton.create(Component.literal(saveLabel), b -> saveCategory())
                 .bounds(x, y + 80, 200, 20)
                 .tooltip(saveTooltip)
                 .build());
 
-        this.addRenderableWidget(Button.builder(
+        this.addRenderableWidget(ArchiveButton.create(
                 Component.literal("CANCEL"),
                 b -> this.minecraft.setScreen(lastScreen))
                 .bounds(x, y + 105, 200, 16)
