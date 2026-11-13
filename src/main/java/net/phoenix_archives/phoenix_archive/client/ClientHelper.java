@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 
 import java.util.List;
 
@@ -24,6 +25,6 @@ public class ClientHelper {
     public static void appendPlayerTooltip(List<Component> tooltip) {
         var player = Minecraft.getInstance().player;
         String user = player != null ? player.getScoreboardName().toUpperCase() : "USER";
-        tooltip.add(Component.literal("§8[ §7AUTH_AS: §b" + user + " §8]"));
+        tooltip.add(ArchiveLang.tr("phoenix_archive.client_helper.auth_as", user));
     }
 }

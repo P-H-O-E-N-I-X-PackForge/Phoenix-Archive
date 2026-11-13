@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.phoenix_archives.phoenix_archive.api.CategoryDefinition;
 import net.phoenix_archives.phoenix_archive.api.CategoryRegistry;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 import com.google.gson.GsonBuilder;
@@ -38,7 +39,7 @@ public class CategoryManagementScreen extends Screen {
     }
 
     public CategoryManagementScreen(Screen lastScreen, String existingCategoryId) {
-        super(Component.literal("Category Manager"));
+        super(ArchiveLang.tr("phoenix_archive.category_management_screen.category_manager"));
         this.lastScreen = lastScreen;
         this.editingId = existingCategoryId;
     }
@@ -66,7 +67,7 @@ public class CategoryManagementScreen extends Screen {
         }
 
         idBox = new EditBox(this.font, x, y, 200, 20, Component.empty());
-        idBox.setHint(Component.literal("Category ID (e.g. MATERIALS)"));
+        idBox.setHint(ArchiveLang.tr("phoenix_archive.category_management_screen.category_id_e_g_materials"));
         idBox.setValue(idText);
         if (editingId != null) {
             idBox.setEditable(false);
@@ -75,11 +76,11 @@ public class CategoryManagementScreen extends Screen {
 
         descBox = new EditBox(this.font, x, y + 25, 200, 20, Component.empty());
         descBox.setMaxLength(512);
-        descBox.setHint(Component.literal("Broad Explanation..."));
+        descBox.setHint(ArchiveLang.tr("phoenix_archive.category_management_screen.broad_explanation"));
         descBox.setValue(descText);
 
         weightBox = new EditBox(this.font, x, y + 50, 40, 20, Component.empty());
-        weightBox.setHint(Component.literal("Weight"));
+        weightBox.setHint(ArchiveLang.tr("phoenix_archive.category_management_screen.weight"));
         weightBox.setValue(weightText);
 
         this.addRenderableWidget(idBox);
@@ -89,16 +90,19 @@ public class CategoryManagementScreen extends Screen {
         String parentLabel = (selectedParentId == null) ? "(none — root)" : selectedParentId;
 
         this.addRenderableWidget(ArchiveButton.create(
-                Component.literal("§8Parent: §7" + parentLabel + " §8[change]"),
+                ArchiveLang.tr("phoenix_archive.category_management_screen.parent_change", parentLabel),
                 b -> openParentPicker())
                 .bounds(x + 45, y + 50, 155, 20)
-                .tooltip(Tooltip.create(Component.literal(
-                        "Set parent category. Opens a picker screen.")))
+                .tooltip(Tooltip.create(
+                        ArchiveLang.tr("phoenix_archive.category_management_screen.set_parent_category_opens_a")))
                 .build());
 
-        String saveLabel = (editingId != null) ? "§2UPDATE_CATEGORY" : "§2INITIALIZE_CATEGORY";
-        Tooltip saveTooltip = (editingId != null) ? Tooltip.create(Component.literal("Update Selected Category")) :
-                Tooltip.create(Component.literal("Save New Category"));
+        String saveLabel = (editingId != null) ?
+                ArchiveText.str("phoenix_archive.category_management.update_category") :
+                ArchiveText.str("phoenix_archive.category_management.initialize_category");
+        Tooltip saveTooltip = (editingId != null) ?
+                Tooltip.create(ArchiveLang.tr("phoenix_archive.category_management_screen.update_selected_category")) :
+                Tooltip.create(ArchiveLang.tr("phoenix_archive.category_management_screen.save_new_category"));
 
         this.addRenderableWidget(ArchiveButton.create(Component.literal(saveLabel), b -> saveCategory())
                 .bounds(x, y + 80, 200, 20)
@@ -106,7 +110,7 @@ public class CategoryManagementScreen extends Screen {
                 .build());
 
         this.addRenderableWidget(ArchiveButton.create(
-                Component.literal("CANCEL"),
+                ArchiveLang.tr("phoenix_archive.category_management_screen.cancel"),
                 b -> this.minecraft.setScreen(lastScreen))
                 .bounds(x, y + 105, 200, 16)
                 .build());
@@ -142,13 +146,16 @@ public class CategoryManagementScreen extends Screen {
         ArchivePalette.refresh(PhoenixTheme.current());
         this.renderBackground(graphics, mouseX, mouseY, partial);
 
-        String title = (editingId != null) ? "§6EDIT_CATEGORY: " + editingId : "§6NEW_CATEGORY_PROTOCOL";
+        String title = (editingId != null) ?
+                ArchiveText.str("phoenix_archive.category_management.edit_category", editingId) :
+                ArchiveText.str("phoenix_archive.category_management.new_category_protocol");
 
         graphics.drawCenteredString(this.font, title, this.width / 2, this.height / 2 - 80,
                 ArchivePalette.TERM_BRIGHT);
 
         if (editingId != null) {
-            graphics.drawCenteredString(this.font, "§8(ID cannot be changed)",
+            graphics.drawCenteredString(this.font,
+                    ArchiveText.str("phoenix_archive.category_management.id_cannot_be_changed"),
                     this.width / 2, this.height / 2 - 68, ArchivePalette.TEXT_FAINT);
         }
 

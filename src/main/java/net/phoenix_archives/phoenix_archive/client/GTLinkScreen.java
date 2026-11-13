@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 import org.jetbrains.annotations.NotNull;
@@ -17,10 +18,10 @@ public class GTLinkScreen extends Screen {
 
     private final ArchiveEditorScreen parent;
     private EditBox machineInput;
-    private String status = "§8AWAITING_GT_ID...";
+    private String status = ArchiveText.str("phoenix_archive.g_t_link.awaiting_gt_id");
 
     public GTLinkScreen(ArchiveEditorScreen parent) {
-        super(Component.literal("GT_LINK_TERMINAL"));
+        super(ArchiveLang.tr("phoenix_archive.g_t_link_screen.gt_link_terminal"));
         this.parent = parent;
     }
 
@@ -31,23 +32,24 @@ public class GTLinkScreen extends Screen {
         int x = this.width / 2 - 100;
 
         machineInput = new EditBox(this.font, x, this.height / 2 - 10, 200, 20, Component.empty());
-        machineInput.setHint(Component.literal("gtceu:macerator..."));
+        machineInput.setHint(ArchiveLang.tr("phoenix_archive.g_t_link_screen.gtceu_macerator"));
 
         String existing = parent.getLeafValue("machine");
         machineInput.setValue(existing);
 
         this.addRenderableWidget(machineInput);
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("VERIFY_ID"), b -> {
-            ResourceLocation loc = ResourceLocation.tryParse(machineInput.getValue());
-            if (loc != null && BuiltInRegistries.BLOCK.containsKey(loc)) {
-                status = "§2ID_VALID: §f" + loc.getPath();
-            } else {
-                status = "§4ID_NOT_FOUND_IN_REGISTRY";
-            }
-        }).bounds(x, this.height / 2 + 15, 95, 20).build());
+        this.addRenderableWidget(
+                ArchiveButton.create(ArchiveLang.tr("phoenix_archive.g_t_link_screen.verify_id"), b -> {
+                    ResourceLocation loc = ResourceLocation.tryParse(machineInput.getValue());
+                    if (loc != null && BuiltInRegistries.BLOCK.containsKey(loc)) {
+                        status = ArchiveText.str("phoenix_archive.g_t_link.id_valid", loc.getPath());
+                    } else {
+                        status = ArchiveText.str("phoenix_archive.g_t_link.id_not_found_in_registry");
+                    }
+                }).bounds(x, this.height / 2 + 15, 95, 20).build());
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("§2[ LINK ]"), b -> {
+        this.addRenderableWidget(ArchiveButton.create(ArchiveLang.tr("phoenix_archive.g_t_link_screen.link"), b -> {
             String id = machineInput.getValue().trim();
             if (!id.isEmpty()) {
 
@@ -70,9 +72,11 @@ public class GTLinkScreen extends Screen {
                 ArchivePalette.BG_SCRIM);
         graphics.renderOutline(this.width / 2 - 120, this.height / 2 - 60, 240, 110, ArchivePalette.TERM_BRIGHT);
 
-        graphics.drawCenteredString(this.font, "§2GREGTECH_INTEGRATION_UNIT", this.width / 2, this.height / 2 - 50,
+        graphics.drawCenteredString(this.font, ArchiveText.str("phoenix_archive.g_t_link.gregtech_integration_unit"),
+                this.width / 2, this.height / 2 - 50,
                 ArchivePalette.TERM_BRIGHT);
-        graphics.drawCenteredString(this.font, "§7Registers a 'machine' condition key", this.width / 2,
+        graphics.drawCenteredString(this.font,
+                ArchiveText.str("phoenix_archive.g_t_link.registers_a_machine_condition_key"), this.width / 2,
                 this.height / 2 - 40, ArchivePalette.TEXT_DIM);
         graphics.drawCenteredString(this.font, status, this.width / 2, this.height / 2 - 25,
                 ArchivePalette.TERM_BRIGHT);

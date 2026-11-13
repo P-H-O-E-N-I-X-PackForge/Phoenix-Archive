@@ -1,11 +1,11 @@
 package net.phoenix_archives.phoenix_archive.api;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenix_archives.phoenix_archive.common.LoreSavedData;
 
 import org.jetbrains.annotations.Nullable;
@@ -82,8 +82,8 @@ public class TriggerRegistry {
                     if (!isPublicArchive) {
                         player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.MASTER, 0.5f, 1.5f);
                         player.displayClientMessage(
-                                Component
-                                        .literal("§6[PHOENIX_OS] §fARCHIVE_DECRYPTED: §b" + lore.title().toUpperCase()),
+                                ArchiveLang.tr("phoenix_archive.trigger_registry.phoenix_os_archive_decrypted",
+                                        lore.title().toUpperCase()),
                                 true);
                     }
                 }

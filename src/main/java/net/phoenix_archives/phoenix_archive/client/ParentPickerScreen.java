@@ -2,8 +2,8 @@ package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import net.phoenix_archives.phoenix_archive.api.CategoryRegistry;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class ParentPickerScreen extends Screen {
 
     public ParentPickerScreen(Screen returnTo, String currentId,
                               String excludeId, Consumer<String> onPicked) {
-        super(Component.literal("Select Parent Category"));
+        super(ArchiveLang.tr("phoenix_archive.parent_picker_screen.select_parent_category"));
         this.returnTo = returnTo;
         this.excludeId = excludeId;
         this.onPicked = onPicked;
@@ -79,7 +79,7 @@ public class ParentPickerScreen extends Screen {
         listY = (this.height - listH) / 2 - 10;
 
         this.addRenderableWidget(
-                ArchiveButton.create(Component.literal("CANCEL"),
+                ArchiveButton.create(ArchiveLang.tr("phoenix_archive.category_management_screen.cancel"),
                         b -> this.minecraft.setScreen(returnTo))
                         .bounds(this.width / 2 - 60, listY + listH + 8, 120, 16)
                         .build());
@@ -95,9 +95,9 @@ public class ParentPickerScreen extends Screen {
         ArchivePalette.refresh(PhoenixTheme.current());
         this.renderBackground(g, mouseX, mouseY, partial);
 
-        g.drawCenteredString(this.font, "§6SELECT_PARENT_CATEGORY",
+        g.drawCenteredString(this.font, ArchiveText.str("phoenix_archive.parent_picker.select_parent_category"),
                 this.width / 2, listY - 18, ArchivePalette.TERM_BRIGHT);
-        g.drawCenteredString(this.font, "§8Click to select, §7ENTER §8or double-click to confirm",
+        g.drawCenteredString(this.font, ArchiveText.str("phoenix_archive.parent_picker.click_to_select_enter_or"),
                 this.width / 2, listY - 8, ArchivePalette.TEXT_FAINT);
 
         g.fill(listX - 1, listY - 1,

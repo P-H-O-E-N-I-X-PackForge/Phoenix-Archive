@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.phoenix_archives.phoenix_archive.client.rich.ArchiveMarkdown;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.client.rich.RichBlock;
 import net.phoenixvine.wiki.client.rich.RichSpan;
 import net.phoenixvine.wiki.client.rich.WikiRichTextRenderer;
@@ -46,7 +47,7 @@ public class TerminalInputScreen extends Screen {
     private final Set<String> previewExpandedKeys = new HashSet<>();
 
     public TerminalInputScreen(Screen parent, String titleLabel, String initialValue, Consumer<String> onCommit) {
-        super(Component.literal("Terminal Input Unit"));
+        super(ArchiveLang.tr("phoenix_archive.terminal_input_screen.terminal_input_unit"));
         this.parent = parent;
         this.titleLabel = titleLabel;
         this.initialValue = initialValue;
@@ -95,9 +96,8 @@ public class TerminalInputScreen extends Screen {
                         TextColor.fromRgb(ArchivePalette.TERM & 0xFFFFFF))),
                 b -> insertCode("&t"))
                 .bounds(startX, startY, btnW, 14)
-                .tooltip(Tooltip.create(Component.literal(
-                        "Theme Color -- live, tracks the suite's current theme (animated themes too), " +
-                                "unlike the fixed colors to the left")))
+                .tooltip(Tooltip
+                        .create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.theme_color_live_tracks_the")))
                 .build());
         startX += btnW + 4;
 
@@ -115,12 +115,10 @@ public class TerminalInputScreen extends Screen {
         }
 
         startX += 4;
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("§b[THEME]"), b -> applyThemeToColors())
+        this.addRenderableWidget(ArchiveButton
+                .create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.theme"), b -> applyThemeToColors())
                 .bounds(startX, startY, 46, 14)
-                .tooltip(Tooltip.create(Component.literal(
-                        "Recolor every &0-&f code above to the suite's current theme (dark codes -> theme " +
-                                "dim accent, bright codes -> theme bright accent). Formatting codes and " +
-                                "existing &#hex codes are left alone.")))
+                .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.recolor_every_0_f_code")))
                 .build());
 
         int mdY = startY + 16;
@@ -149,50 +147,54 @@ public class TerminalInputScreen extends Screen {
         mdX += 4;
         this.addRenderableWidget(ArchiveButton.create(Component.literal("`c`"), b -> insertMarkdownWrap("`", "`"))
                 .bounds(mdX, mdY, 26, 14)
-                .tooltip(Tooltip.create(Component.literal("Inline code")))
+                .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.inline_code")))
                 .build());
         mdX += 28;
         this.addRenderableWidget(
                 ArchiveButton.create(Component.literal("```"), b -> insertMarkdownWrap("\n```\n", "\n```\n"))
                         .bounds(mdX, mdY, 26, 14)
-                        .tooltip(Tooltip.create(Component.literal("Code block")))
+                        .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.code_block")))
                         .build());
         mdX += 28;
         this.addRenderableWidget(ArchiveButton
                 .create(Component.literal(":::"), b -> insertMarkdownWrap(":::spoiler Title\n", "\n:::\n"))
                 .bounds(mdX, mdY, 26, 14)
-                .tooltip(Tooltip.create(Component.literal("Spoiler / details block")))
+                .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.spoiler_details_block")))
                 .build());
         mdX += 28;
         this.addRenderableWidget(
                 ArchiveButton.create(Component.literal("!"), b -> insertMarkdownWrap(":::warning\n", "\n:::\n"))
                         .bounds(mdX, mdY, 18, 14)
-                        .tooltip(Tooltip.create(Component.literal("Warning callout")))
+                        .tooltip(
+                                Tooltip.create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.warning_callout")))
                         .build());
         mdX += 20;
         this.addRenderableWidget(
-                ArchiveButton.create(Component.literal("[url]"), b -> insertMarkdownWrap("[", "](https://)"))
+                ArchiveButton
+                        .create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.url"),
+                                b -> insertMarkdownWrap("[", "](https://)"))
                         .bounds(mdX, mdY, 34, 14)
-                        .tooltip(Tooltip.create(Component.literal(
-                                "Link -- the target must start with http://, https://, wiki:, or quest: or it " +
-                                        "won't render as clickable")))
+                        .tooltip(Tooltip.create(
+                                ArchiveLang.tr("phoenix_archive.terminal_input_screen.link_the_target_must_start")))
                         .build());
 
         if (net.neoforged.fml.ModList.get().isLoaded("phoenix_chromatic_codes")) {
-            this.addRenderableWidget(ArchiveButton.create(Component.literal("§z[ CHROMATIC_OS ]"), b -> {
-                if (this.minecraft != null) {
-                    liveValue = this.textArea.getValue();
-                    this.minecraft.setScreen(new ChromaticSelectorScreen(this));
-                }
-            }).bounds(this.width - 110, 12, 100, 14).build());
+            this.addRenderableWidget(
+                    ArchiveButton.create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.chromatic_os"), b -> {
+                        if (this.minecraft != null) {
+                            liveValue = this.textArea.getValue();
+                            this.minecraft.setScreen(new ChromaticSelectorScreen(this));
+                        }
+                    }).bounds(this.width - 110, 12, 100, 14).build());
         }
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("§2[ COMMIT_CHANGES ]"), b -> {
-            this.onCommit.accept(this.textArea.getValue());
-            if (this.minecraft != null) {
-                this.minecraft.setScreen(parent);
-            }
-        }).bounds(this.width / 2 - 60, this.height - 35, 120, 20).build());
+        this.addRenderableWidget(
+                ArchiveButton.create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.commit_changes"), b -> {
+                    this.onCommit.accept(this.textArea.getValue());
+                    if (this.minecraft != null) {
+                        this.minecraft.setScreen(parent);
+                    }
+                }).bounds(this.width / 2 - 60, this.height - 35, 120, 20).build());
 
         this.setInitialFocus(textArea);
     }
@@ -262,7 +264,8 @@ public class TerminalInputScreen extends Screen {
         this.renderBackground(graphics, mouseX, mouseY, partialTicks);
         graphics.fill(10, 10, this.width - 10, this.height - 10, ArchivePalette.BG_SCRIM);
         graphics.renderOutline(10, 10, this.width - 20, this.height - 20, ArchivePalette.TERM_BRIGHT);
-        graphics.drawString(this.font, titleLabel + " // ADDR: 0x7FFA", 20, 46, ArchivePalette.TERM);
+        graphics.drawString(this.font, ArchiveText.str("phoenix_archive.terminal_input.addr_0x7ffa", titleLabel), 20,
+                46, ArchivePalette.TERM);
         renderPreview(graphics);
         super.render(graphics, mouseX, mouseY, partialTicks);
     }
@@ -277,7 +280,8 @@ public class TerminalInputScreen extends Screen {
 
         g.fill(previewX - 2, previewY - 2, previewX + previewW + 2, previewY + previewH + 2, ArchivePalette.BG);
         g.renderOutline(previewX - 2, previewY - 2, previewW + 4, previewH + 4, ArchivePalette.BORDER);
-        g.drawString(this.font, "§8PREVIEW", previewX, previewY - 11, ArchivePalette.TEXT_FAINT, false);
+        g.drawString(this.font, ArchiveText.str("phoenix_archive.terminal_input.preview"), previewX, previewY - 11,
+                ArchivePalette.TEXT_FAINT, false);
 
         g.enableScissor(previewX, previewY, previewX + previewW, previewY + previewH);
         previewRegions = WikiRichTextRenderer.renderBlocks(g, this.font, previewBlocks, previewX + 4,
@@ -353,9 +357,8 @@ public class TerminalInputScreen extends Screen {
             super(x, y, width, height, message);
             this.textField = new MultilineTextField(TerminalInputScreen.this.font, width - 12);
             this.textField.setCharacterLimit(MAX_LENGTH);
-            this.setTooltip(Tooltip.create(Component.literal(
-                    "Click+drag to select. Ctrl+C copy, Ctrl+X cut, Ctrl+V paste, Ctrl+A select all. " +
-                            "Scroll to see more.")));
+            this.setTooltip(
+                    Tooltip.create(ArchiveLang.tr("phoenix_archive.terminal_input_screen.click_drag_to_select_ctrl")));
         }
 
         public void setValue(String val) {
