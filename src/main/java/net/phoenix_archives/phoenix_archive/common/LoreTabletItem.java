@@ -38,32 +38,32 @@ public class LoreTabletItem extends Item {
         int seed = Math.abs(stack.hashCode());
 
         String[] headers = {
-                "§8// §aPHOENIX_ARCHIVE_INTERFACE_v4.2",
-                "§2[ §aSYSTEM_READY §2] §7Uplink Stable",
-                "§b⚡ §3ROOT_UPLINK_ACTIVE",
-                "§f$ §7sudo get_archives --force"
+                "phoenix_archive.lore_tablet.header_0",
+                "phoenix_archive.lore_tablet.header_1",
+                "phoenix_archive.lore_tablet.header_2",
+                "phoenix_archive.lore_tablet.header_3"
         };
-        tooltip.add(Component.literal(headers[seed % headers.length]));
+        tooltip.add(ArchiveLang.tr(headers[seed % headers.length]));
 
         PhoenixArchive.PROXY.appendPlayerTooltip(tooltip);
 
         String tabletName = ArchiveConfigs.INSTANCE.general.loreTabletTooltipName;
-        tooltip.add(Component.literal("§6> §7Click to access §f" + tabletName));
+        tooltip.add(ArchiveLang.tr("phoenix_archive.lore_tablet_item.click_to_access", tabletName));
 
         String[] flavorText = {
-                "§e\"Reclaim what is lost, remember who you are.\"",
-                "§e\"Was our power worth the loss of the world?\"",
-                "§e\"Are you still.... Yourself?\"",
-                "§e\"The code remembers. The flesh forgets.\"",
-                "§e\"The stars are silent, but the data screams.\"",
-                "§e\"Identity is the only thing the void cannot digitize.\""
+                "phoenix_archive.lore_tablet.flavor_0",
+                "phoenix_archive.lore_tablet.flavor_1",
+                "phoenix_archive.lore_tablet.flavor_2",
+                "phoenix_archive.lore_tablet.flavor_3",
+                "phoenix_archive.lore_tablet.flavor_4",
+                "phoenix_archive.lore_tablet.flavor_5"
         };
 
         int footerIndex = (seed / headers.length) % flavorText.length;
         tooltip.add(Component.empty());
-        tooltip.add(Component.literal(flavorText[footerIndex]));
+        tooltip.add(ArchiveLang.tr(flavorText[footerIndex]));
 
         String hexId = Integer.toHexString(seed).toUpperCase();
-        tooltip.add(Component.literal("§8ID: " + hexId + " // VER: " + (seed % 9)));
+        tooltip.add(ArchiveLang.tr("phoenix_archive.lore_tablet_item.id_ver", hexId, (seed % 9)));
     }
 }

@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.phoenix_archives.phoenix_archive.api.ConditionExprParser;
 import net.phoenix_archives.phoenix_archive.api.ConditionNode;
 import net.phoenix_archives.phoenix_archive.api.ConditionSyntaxException;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 public class ConditionTunerScreen extends Screen {
@@ -18,7 +19,7 @@ public class ConditionTunerScreen extends Screen {
     private String error = "";
 
     public ConditionTunerScreen(ArchiveEditorScreen parent, ConditionNode initial) {
-        super(Component.literal("Condition Tuner"));
+        super(ArchiveLang.tr("phoenix_archive.condition_tuner_screen.condition_tuner"));
         this.parent = parent;
         this.initial = initial;
     }
@@ -34,11 +35,12 @@ public class ConditionTunerScreen extends Screen {
         int boxH = Math.max(40, this.height - 130);
 
         exprBox = new MultiLineEditBox(this.font, boxX, boxY, boxW, boxH, Component.empty(),
-                Component.literal("Condition Logic"));
+                ArchiveLang.tr("phoenix_archive.condition_tuner_screen.condition_logic"));
         exprBox.setValue(ConditionExprParser.render(initial));
         this.addRenderableWidget(exprBox);
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("§2[ APPLY_CHANGES ]"), b -> tryApply())
+        this.addRenderableWidget(ArchiveButton
+                .create(ArchiveLang.tr("phoenix_archive.condition_tuner_screen.apply_changes"), b -> tryApply())
                 .bounds(this.width / 2 - 100, this.height - 30, 200, 20)
                 .build());
     }
@@ -66,12 +68,13 @@ public class ConditionTunerScreen extends Screen {
         graphics.fill(this.width / 2 - 170, 10, this.width / 2 + 170, this.height - 10, ArchivePalette.BG_SCRIM);
         graphics.renderOutline(this.width / 2 - 170, 10, 340, this.height - 20, ArchivePalette.TERM);
 
-        graphics.drawCenteredString(this.font, "PHOENIX_OS // CONDITION_TUNER", this.width / 2, 20,
+        graphics.drawCenteredString(this.font,
+                ArchiveText.str("phoenix_archive.condition_tuner.phoenix_os_condition_tuner"), this.width / 2, 20,
                 ArchivePalette.TERM);
-        graphics.drawString(this.font, "§7type:value combined with AND / OR / NOT and (parens)",
+        graphics.drawString(this.font, ArchiveText.str("phoenix_archive.condition_tuner.type_value_combined_with_and"),
                 this.width / 2 - 160, 32, ArchivePalette.TEXT_DIM);
         graphics.drawString(this.font,
-                "§8e.g. item:minecraft:diamond AND NOT dimension:minecraft:the_nether",
+                ArchiveText.str("phoenix_archive.condition_tuner.e_g_item_minecraft_diamond"),
                 this.width / 2 - 160, 42, ArchivePalette.TEXT_FAINT);
 
         super.render(graphics, mouseX, mouseY, partialTicks);

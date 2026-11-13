@@ -2,7 +2,7 @@ package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 public class TriggerSelectorScreen extends Screen {
@@ -10,7 +10,7 @@ public class TriggerSelectorScreen extends Screen {
     private final ArchiveEditorScreen parent;
 
     public TriggerSelectorScreen(ArchiveEditorScreen parent) {
-        super(Component.literal("TRIGGER_SELECT"));
+        super(ArchiveLang.tr("phoenix_archive.trigger_selector_screen.trigger_select"));
         this.parent = parent;
     }
 
@@ -21,17 +21,20 @@ public class TriggerSelectorScreen extends Screen {
         int x = this.width / 2 - 80;
         int y = this.height / 2 - 40;
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("GT: MULTIBLOCK"), b -> {
-            this.minecraft.setScreen(new GTLinkScreen(parent));
-        }).bounds(x, y, 160, 20).build());
+        this.addRenderableWidget(
+                ArchiveButton.create(ArchiveLang.tr("phoenix_archive.trigger_selector_screen.gt_multiblock"), b -> {
+                    this.minecraft.setScreen(new GTLinkScreen(parent));
+                }).bounds(x, y, 160, 20).build());
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("WORLD: BIOME"), b -> {
+        this.addRenderableWidget(
+                ArchiveButton.create(ArchiveLang.tr("phoenix_archive.trigger_selector_screen.world_biome"), b -> {
 
-        }).bounds(x, y + 25, 160, 20).build());
+                }).bounds(x, y + 25, 160, 20).build());
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("CANCEL"), b -> {
-            this.minecraft.setScreen(parent);
-        }).bounds(x, y + 60, 160, 20).build());
+        this.addRenderableWidget(
+                ArchiveButton.create(ArchiveLang.tr("phoenix_archive.category_management_screen.cancel"), b -> {
+                    this.minecraft.setScreen(parent);
+                }).bounds(x, y + 60, 160, 20).build());
     }
 
     @Override
@@ -43,7 +46,8 @@ public class TriggerSelectorScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partial) {
         ArchivePalette.refresh(PhoenixTheme.current());
         this.renderBackground(graphics);
-        graphics.drawCenteredString(this.font, "§2SELECT_TRIGGER_TYPE", this.width / 2, this.height / 2 - 60,
+        graphics.drawCenteredString(this.font, ArchiveText.str("phoenix_archive.trigger_selector.select_trigger_type"),
+                this.width / 2, this.height / 2 - 60,
                 ArchivePalette.TERM_BRIGHT);
         super.render(graphics, mouseX, mouseY, partial);
     }

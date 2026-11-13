@@ -2,9 +2,9 @@ package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import net.minecraftforge.fml.ModList;
 import net.phoenix.chromatic_codes.config.ModConfig;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ public class ChromaticSelectorScreen extends Screen {
     private final TerminalInputScreen parent;
 
     public ChromaticSelectorScreen(TerminalInputScreen parent) {
-        super(Component.literal("Chromatic OS Interface"));
+        super(ArchiveLang.tr("phoenix_archive.chromatic_selector_screen.chromatic_os_interface"));
         this.parent = parent;
     }
 
@@ -27,7 +27,8 @@ public class ChromaticSelectorScreen extends Screen {
 
         if (ModList.get().isLoaded("phoenix_chromatic_codes")) {
 
-            this.addRenderableWidget(ArchiveButton.create(Component.literal("§b>_ STATIC_SIGNATURE_ARRAY"), b -> {})
+            this.addRenderableWidget(ArchiveButton
+                    .create(ArchiveLang.tr("phoenix_archive.chromatic_selector_screen.static_signature_array"), b -> {})
                     .bounds(centerX - 100, startY, 200, 14).build()).active = false;
 
             startY += 20;
@@ -38,9 +39,10 @@ public class ChromaticSelectorScreen extends Screen {
 
             for (String entry : ModConfig.INSTANCE.colors.customColors) {
                 String code = entry.split(":")[0];
-                this.addRenderableWidget(ArchiveButton.create(Component.literal("§" + code + "Color &" + code), b -> {
-                    insertAndClose("&" + code);
-                }).bounds(currentX + (rowCount % 3 * (colWidth + 2)), startY, colWidth, 18).build());
+                this.addRenderableWidget(ArchiveButton
+                        .create(ArchiveLang.tr("phoenix_archive.chromatic_selector_screen.scolor", code, code), b -> {
+                            insertAndClose("&" + code);
+                        }).bounds(currentX + (rowCount % 3 * (colWidth + 2)), startY, colWidth, 18).build());
 
                 if (++rowCount % 3 == 0) startY += 20;
             }
@@ -48,7 +50,8 @@ public class ChromaticSelectorScreen extends Screen {
             if (rowCount % 3 != 0) startY += 25;
             else startY += 5;
 
-            this.addRenderableWidget(ArchiveButton.create(Component.literal("§d>_ ACTIVE_CHROMATIC_FLUX"), b -> {})
+            this.addRenderableWidget(ArchiveButton
+                    .create(ArchiveLang.tr("phoenix_archive.chromatic_selector_screen.active_chromatic_flux"), b -> {})
                     .bounds(centerX - 100, startY, 200, 14).build()).active = false;
 
             startY += 20;
@@ -56,14 +59,17 @@ public class ChromaticSelectorScreen extends Screen {
             for (String entry : ModConfig.INSTANCE.colors.customGradients) {
                 String code = entry.split(":")[0];
                 this.addRenderableWidget(
-                        ArchiveButton.create(Component.literal("§" + code + "EXECUTABLE_EFFECT: &" + code), b -> {
-                            insertAndClose("&" + code);
-                        }).bounds(centerX - 100, startY, 200, 18).build());
+                        ArchiveButton.create(ArchiveLang
+                                .tr("phoenix_archive.chromatic_selector_screen.sexecutable_effect", code, code), b -> {
+                                    insertAndClose("&" + code);
+                                }).bounds(centerX - 100, startY, 200, 18).build());
                 startY += 20;
             }
         }
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("§7[ ABORT_AND_RETURN ]"), b -> this.onClose())
+        this.addRenderableWidget(ArchiveButton
+                .create(ArchiveLang.tr("phoenix_archive.chromatic_selector_screen.abort_and_return"),
+                        b -> this.onClose())
                 .bounds(centerX - 60, this.height - 35, 120, 20).build());
     }
 
@@ -79,7 +85,9 @@ public class ChromaticSelectorScreen extends Screen {
 
         graphics.fill(this.width / 2 - 110, 20, this.width / 2 + 110, this.height - 10, ArchivePalette.BG_SCRIM);
         graphics.renderOutline(this.width / 2 - 110, 20, 220, this.height - 30, ArchivePalette.TERM_BRIGHT);
-        graphics.drawCenteredString(this.font, "CHROMATIC_SELECTOR_V1.0.4", this.width / 2, 30, ArchivePalette.TERM);
+        graphics.drawCenteredString(this.font,
+                ArchiveText.str("phoenix_archive.chromatic_selector.chromatic_selector_v1_0_4"), this.width / 2, 30,
+                ArchivePalette.TERM);
 
         super.render(graphics, mouseX, mouseY, partialTicks);
     }

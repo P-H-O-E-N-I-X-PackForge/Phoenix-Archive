@@ -17,6 +17,7 @@ import net.phoenix_archives.phoenix_archive.api.ConditionNode;
 import net.phoenix_archives.phoenix_archive.api.ConditionNodeAdapter;
 import net.phoenix_archives.phoenix_archive.api.LoreDataLoader;
 import net.phoenix_archives.phoenix_archive.api.LoreEntry;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenix_archives.phoenix_archive.config.ArchiveConfigs;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
@@ -82,7 +83,7 @@ public class ArchiveEditorScreen extends Screen {
     private List<String> statusEntries = List.of();
 
     public ArchiveEditorScreen(Screen parent, LoreEntry existing, String defaultCategory) {
-        super(Component.literal("Archive Editor"));
+        super(ArchiveLang.tr("phoenix_archive.archive_editor_screen.archive_editor"));
         this.parent = parent;
         this.editingEntry = existing;
         this.initialCategory = (defaultCategory == null || defaultCategory.isEmpty()) ? "GENERAL" : defaultCategory;
@@ -221,12 +222,12 @@ public class ArchiveEditorScreen extends Screen {
         boolean hasAnything = questId != 0 || !currentConditionTree.isEmpty();
 
         if (!hasAnything) {
-            out.add("§8(Manual Only)");
+            out.add(ArchiveText.str("phoenix_archive.archive_editor.manual_only"));
             return out;
         }
 
         if (questId != 0) {
-            out.add("§b• Quest: " + questName + " §8(ftb_quest:" + questId + ")");
+            out.add(ArchiveText.str("phoenix_archive.archive_editor.quest_ftb_quest", questName, questId));
         }
 
         for (var nl : currentConditionTree.collectLeaves()) {
@@ -234,7 +235,8 @@ public class ArchiveEditorScreen extends Screen {
             if (value == null || value.isEmpty()) continue;
             if (!nl.negated() && nl.leaf().type().equals("chronicles_quest")) {
                 String name = chroniclesQuestName.isEmpty() ? value : chroniclesQuestName;
-                out.add("§d• Chronicles Quest: " + name + " §8(chronicles_quest:" + value + ")");
+                out.add(ArchiveText.str("phoenix_archive.archive_editor.chronicles_quest_chronicles_quest", name,
+                        value));
                 continue;
             }
             if (nl.leaf().type().equals("external")) {
@@ -263,13 +265,13 @@ public class ArchiveEditorScreen extends Screen {
         String termLabel = termW >= 72 ? "TERMINAL >_" : "TERM >_";
 
         idBox = new EditBox(this.font, x, idY, w, rowH, Component.empty());
-        idBox.setHint(Component.literal("§6Permanent ID (e.g. log_001)"));
+        idBox.setHint(ArchiveLang.tr("phoenix_archive.archive_editor_screen.permanent_id_e_g_log"));
         idBox.setValue(savedId);
         idBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(idBox);
 
         titleBox = new EditBox(this.font, x, titleY, w, rowH, Component.empty());
-        titleBox.setHint(Component.literal("§8Title..."));
+        titleBox.setHint(ArchiveLang.tr("phoenix_archive.archive_editor_screen.title"));
         titleBox.setValue(savedTitle);
         titleBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(titleBox);
@@ -281,7 +283,8 @@ public class ArchiveEditorScreen extends Screen {
                 this.titleBox.setValue(val);
             }));
         }).bounds(termX, titleY, termW, rowH)
-                .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Title")))
+                .tooltip(Tooltip
+                        .create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.open_terminal_editor_for_title")))
                 .build());
 
         String currentCat = getCurrentCategory();
@@ -313,18 +316,19 @@ public class ArchiveEditorScreen extends Screen {
                 this.init(this.minecraft, this.width, this.height);
             }));
         }).bounds(x + w - 28, catY, 28, rowH)
-                .tooltip(Tooltip.create(Component.literal("Make a New Category")))
+                .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.make_a_new_category")))
                 .build());
 
         iconBox = new EditBox(this.font, x, iconY, w, rowH, Component.empty());
         iconBox.setMaxLength(512);
-        iconBox.setHint(Component.literal("§8Icon (minecraft:apple)"));
+        iconBox.setHint(ArchiveLang.tr("phoenix_archive.archive_editor_screen.icon_minecraft_apple"));
         iconBox.setValue(savedIcon);
         iconBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(iconBox);
 
         voiceLineBox = new EditBox(this.font, x, voiceY, w, rowH, Component.empty());
-        voiceLineBox.setHint(Component.literal("§dVoice (phoenix_archive:voice.filename)"));
+        voiceLineBox
+                .setHint(ArchiveLang.tr("phoenix_archive.archive_editor_screen.voice_phoenix_archive_voice_filename"));
         voiceLineBox.setValue(savedVoiceLine);
         voiceLineBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(voiceLineBox);
@@ -348,7 +352,8 @@ public class ArchiveEditorScreen extends Screen {
                 this.contentBox.setValue(val);
             }));
         }).bounds(termX, contentY, termW, rowH)
-                .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Unlocked Content")))
+                .tooltip(Tooltip.create(
+                        ArchiveLang.tr("phoenix_archive.archive_editor_screen.open_terminal_editor_for_unlocked")))
                 .build());
 
         this.addRenderableWidget(ArchiveButton.create(Component.literal(termLabel), b -> {
@@ -359,39 +364,46 @@ public class ArchiveEditorScreen extends Screen {
                         this.lockedContentBox.setValue(val);
                     }));
         }).bounds(termX, lockedY, termW, rowH)
-                .tooltip(Tooltip.create(Component.literal("Open Terminal Editor for Locked Content")))
+                .tooltip(Tooltip.create(
+                        ArchiveLang.tr("phoenix_archive.archive_editor_screen.open_terminal_editor_for_locked")))
                 .build());
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("§6EDIT_LOGIC"), b -> {
-            updateSavedValues();
-            this.minecraft.setScreen(new ConditionTunerScreen(this, this.currentConditionTree));
-        }).bounds(rightX, catY, rightW, rowH)
-                .tooltip(Tooltip.create(Component.literal("Add/Remove Entry Conditions")))
-                .build());
+        this.addRenderableWidget(
+                ArchiveButton.create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.edit_logic"), b -> {
+                    updateSavedValues();
+                    this.minecraft.setScreen(new ConditionTunerScreen(this, this.currentConditionTree));
+                }).bounds(rightX, catY, rightW, rowH)
+                        .tooltip(Tooltip.create(
+                                ArchiveLang.tr("phoenix_archive.archive_editor_screen.add_remove_entry_conditions")))
+                        .build());
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("SELECT_QUEST"), b -> {
-            updateSavedValues();
-            openQuestSelector();
-        }).bounds(rightX, titleY, rightW, rowH)
-                .tooltip(Tooltip.create(Component.literal("Open Quest Selector (Chronicles + FTB Quests)")))
-                .build());
+        this.addRenderableWidget(
+                ArchiveButton.create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.select_quest"), b -> {
+                    updateSavedValues();
+                    openQuestSelector();
+                }).bounds(rightX, titleY, rightW, rowH)
+                        .tooltip(Tooltip.create(ArchiveLang
+                                .tr("phoenix_archive.archive_editor_screen.open_quest_selector_chronicles_ftb")))
+                        .build());
 
         boolean hasChroniclesQuest = !getLeafValue("chronicles_quest").isEmpty();
         if (questId != 0 || hasChroniclesQuest) {
-            this.addRenderableWidget(ArchiveButton.create(Component.literal("§4CLEAR QUEST"), b -> {
-                this.questId = 0;
-                this.questName = "None Selected";
-                this.chroniclesQuestName = "";
-                setLeafValue("chronicles_quest", "");
-                this.init(this.minecraft, this.width, this.height);
-            }).bounds(rightX, idY + (rowH - 16) / 2, rightW, 16)
-                    .tooltip(Tooltip.create(Component.literal("Clear Selected Quest")))
-                    .build());
+            this.addRenderableWidget(
+                    ArchiveButton.create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.clear_quest"), b -> {
+                        this.questId = 0;
+                        this.questName = "None Selected";
+                        this.chroniclesQuestName = "";
+                        setLeafValue("chronicles_quest", "");
+                        this.init(this.minecraft, this.width, this.height);
+                    }).bounds(rightX, idY + (rowH - 16) / 2, rightW, 16)
+                            .tooltip(Tooltip.create(
+                                    ArchiveLang.tr("phoenix_archive.archive_editor_screen.clear_selected_quest")))
+                            .build());
         }
 
         shaderBox = new EditBox(this.font, rightX, shaderBoxY, rightW - 21, 16, Component.empty());
         shaderBox.setMaxLength(64);
-        shaderBox.setHint(Component.literal("§8bg shader id"));
+        shaderBox.setHint(ArchiveLang.tr("phoenix_archive.archive_editor_screen.bg_shader_id"));
         shaderBox.setValue(savedBackgroundShader);
         shaderBox.setResponder(v -> isDirty = true);
         this.addRenderableWidget(shaderBox);
@@ -405,35 +417,35 @@ public class ArchiveEditorScreen extends Screen {
                 this.isDirty = true;
             }));
         }).bounds(rightX + rightW - 18, shaderBoxY, 18, 16)
-                .tooltip(Tooltip.create(Component.literal("Browse Shaders")))
+                .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.browse_shaders")))
                 .build());
 
         this.addRenderableWidget(ArchiveButton.create(
-                Component.literal(savedHidden ? "§eHidden From List: ON" : "§8Hidden From List: OFF"),
+                Component.literal(savedHidden ? ArchiveText.str("phoenix_archive.archive_editor.hidden_from_list_on") :
+                        ArchiveText.str("phoenix_archive.archive_editor.hidden_from_list_off")),
                 b -> {
                     savedHidden = !savedHidden;
                     isDirty = true;
                     this.init(this.minecraft, this.width, this.height);
                 })
                 .bounds(x, hiddenY, w, 16)
-                .tooltip(Tooltip.create(Component.literal(
-                        "When ON, this entry is left out of the sidebar entirely (instead of showing\n" +
-                                "greyed-out with its locked text) until the unlock check below passes.")))
+                .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.when_on_this_entry_is")))
                 .build());
 
-        String unlockLabel = savedHiddenUntilId.isEmpty() ? "§8(this entry's own unlock)" : "§f" + savedHiddenUntilId;
+        String unlockLabel = savedHiddenUntilId.isEmpty() ?
+                ArchiveText.str("phoenix_archive.archive_editor.this_entry_s_own_unlock") : "§f" + savedHiddenUntilId;
         int unlockBtnW = savedHiddenUntilId.isEmpty() ? w : w - 22;
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("§6UNLOCK_CHECK: " + unlockLabel), b -> {
-            updateSavedValues();
-            this.minecraft.setScreen(new ArchiveEntryPickerScreen(this, savedId, id -> {
-                this.savedHiddenUntilId = id;
-                this.isDirty = true;
-                this.init(this.minecraft, this.width, this.height);
-            }));
-        }).bounds(x, unlockY, unlockBtnW, 16)
-                .tooltip(Tooltip.create(Component.literal(
-                        "Which entry's unlock state gates this one appearing (used with Hidden From " +
-                                "List above). Defaults to this entry's own unlock if none is picked.")))
+        this.addRenderableWidget(ArchiveButton
+                .create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.unlock_check", unlockLabel), b -> {
+                    updateSavedValues();
+                    this.minecraft.setScreen(new ArchiveEntryPickerScreen(this, savedId, id -> {
+                        this.savedHiddenUntilId = id;
+                        this.isDirty = true;
+                        this.init(this.minecraft, this.width, this.height);
+                    }));
+                }).bounds(x, unlockY, unlockBtnW, 16)
+                .tooltip(Tooltip
+                        .create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.which_entry_s_unlock_state")))
                 .build());
 
         if (!savedHiddenUntilId.isEmpty()) {
@@ -442,13 +454,15 @@ public class ArchiveEditorScreen extends Screen {
                 isDirty = true;
                 this.init(this.minecraft, this.width, this.height);
             }).bounds(x + w - 19, unlockY, 19, 16)
-                    .tooltip(Tooltip.create(Component.literal("Clear (gate on this entry's own unlock)")))
+                    .tooltip(Tooltip
+                            .create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.clear_gate_on_this_entry")))
                     .build());
         }
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("§2SAVE PACKET"), b -> saveEntry())
+        this.addRenderableWidget(ArchiveButton
+                .create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.save_packet"), b -> saveEntry())
                 .bounds(x, saveY, w, rowH)
-                .tooltip(Tooltip.create(Component.literal("Save Archive Entry")))
+                .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.archive_editor_screen.save_archive_entry")))
                 .build());
     }
 
@@ -533,8 +547,8 @@ public class ArchiveEditorScreen extends Screen {
                         if (confirmed) saveEntry();
                         else returnToParent();
                     },
-                    Component.literal("§6[UNSAVED_CHANGES]"),
-                    Component.literal("You have unsaved changes. Save before leaving?")));
+                    ArchiveLang.tr("phoenix_archive.archive_editor_screen.unsaved_changes"),
+                    ArchiveLang.tr("phoenix_archive.archive_editor_screen.you_have_unsaved_changes_save")));
         } else {
             returnToParent();
         }
@@ -599,7 +613,8 @@ public class ArchiveEditorScreen extends Screen {
         this.renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTicks);
 
-        graphics.drawString(this.font, "§6TRIGGER_LOGIC:", rightX, triggerY, ArchivePalette.TERM_BRIGHT);
+        graphics.drawString(this.font, ArchiveText.str("phoenix_archive.archive_editor.trigger_logic"), rightX,
+                triggerY, ArchivePalette.TERM_BRIGHT);
         int lineW = Math.min(110, this.width - MARGIN - rightX);
         graphics.fill(rightX, triggerY + 10, rightX + lineW, triggerY + 11,
                 ArchivePalette.withAlpha(ArchivePalette.TERM_BRIGHT, 0x44));
@@ -612,7 +627,8 @@ public class ArchiveEditorScreen extends Screen {
             }
         }
 
-        graphics.drawString(this.font, "§6BG_SHADER:", rightX, shaderLabelY, ArchivePalette.TERM_BRIGHT);
+        graphics.drawString(this.font, ArchiveText.str("phoenix_archive.archive_editor.bg_shader"), rightX,
+                shaderLabelY, ArchivePalette.TERM_BRIGHT);
 
         String tag = "> " + ArchiveConfigs.INSTANCE.general.mainMenuName + "Lore_Dev";
         if (10 + this.font.width(tag) < fieldX - 4) {

@@ -2,11 +2,11 @@ package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 
 public class ClientPacketHandler {
 
@@ -19,7 +19,7 @@ public class ClientPacketHandler {
 
         mc.getToasts().addToast(new SystemToast(
                 SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
-                Component.literal("§6§lPHOENIX_OS"),
-                Component.literal("§fDecrypted: " + title)));
+                ArchiveLang.tr("phoenix_archive.client_packet_handler.phoenix_os"),
+                ArchiveLang.tr("phoenix_archive.client_packet_handler.decrypted", title)));
     }
 }

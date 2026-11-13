@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.phoenix_archives.phoenix_archive.client.render.shader.ArchiveShaderManager;
 import net.phoenix_archives.phoenix_archive.client.render.shader.ArchiveShaderRenderUtil;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class ArchiveShaderPickerScreen extends Screen {
     private int hoveredIdx = -1;
 
     public ArchiveShaderPickerScreen(Screen parent, Consumer<String> onSelect) {
-        super(Component.literal("Shader Browser"));
+        super(ArchiveLang.tr("phoenix_archive.archive_shader_picker_screen.shader_browser"));
         this.parent = parent;
         this.onSelect = onSelect;
     }
@@ -49,7 +50,7 @@ public class ArchiveShaderPickerScreen extends Screen {
         applyFilter();
 
         searchBox = new EditBox(font, width / 2 - 100, HEADER_H / 2 - 5, 200, 14, Component.empty());
-        searchBox.setHint(Component.literal("§8Search…"));
+        searchBox.setHint(ArchiveLang.tr("phoenix_archive.archive_entry_picker_screen.search"));
         searchBox.setValue(query);
         searchBox.setResponder(q -> {
             query = q.toLowerCase();
@@ -71,16 +72,17 @@ public class ArchiveShaderPickerScreen extends Screen {
 
         g.fill(0, 0, width, HEADER_H, ArchivePalette.PANEL);
         g.fill(0, HEADER_H - 1, width, HEADER_H, ArchivePalette.BORDER);
-        g.drawCenteredString(font, "§fShader Browser", width / 2, 6, ArchivePalette.TERM_BRIGHT);
-        g.drawString(font, "§8Search:", width / 2 - 100 - font.width("Search: "), HEADER_H / 2 - 3,
+        g.drawCenteredString(font, ArchiveText.str("phoenix_archive.archive_shader_picker.shader_browser"), width / 2,
+                6, ArchivePalette.TERM_BRIGHT);
+        g.drawString(font, ArchiveText.str("phoenix_archive.archive_entry_picker.search"),
+                width / 2 - 100 - font.width("Search: "), HEADER_H / 2 - 3,
                 ArchivePalette.TEXT_FAINT, false);
 
         int fy = height - FOOTER_H;
         g.fill(0, fy, width, height, ArchivePalette.PANEL);
         g.fill(0, fy, width, fy + 1, ArchivePalette.BORDER);
-        g.drawString(font, "§8" + filtered.size() +
-                " Shaders  ·  LMB to select  ·  RMB to copy id  ·  live preview, so a broken" +
-                " shader shows §c⚠",
+        g.drawString(font,
+                ArchiveText.str("phoenix_archive.archive_shader_picker.shaders_lmb_to_select_rmb", filtered.size()),
                 8, fy + 10, ArchivePalette.TEXT_FAINT, false);
 
         g.enableScissor(0, HEADER_H, width, fy);
@@ -132,7 +134,7 @@ public class ArchiveShaderPickerScreen extends Screen {
 
             if (hov) {
                 Component tip = shader != null ? Component.literal("§f" + id) :
-                        Component.literal("§c" + id + " §7(failed to compile -- check the log)");
+                        ArchiveLang.tr("phoenix_archive.archive_shader_picker_screen.failed_to_compile_check_the", id);
                 g.renderTooltip(font, tip, mx, my);
             }
         }
@@ -140,7 +142,7 @@ public class ArchiveShaderPickerScreen extends Screen {
         g.disableScissor();
 
         if (filtered.isEmpty()) {
-            g.drawCenteredString(font, "§8No .frag files in config/phoenix_archive/shaders/",
+            g.drawCenteredString(font, ArchiveText.str("phoenix_archive.archive_shader_picker.no_frag_files_in_config"),
                     width / 2, HEADER_H + 20, ArchivePalette.TEXT_FAINT);
         }
 

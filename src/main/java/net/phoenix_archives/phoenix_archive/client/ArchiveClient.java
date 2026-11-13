@@ -2,7 +2,6 @@ package net.phoenix_archives.phoenix_archive.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -13,6 +12,7 @@ import net.phoenix_archives.phoenix_archive.api.LoreDataLoader;
 import net.phoenix_archives.phoenix_archive.api.LoreEntry;
 import net.phoenix_archives.phoenix_archive.client.render.shader.ArchiveShaderManager;
 import net.phoenix_archives.phoenix_archive.client.rich.ArchiveConditionalBlockParser;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.client.rich.markdown.BlockParserRegistry;
 import net.phoenixvine.wiki.client.rich.markdown.inline.handlers.LinkTargetHandler;
 import net.phoenixvine.wiki.client.suite.SuiteHudBar;
@@ -123,7 +123,7 @@ public class ArchiveClient {
                 MOD_ID,
                 SuiteHudBar.PRIORITY_ARCHIVE,
                 iconPath,
-                () -> Component.literal("§fOpen Archive"),
+                () -> ArchiveLang.tr("phoenix_archive.archive_client.open_archive"),
                 () -> 1,
                 () -> mc.setScreen(new ArchiveScreen(mc.screen)),
                 16,

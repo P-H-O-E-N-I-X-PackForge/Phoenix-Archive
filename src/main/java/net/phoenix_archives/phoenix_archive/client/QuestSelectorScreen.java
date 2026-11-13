@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,7 @@ public class QuestSelectorScreen extends Screen {
     private int left, top;
 
     public QuestSelectorScreen(ArchiveEditorScreen parent, List<PickableQuest> allQuests) {
-        super(Component.literal("Quest Selector"));
+        super(ArchiveLang.tr("phoenix_archive.quest_selector_screen.quest_selector"));
         this.parent = parent;
         this.allQuests = allQuests;
     }
@@ -50,7 +51,9 @@ public class QuestSelectorScreen extends Screen {
         this.addRenderableWidget(list);
 
         this.addRenderableWidget(
-                ArchiveButton.create(Component.literal("CANCEL"), b -> this.minecraft.setScreen(parent))
+                ArchiveButton
+                        .create(ArchiveLang.tr("phoenix_archive.category_management_screen.cancel"),
+                                b -> this.minecraft.setScreen(parent))
                         .bounds(left + 10, top + guiHeight - 22, guiWidth - 20, 16).build());
 
         this.setInitialFocus(this.searchBox);
@@ -122,7 +125,8 @@ public class QuestSelectorScreen extends Screen {
         @Override
         public void render(GuiGraphics g, int i, int top, int left, int w, int h, int mx, int my, boolean hover,
                            float p) {
-            String sourceTag = quest.chronicles() ? "§d[CHR] " : "§7[FTB] ";
+            String sourceTag = quest.chronicles() ? ArchiveText.str("phoenix_archive.quest_selector.chr") :
+                    ArchiveText.str("phoenix_archive.quest_selector.ftb");
             String text = sourceTag + quest.title();
 
             int color = quest.locked() ? ArchivePalette.TEXT_FAINT :

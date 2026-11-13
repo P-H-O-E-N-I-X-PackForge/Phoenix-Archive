@@ -31,6 +31,7 @@ import net.phoenix_archives.phoenix_archive.client.render.shader.ArchiveShaderMa
 import net.phoenix_archives.phoenix_archive.client.render.shader.ArchiveShaderRenderUtil;
 import net.phoenix_archives.phoenix_archive.client.rich.ArchiveConditionalSection;
 import net.phoenix_archives.phoenix_archive.client.rich.ArchiveMarkdown;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenix_archives.phoenix_archive.common.LoreSavedData;
 import net.phoenix_archives.phoenix_archive.config.ArchiveConfigs;
 import net.phoenix_archives.phoenix_archive.network.BookmarkPacket;
@@ -211,7 +212,7 @@ public class ArchiveScreen extends Screen {
         clampSidebarScroll();
 
         searchBox = new EditBox(this.font, guiX + 2, guiY + 18, sidebarWidth - 4, 10, Component.empty());
-        searchBox.setHint(Component.literal("§8search..."));
+        searchBox.setHint(ArchiveLang.tr("phoenix_archive.archive_screen.search"));
         searchBox.setValue(searchQuery);
         searchBox.setMaxLength(64);
         searchBox.setBordered(false);
@@ -233,10 +234,12 @@ public class ArchiveScreen extends Screen {
                 !selectedEntry.voiceLine().isEmpty()) {
             final LoreEntry voiceTarget = selectedEntry;
             this.addRenderableWidget(
-                    ArchiveButton.create(Component.literal(shortLabels ? "▶ VOICE" : "▶ PLAY VOICE"),
-                            b -> playLoreVoice(voiceTarget.voiceLine()))
+                    ArchiveButton
+                            .create(Component.literal(shortLabels ? ArchiveText.str("phoenix_archive.archive.voice") :
+                                    ArchiveText.str("phoenix_archive.archive.play_voice")),
+                                    b -> playLoreVoice(voiceTarget.voiceLine()))
                             .bounds(guiX + contentXOffset, guiY + guiHeight - 25, btnW, 16)
-                            .tooltip(Tooltip.create(Component.literal("Play Voice Entry")))
+                            .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.archive_screen.play_voice_entry")))
                             .build());
         }
 
@@ -245,10 +248,11 @@ public class ArchiveScreen extends Screen {
             String chroniclesQuestId = selectedEntry.conditionTree().findLeafValue("chronicles_quest").orElse(null);
             if (chroniclesQuestId != null && !chroniclesQuestId.isEmpty()) {
                 this.addRenderableWidget(ArchiveButton
-                        .create(Component.literal(shortLabels ? "§b→ QUEST" : "§b→ QUEST TREE"),
+                        .create(Component.literal(shortLabels ? ArchiveText.str("phoenix_archive.archive.quest") :
+                                ArchiveText.str("phoenix_archive.archive.quest_tree")),
                                 b -> ArchiveClient.openChroniclesQuest(this, chroniclesQuestId))
                         .bounds(guiX + contentXOffset + btnW + 4, guiY + guiHeight - 25, btnW, 16)
-                        .tooltip(Tooltip.create(Component.literal("Jump to this quest in Chronicles")))
+                        .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.archive_screen.jump_to_this_quest_in")))
                         .build());
             }
         }
@@ -260,27 +264,30 @@ public class ArchiveScreen extends Screen {
                     Component.literal(bookmarked ? "§6★" : "§8☆"),
                     b -> toggleBookmark(pinnedEntry))
                     .bounds(guiX + guiWidth - 24, guiY + guiHeight - 25, 14, 14)
-                    .tooltip(Tooltip.create(Component.literal(bookmarked ? "Remove bookmark" : "Bookmark this entry")))
+                    .tooltip(Tooltip.create(
+                            Component.literal(bookmarked ? ArchiveText.str("phoenix_archive.archive.remove_bookmark") :
+                                    ArchiveText.str("phoenix_archive.archive.bookmark_this_entry"))))
                     .build());
 
             if (isLoreUnlockedClient(pinnedEntry)) {
                 this.addRenderableWidget(ArchiveButton.create(
-                        Component.literal("§7[copy]"),
+                        ArchiveLang.tr("phoenix_archive.archive_screen.copy"),
                         b -> {
                             final String text = pinnedEntry.content();
                             new Thread(() -> this.minecraft.keyboardHandler.setClipboard(text),
                                     "phoenix_archives-clipboard").start();
                         })
                         .bounds(guiX + guiWidth - 42, guiY + guiHeight - 25, 16, 14)
-                        .tooltip(Tooltip.create(Component.literal("Copy entry text to clipboard")))
+                        .tooltip(Tooltip
+                                .create(ArchiveLang.tr("phoenix_archive.archive_screen.copy_entry_text_to_clipboard")))
                         .build());
             }
         }
 
-        this.addRenderableWidget(ArchiveButton.create(Component.literal("§6[ THEME ]"),
+        this.addRenderableWidget(ArchiveButton.create(ArchiveLang.tr("phoenix_archive.archive_screen.theme"),
                 b -> this.minecraft.setScreen(new PhoenixThemeEditorScreen(this, "Phoenix Archive")))
                 .bounds(guiX + guiWidth - 75, guiY + 22, 70, 14)
-                .tooltip(Tooltip.create(Component.literal("Open the Suite Theme Editor")))
+                .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.archive_screen.open_the_suite_theme_editor")))
                 .build());
 
         if (isOp) {
@@ -296,28 +303,34 @@ public class ArchiveScreen extends Screen {
             int catX = entryX - 4 - catW;
 
             this.addRenderableWidget(ArchiveButton.create(
-                    Component.literal(isEditMode ? "§c[EDIT: ON]" : "§7[EDIT: OFF]"),
+                    Component.literal(isEditMode ? ArchiveText.str("phoenix_archive.archive.edit_on") :
+                            ArchiveText.str("phoenix_archive.archive.edit_off")),
                     b -> {
                         this.isEditMode = !this.isEditMode;
                         this.minecraft.tell(() -> this.init(this.minecraft, this.width, this.height));
                     }).bounds(editX, guiY + 6, 70, 14)
-                    .tooltip(Tooltip.create(Component.literal("Toggle Editing Mode")))
+                    .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.archive_screen.toggle_editing_mode")))
                     .build());
 
             if (isEditMode) {
-                this.addRenderableWidget(ArchiveButton.create(Component.literal(compact ? "+ Cat" : "+ Category"),
-                        b -> this.minecraft.setScreen(new CategoryManagementScreen(this)))
+                this.addRenderableWidget(ArchiveButton
+                        .create(Component.literal(compact ? ArchiveText.str("phoenix_archive.archive.cat") :
+                                ArchiveText.str("phoenix_archive.archive.category")),
+                                b -> this.minecraft.setScreen(new CategoryManagementScreen(this)))
                         .bounds(catX, guiY + 6, catW, 14)
-                        .tooltip(Tooltip.create(Component.literal("Open New Category Screen")))
+                        .tooltip(Tooltip
+                                .create(ArchiveLang.tr("phoenix_archive.archive_screen.open_new_category_screen")))
                         .build());
 
                 int ctrlX = guiX + guiWidth - 22;
                 final String pinnedCat = selectedCategory;
 
-                this.addRenderableWidget(ArchiveButton.create(Component.literal(compact ? "+ Ent" : "+ Entry"),
-                        b -> this.minecraft.setScreen(new ArchiveEditorScreen(this, null, pinnedCat)))
+                this.addRenderableWidget(ArchiveButton
+                        .create(Component.literal(compact ? ArchiveText.str("phoenix_archive.archive.ent") :
+                                ArchiveText.str("phoenix_archive.archive.entry")),
+                                b -> this.minecraft.setScreen(new ArchiveEditorScreen(this, null, pinnedCat)))
                         .bounds(entryX, guiY + 6, entryW, 14)
-                        .tooltip(Tooltip.create(Component.literal("Open New Entry Screen")))
+                        .tooltip(Tooltip.create(ArchiveLang.tr("phoenix_archive.archive_screen.open_new_entry_screen")))
                         .build());
 
                 if (selectedEntry != null) {
@@ -327,46 +340,56 @@ public class ArchiveScreen extends Screen {
                     if (!viewingViaBookmark) {
                         this.addRenderableWidget(ArchiveButton.create(Component.literal("§4X"), b -> openDeletePrompt())
                                 .bounds(ctrlX, guiY + 42, 18, 14)
-                                .tooltip(Tooltip.create(Component.literal("Delete Entry? Cannot be undone.")))
+                                .tooltip(Tooltip.create(
+                                        ArchiveLang.tr("phoenix_archive.archive_screen.delete_entry_cannot_be_undone")))
                                 .build());
-                        this.addRenderableWidget(ArchiveButton.create(Component.literal("§aDupe"),
-                                b -> duplicateEntry(pinnedEdit))
+                        this.addRenderableWidget(ArchiveButton
+                                .create(ArchiveLang.tr("phoenix_archive.archive_screen.dupe"),
+                                        b -> duplicateEntry(pinnedEdit))
                                 .bounds(ctrlX - 36, guiY + 59, 55, 14)
-                                .tooltip(Tooltip.create(Component.literal("Duplicate this entry as a new draft")))
+                                .tooltip(Tooltip.create(
+                                        ArchiveLang.tr("phoenix_archive.archive_screen.duplicate_this_entry_as_a")))
                                 .build());
                     }
 
                 } else if (selectedCategory != null && !BOOKMARK_CAT_ID.equals(selectedCategory)) {
                     this.addRenderableWidget(ArchiveButton.create(Component.literal("↑"), b -> shiftCategory(-1))
-                            .tooltip(Tooltip.create(Component.literal("Move Category Up (among siblings)")))
+                            .tooltip(Tooltip.create(
+                                    ArchiveLang.tr("phoenix_archive.archive_screen.move_category_up_among_siblings")))
                             .bounds(ctrlX, guiY + 42, 18, 14).build());
 
                     this.addRenderableWidget(ArchiveButton.create(Component.literal("↓"), b -> shiftCategory(1))
-                            .tooltip(Tooltip.create(Component.literal("Move Category Down (among siblings)")))
+                            .tooltip(Tooltip.create(
+                                    ArchiveLang.tr("phoenix_archive.archive_screen.move_category_down_among_siblings")))
                             .bounds(ctrlX, guiY + 59, 18, 14).build());
 
                     this.addRenderableWidget(
-                            ArchiveButton.create(Component.literal("§4Delete"), b -> openDeleteCategoryPrompt())
-                                    .tooltip(Tooltip.create(Component.literal("Delete this category (entries remain)")))
+                            ArchiveButton
+                                    .create(ArchiveLang.tr("phoenix_archive.archive_screen.delete"),
+                                            b -> openDeleteCategoryPrompt())
+                                    .tooltip(Tooltip.create(ArchiveLang
+                                            .tr("phoenix_archive.archive_screen.delete_this_category_entries_remain")))
                                     .bounds(ctrlX - 36, guiY + 76, 55, 14).build());
 
                     this.addRenderableWidget(ArchiveButton
-                            .create(Component.literal("§eEdit"),
+                            .create(ArchiveLang.tr("phoenix_archive.archive_screen.edit"),
                                     b -> this.minecraft.setScreen(new CategoryManagementScreen(this, pinnedCat)))
-                            .tooltip(Tooltip.create(Component.literal("Edit this category's description and weight")))
+                            .tooltip(Tooltip.create(
+                                    ArchiveLang.tr("phoenix_archive.archive_screen.edit_this_category_s_description")))
                             .bounds(ctrlX - 36, guiY + 93, 55, 14).build());
                 }
 
                 int bulkToggleX = ctrlX - 55;
-                String bulkLabel = bulkMode ? "§e[BULK: ON]" : "§8[BULK: OFF]";
+                String bulkLabel = bulkMode ? ArchiveText.str("phoenix_archive.archive.bulk_on") :
+                        ArchiveText.str("phoenix_archive.archive.bulk_off");
                 this.addRenderableWidget(ArchiveButton.create(Component.literal(bulkLabel), b -> {
                     bulkMode = !bulkMode;
                     if (!bulkMode) bulkSelected.clear();
                     this.init(this.minecraft, this.width, this.height);
                 })
                         .bounds(bulkToggleX, guiY + guiHeight - 40, 74, 14)
-                        .tooltip(Tooltip.create(Component.literal(
-                                "Toggle bulk-select mode. Check entries in the sidebar, then click a category to assign.")))
+                        .tooltip(Tooltip
+                                .create(ArchiveLang.tr("phoenix_archive.archive_screen.toggle_bulk_select_mode_check")))
                         .build());
 
                 if (bulkMode && !bulkSelected.isEmpty() && selectedCategory != null &&
@@ -375,14 +398,12 @@ public class ArchiveScreen extends Screen {
                     int assignX = guiX + sidebarWidth + 4;
                     int assignW = Math.max(40, bulkToggleX - assignX - 4);
                     this.addRenderableWidget(ArchiveButton.create(
-                            Component.literal("§6► Move " + bulkSelected.size() + " entr" +
-                                    (bulkSelected.size() == 1 ? "y" : "ies") +
-                                    " → §e" + bulkTarget),
+                            ArchiveLang.tr("phoenix_archive.archive_screen.move_entr", bulkSelected.size(),
+                                    (bulkSelected.size() == 1 ? "y" : "ies"), bulkTarget),
                             b -> bulkRecategorise(bulkTarget))
                             .bounds(assignX, guiY + guiHeight - 42, assignW, 16)
-                            .tooltip(Tooltip.create(Component.literal(
-                                    "Move all checked entries into: " + bulkTarget +
-                                            "\nClick a different category first to change the target.")))
+                            .tooltip(Tooltip.create(ArchiveLang
+                                    .tr("phoenix_archive.archive_screen.move_all_checked_entries_into", bulkTarget)))
                             .build());
                 }
             }
@@ -458,9 +479,9 @@ public class ArchiveScreen extends Screen {
         this.minecraft.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen((confirmed) -> {
             if (confirmed) deleteCategory(selectedCategory);
             this.minecraft.setScreen(this);
-        }, Component.literal("§4[DELETE_CATEGORY]"),
-                Component.literal("Delete category '" + selectedCategory +
-                        "'? Entries will remain in their category but it will not appear in the registry.")));
+        }, ArchiveLang.tr("phoenix_archive.archive_screen.delete_category"),
+                ArchiveLang.tr("phoenix_archive.archive_screen.delete_category_entries_will_remain",
+                        selectedCategory)));
     }
 
     private static final String BOOKMARK_CAT_ID = "★ BOOKMARKED";
@@ -681,7 +702,8 @@ public class ArchiveScreen extends Screen {
             int centerY = guiY + (guiHeight / 2);
 
             String breadcrumb = buildBreadcrumb(selectedCategory);
-            graphics.drawCenteredString(this.font, "§6FOLDER: " + breadcrumb, centerX, centerY - 30,
+            graphics.drawCenteredString(this.font, ArchiveText.str("phoenix_archive.archive.folder", breadcrumb),
+                    centerX, centerY - 30,
                     ArchivePalette.TERM_BRIGHT);
 
             String desc = CategoryRegistry.getDescription(selectedCategory);
@@ -695,7 +717,8 @@ public class ArchiveScreen extends Screen {
             }
 
             if (isEditMode) {
-                graphics.drawCenteredString(this.font, "§8[ SELECTED DESTINATION FOR NEW ENTRIES ]", centerX,
+                graphics.drawCenteredString(this.font,
+                        ArchiveText.str("phoenix_archive.archive.selected_destination_for_new_entries"), centerX,
                         centerY + 50, ArchivePalette.TEXT_FAINT);
             }
         }
@@ -1023,7 +1046,8 @@ public class ArchiveScreen extends Screen {
 
         int titleMaxW = (guiX + guiWidth - 80) - titleX;
         String shownTitle = unlocked ?
-                "§6" + this.font.plainSubstrByWidth(selectedEntry.title().toUpperCase(), titleMaxW) : "§4[ENCRYPTED]";
+                "§6" + this.font.plainSubstrByWidth(selectedEntry.title().toUpperCase(), titleMaxW) :
+                ArchiveText.str("phoenix_archive.archive.encrypted");
         graphics.drawString(this.font, shownTitle, titleX, guiY + 30, ArchivePalette.TERM_BRIGHT);
 
         String crumb = this.font.plainSubstrByWidth("CAT: " + buildBreadcrumb(selectedEntry.category()),
@@ -1139,7 +1163,8 @@ public class ArchiveScreen extends Screen {
             cx = segEndX;
         }
 
-        g.drawCenteredString(this.font, "§8⌀ DATA_FRAGMENT_MISSING", x + width / 2, tearY - 12,
+        g.drawCenteredString(this.font, ArchiveText.str("phoenix_archive.archive.data_fragment_missing"), x + width / 2,
+                tearY - 12,
                 ArchivePalette.TEXT_FAINT);
     }
 
@@ -1154,13 +1179,15 @@ public class ArchiveScreen extends Screen {
         }
 
         g.fill(x - 2, y - 2, guiX + guiWidth - 15, y + 4 + (lineCount * 10), ArchivePalette.ALERT_FILL);
-        g.drawString(this.font, "§c>> REQUISITION:", x + 2, y, ArchivePalette.TERM_BRIGHT);
+        g.drawString(this.font, ArchiveText.str("phoenix_archive.archive.requisition"), x + 2, y,
+                ArchivePalette.TERM_BRIGHT);
 
         int offset = 12;
 
         if (questId != 0) {
             boolean met = QuestHelper.isQuestCompleted(questId);
-            g.drawString(this.font, (met ? "§a" : "§7") + "- Quest: §f" + questId, x + 5, y + offset,
+            g.drawString(this.font, ArchiveText.str("phoenix_archive.archive.quest_2", (met ? "§a" : "§7"), questId),
+                    x + 5, y + offset,
                     ArchivePalette.TEXT_DIM);
             offset += 10;
         }
@@ -1275,8 +1302,8 @@ public class ArchiveScreen extends Screen {
         this.minecraft.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen((confirmed) -> {
             if (confirmed) deleteEntry(selectedEntry);
             this.minecraft.setScreen(this);
-        }, Component.literal("§4[CRITICAL_PURGE]"),
-                Component.literal("Permanently delete '" + selectedEntry.title() + "'?")));
+        }, ArchiveLang.tr("phoenix_archive.archive_screen.critical_purge"),
+                ArchiveLang.tr("phoenix_archive.archive_screen.permanently_delete", selectedEntry.title())));
     }
 
     private boolean isBookmarked(LoreEntry entry) {

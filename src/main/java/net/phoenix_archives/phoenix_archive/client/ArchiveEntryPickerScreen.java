@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.phoenix_archives.phoenix_archive.api.LoreDataLoader;
 import net.phoenix_archives.phoenix_archive.api.LoreEntry;
+import net.phoenix_archives.phoenix_archive.common.ArchiveLang;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class ArchiveEntryPickerScreen extends Screen {
     private int searchX, searchW;
 
     public ArchiveEntryPickerScreen(Screen parent, String excludeId, Consumer<String> onSelect) {
-        super(Component.literal("Entry Browser"));
+        super(ArchiveLang.tr("phoenix_archive.archive_entry_picker_screen.entry_browser"));
         this.parent = parent;
         this.excludeId = excludeId == null ? "" : excludeId;
         this.onSelect = onSelect;
@@ -60,7 +61,7 @@ public class ArchiveEntryPickerScreen extends Screen {
         searchX = (width - searchW) / 2;
 
         searchBox = new EditBox(font, searchX, HEADER_H / 2 - 5, searchW, 14, Component.empty());
-        searchBox.setHint(Component.literal("§8Search…"));
+        searchBox.setHint(ArchiveLang.tr("phoenix_archive.archive_entry_picker_screen.search"));
         searchBox.setValue(query);
         searchBox.setResponder(q -> {
             query = q.toLowerCase();
@@ -82,14 +83,17 @@ public class ArchiveEntryPickerScreen extends Screen {
 
         g.fill(0, 0, width, HEADER_H, ArchivePalette.PANEL);
         g.fill(0, HEADER_H - 1, width, HEADER_H, ArchivePalette.BORDER);
-        g.drawCenteredString(font, "§fEntry Browser", width / 2, 6, ArchivePalette.TERM_BRIGHT);
-        g.drawString(font, "§8Search:", searchX - font.width("Search: "), HEADER_H / 2 - 3,
+        g.drawCenteredString(font, ArchiveText.str("phoenix_archive.archive_entry_picker.entry_browser"), width / 2, 6,
+                ArchivePalette.TERM_BRIGHT);
+        g.drawString(font, ArchiveText.str("phoenix_archive.archive_entry_picker.search"),
+                searchX - font.width("Search: "), HEADER_H / 2 - 3,
                 ArchivePalette.TEXT_FAINT, false);
 
         int fy = height - FOOTER_H;
         g.fill(0, fy, width, height, ArchivePalette.PANEL);
         g.fill(0, fy, width, fy + 1, ArchivePalette.BORDER);
-        g.drawString(font, "§8" + filtered.size() + " Entries  ·  LMB to select",
+        g.drawString(font,
+                ArchiveText.str("phoenix_archive.archive_entry_picker.entries_lmb_to_select", filtered.size()),
                 8, fy + 6, ArchivePalette.TEXT_FAINT, false);
 
         g.enableScissor(0, HEADER_H, width, fy);
@@ -117,7 +121,8 @@ public class ArchiveEntryPickerScreen extends Screen {
         g.disableScissor();
 
         if (filtered.isEmpty()) {
-            g.drawCenteredString(font, "§8No lore entries found", width / 2, HEADER_H + 20,
+            g.drawCenteredString(font, ArchiveText.str("phoenix_archive.archive_entry_picker.no_lore_entries_found"),
+                    width / 2, HEADER_H + 20,
                     ArchivePalette.TEXT_FAINT);
         }
 
