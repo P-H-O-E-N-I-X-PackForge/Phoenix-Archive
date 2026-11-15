@@ -8,14 +8,8 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.phoenixvine.wiki.theme.PhoenixTheme;
 
-/**
- * The Phoenix Suite button: a slim flat plate with a thin border that lights up under the cursor, in place of the
- * stone-grey Minecraft button. It takes its colours from the suite theme, so the
- * theme editor restyles it with everything else.
- */
 public class ArchiveButton extends Button {
 
-    /** Buttons never get taller than this, so a screen asking for a chunky one still gets a slim plate. */
     private static final int MAX_HEIGHT = 14;
 
     protected ArchiveButton(int x, int y, int w, int h, Component message, OnPress onPress) {
@@ -58,7 +52,6 @@ public class ArchiveButton extends Button {
         }
     }
 
-    /** The same chained calls as the vanilla builder, so screens only change the class they start from. */
     public static final class Builder {
 
         private final Component message;
